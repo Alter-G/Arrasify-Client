@@ -304,6 +304,7 @@
             <div class="book-side">
                 <h1>Getting Started</h1>
                 <p id="bookRules" class="book-side-option-h"><i class="bi bi-shield-fill-exclamation"></i> Rules</p>
+                <p id="bookChangelog" class="book-side-option"><i class="bi bi-archive"></i> Changelog</p>
                 <p id="bookAdmins" class="book-side-option"><i class="bi bi-key"></i> Admins</p>
                 <p id="bookSupport" class="book-side-option"><i class="bi bi-info-circle"></i> Support</p>
                 <hr>
@@ -438,6 +439,18 @@
                         status or obligation.
                     </p>
                 </div>
+                <div id="bookChangelogContent" class="hidden">
+                    <h1>Getting Started - Changelog</h1>
+                    <h2>17th September 2026</h2>
+                    <ul>
+                        <li>Full release.</li>
+                        <li>Minimal adjustmenets.</li>
+                    </ul>
+                    <h2>16th September 2026</h2>
+                    <ul>
+                        <li>Early release.</li>
+                    </ul>
+                </div>
                 <div id="bookAdminsContent" class="hidden">
                     <h1>Getting Started - Admins</h1>
                     <p>This section may contain out-of-date information.</p>
@@ -565,63 +578,98 @@
                 </div>
                 <div id="bookCommandsContent" class="hidden">
                     <h1>Advanced - Commands</h1>
-                    <p>This section may contain out-of-date information.</p>
-                    <h2>/id</h2>
-                    <h3>
-                        Returns the data of the account the user is logged into.<br>
-                        Access Level: Guest<br>
-                        Parameters: None<br>
-                        Output: "Name: [name] | ID: [id] | Auth: [auth]"
-                    </h3>
+                    <h2>Types</h2>
+                    <p>
+                        First and foremost; selectors. Selectors are the basis of almost every command. Specific
+                        commands
+                        require different selectors. There are multiple types, but I'll briefly go over the main three;
+                    </p>
+                    <h3>Account ID (aID)</h3>
+                    <p>
+                        Refers to 'account ID'. This is a unique ID given to accounts upon account creation. Only a few
+                        commands require it.
+                        It is usually reserved for commands that require to edit accounts, even when they aren't online.
+                    </p>
+                    <h3>Instance ID (iID)</h3>
+                    <p>
+                        Refers to 'instance ID'. This is a randomly-chosen string of characters which can be used to
+                        reference a temporary client.
+                        This selector is useful if you want to target guests, but is also used in other commands too.
+                    </p>
+                    <h3>Database ID (dID)</h3>
+                    <p>
+                        Refers to 'database ID'. This is the index in the database of the account you possess, and is
+                        used to edit permanent
+                        information usually found inside the account database. This is most commonly used in the /data
+                        command.
+                    </p>
                     <hr>
-                    <h2>/test</h2>
-                    <h3>
-                        Use this to test if the server commands are working.<br>
-                        Access Level: Guest<br>
-                        Parameters: None<br>
-                        Output: "Test received."
-                    </h3>
+                    <h2>Commands</h2>
+                    <h3>Guest+ Commands</h3>
+                    <h4>/test</h4>
+                    <p>Used to test if other commands work.</p>
+                    <h4>/id [param1] </h4>
+                    <p>Used to get the name, auth, account ID and instance ID of you or another user.</p>
+                    <h5>With [param1] - no value</h5>
+                    <h5>With [param1] - account name</h5>
                     <hr>
-                    <h2>/ignoreguests</h2>
-                    <h3>
-                        Don't show any guest users on the client side.<br>
-                        Access Level: User<br>
-                        Parameters: None<br>
-                        Output: "Guest messages are/aren't filtered."
-                    </h3>
+                    <h3>User+ Commands</h3>
+                    <h4>/ignoreguests</h4>
+                    <p>Toggle ignoring guest messages on the client-side.</p>
+                    <h4>/title</h4>
+                    <p>Toggle the title next to your name in chat, like [User] or [Admin].</p>
+                    <h4>/pfp [param1]</h4>
+                    <p>Set your account's profile picture.</p>
+                    <h5>With [param1] - image url</h5>
+                    <h4>/block [param1] [param2]</h4>
+                    <p>Block user messages from sending to you.</p>
+                    <h5>With [param1] - "add" and [param2] - account ID</h5>
+                    <h5>With [param1] - "remove" and [param2] - account ID</h5>
+                    <h5>With [param1] - "list" and everything else - no value</h5>
+                    <h4>/dm [param1] [param2]</h4>
+                    <p>Sends a direct message to the specific user. Can't be seen by other users.</p>
+                    <h5>With [param1] - instance ID and [param2] - message</h5>
                     <hr>
-                    <h2>/title</h2>
-                    <h3>
-                        Toggle whether your title, if you have one, should be shown.<br>
-                        Access Level: User<br>
-                        Parameters: None<br>
-                        Output: "Badge is shown/not shown."
-                    </h3>
+                    <h3>Helper+ Commands</h3>
+                    <h4>/muteguests</h4>
+                    <p>Toggles the muting of all guests in the current channel.</p>
+                    <h4>/broadcast [param1]</h4>
+                    <p>Broadcasts a message without a user attached to it.</p>
+                    <h5>With [param1] - message</h5>
+                    <h4>/mute [param1] [param2] [param3] [param4]</h4>
+                    <p>Mute a specific user, for text or uploads, for a specified duration. Use 0s to unmute.</p>
+                    <h5>With [param1] - "text" and [param2] - account ID and [param3] - duration + unit</h5>
+                    <h5>With [param1] - "upload" and [param2] - account ID and [param3] - duration + unit</h5>
                     <hr>
-                    <h2>/muteguests</h2>
-                    <h3>
-                        Don't show any guest users on the client side.<br>
-                        Access Level: Helper<br>
-                        Parameters: None<br>
-                        Output: "Muted/unmuted guests."
-                    </h3>
+                    <h3>Underseer+ Commands</h3>
+                    <h4>/data [param1] [param2] [param3] [param4] </h4>
+                    <p>Allows the editing, creation, and deletion of accounts. Also displays accounts you can edit.</p>
+                    <h5>With [param1] - "list"</h5>
+                    <h5>With [param1] - "id" and [param2] - account name</h5>
+                    <h5>With [param1] - "create" and [param2] - new token and [param3] - new auth and [param4] new name
+                    </h5>
+                    <h5>With [param1] - "edit" and [param2] - "name" and [param3] - database ID and [param4] new name
+                    </h5>
+                    <h5>With [param1] - "edit" and [param2] - "auth" and [param3] - database ID and [param4] new auth
+                    </h5>
+                    <h5>With [param1] - "edit" and [param2] - "token" and [param3] - database ID and [param4] new token
+                    </h5>
+                    <h5>With [param1] - "delete" and [param2] - database ID</h5>
                     <hr>
-                    <h2>/server</h2>
-                    <h3>
-                        Edit specific statistics related to the server.<br>
-                        Access Level: Admin<br>
-                        Parameters: action: [sudo], args: [any]<br>
-                        Output: "[args]"
-                    </h3>
+                    <h3>Overseer+ Commands</h3>
+                    <p>There's no exclusive overseer commands yet.</p>
                     <hr>
-                    <h2>/data</h2>
-                    <h3>
-                        Edit database.<br>
-                        Access Level: Admin<br>
-                        Parameters: action: [list | get | edit], args / type: [any / name | token | auth ], args:
-                        [any]<br>
-                        Output: "[varying data]"
-                    </h3>
+                    <h3>Admin+ Commands</h3>
+                    <h4>/server [param1] [param2]</h4>
+                    <p>Allows the editing of certain server settings. Not fully implemented.</p>
+                    <h5>With [param1] - "sudo" and [param2] - message</h5>
+                    <h4>/killall</h4>
+                    <p>Kill every account connection at once.</p>
+                    <h4>/restart</h4>
+                    <p>Restart the entire server.</p>
+                    <hr>
+                    <h3>Developer+ Commands</h3>
+                    <p>There's no exclusive developer commands yet.</p>
                 </div>
             </div>
         </div>
