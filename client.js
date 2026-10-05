@@ -593,6 +593,9 @@ const wsOpen = () => {
     elements.loading.classList.add("hidden");
     elements.main.classList.remove("hidden");
     console.log(`Connected to the server!`);
+    setTimeout(() => {
+        ws.send(JSON.stringify({ "type": "ping" }));
+    }, 30);
 };
 
 const wsMessage = (data) => {
@@ -621,7 +624,7 @@ const wsMessage = (data) => {
                     createMessageSimple(message.content, message.timestamp, message.color);
                     break;
                 };
-                case "heartbeat": {
+                case "pong": {
                     info = message;
                     break;
                 };
