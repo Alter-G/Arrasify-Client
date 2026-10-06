@@ -1,6 +1,7 @@
 // const homeAddress = window.location.href
 // const homeAddress = "arrasify.onrender.com/";
 const homeAddress = "arrasify.alter-g.workers.dev/";
+// const homeAddress = "127.0.0.1:8787/";
 const ws = new WebSocket(`wss://${homeAddress}`);
 
 let settings = {
@@ -16,6 +17,11 @@ let info = {
 let collectedUsers = {
     guests: [],
     users: [],
+    helpers: [],
+    underseers: [],
+    overseers: [],
+    admins: [],
+    developers: [],
     friends: []
 };
 
@@ -39,12 +45,104 @@ let uploadFile = undefined;
 let uploadMime = "application/octet-stream";
 let nextUpload = undefined;
 
+const emojis = { // Emoji - ClassList
+    "smile": "chat-emoji bi bi-emoji-smile-fill",
+    "neutral": "chat-emoji bi bi-emoji-neutral-fill",
+    "frown": "chat-emoji bi bi-emoji-frown-fill",
+    "angry": "chat-emoji bi bi-emoji-angry-fill",
+    "laughing": "chat-emoji bi bi-emoji-laughing-fill",
+    "surprise": "chat-emoji bi bi-emoji-surprise-fill",
+    "sunglasses": "chat-emoji bi bi-emoji-sunglasses-fill",
+    "hearteyes": "chat-emoji bi bi-emoji-heart-eyes-fill",
+    "kiss": "chat-emoji bi bi-emoji-kiss-fill",
+    "tear": "chat-emoji bi bi-emoji-tear-fill",
+    "wink": "chat-emoji bi bi-emoji-wink-fill",
+    "astonished": "chat-emoji bi bi-emoji-astonished-fill",
+    "dizzy": "chat-emoji bi bi-emoji-dizzy-fill",
+    "expressionless": "chat-emoji bi bi-emoji-expressionless-fill"
+};
+
+const emotes = { // Emote - SRC
+    eDiep: {
+        // Diep.io / Arras
+        "spectator": "./emotes/spectator.png",
+        "basic": "./emotes/basic.png",
+        "booster": "./emotes/booster.png",
+        "ranger": "./emotes/ranger.png",
+        "valrayvn": "./emotes/valrayvn.jpg"
+    },
+    eVerify: {
+        // Verify
+        "verifyguest": "./emotes/verifyguest.png",
+        "verifyalt": "./emotes/verifyalt.png",
+        "verifydirector": "./emotes/verifydirector.png",
+        "verifytrial": "./emotes/verifytrial.png",
+        "verifymanager": "./emotes/verifymanager.png",
+        "verifydev": "./emotes/verifydev.png",
+        "verifytrash": "./emotes/verifytrash.png",
+        "verifyyoutuber": "./emotes/verifyyoutuber.png",
+        "verifymusician": "./emotes/verifymusician.png",
+        "verifyartist": "./emotes/verifyartist.png",
+        "verifybongis": "./emotes/verifybongis.png",
+        "verifyolddev": "./emotes/verifyolddev.png"
+    },
+    eTrust: {
+        // Trust
+        "extremelynottrust": "./emotes/extremelynottrust.png",
+        "nottrust": "./emotes/nottrust.png",
+        "maybetrust": "./emotes/maybetrust.png",
+        "yestrust": "./emotes/yestrust.png",
+        "probablytrust": "./emotes/probablytrust.png",
+        "supertrust": "./emotes/supertrust.png",
+        "eviljinn": "./emotes/eviljinn.png"
+    },
+    eDeltarune: {
+        // Deltarune
+        "mlg": "./emotes/mlg.png",
+        "ralsei": "./emotes/ralsei.png",
+        "determination": "./emotes/determination.png",
+        "jaorange": "./emotes/jaorange.png",
+        "justice": "./emotes/justice.png",
+        "kindness": "./emotes/kindness.png",
+        "patience": "./emotes/patience.png",
+        "integrity": "./emotes/integrity.png",
+        "perseverence": "./emotes/perseverence.png"
+    },
+    eTTF: {
+        // TTF
+        "ttfidle": "./emotes/ttfidle.gif",
+        "ttfseizure": "./emotes/ttfseizure.gif",
+        "ttfspin": "./emotes/ttfspin.gif"
+    },
+    eGeneral: {
+        // General
+        "skull": "./emotes/skull.png",
+        "pepe": "./emotes/pepe.png",
+        "troll": "./emotes/troll.png"
+    },
+    eMemes: {
+        // Memes
+        "smart": "./emotes/smart.gif",
+        "clips": "./emotes/clips.gif",
+        "bird": "./emotes/bird.gif",
+        "yippe": "./emotes/yippe.gif",
+        "nerd": "./emotes/nerd.gif",
+        "duck": "./emotes/duck.gif",
+        "bird": "./emotes/bird.gif",
+        "badapple": "./emotes/badapple.gif",
+        "idk": "./emotes/idk.gif"
+    }
+};
+
+const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eTTF, ...emotes.eGeneral, ...emotes.eMemes };
+
 const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
     // Header Bars
     toggleDark: document.querySelector("#toggleDark"), // The element that, when clicked, toggles the dark/light theme. Dark by default
     togglePings: document.querySelector("#togglePings"), // Whether pings make a noise or not
     helper: document.querySelector("#helper"),
+    altOpenTosPp: document.querySelector("#altOpenTosPp"), // Opens the Terms of Service & Privacy Policy UI
     backToAuth: document.querySelector("#backToAuth"), // Takes the user to the authentication page
     // Authentication
     auth: document.querySelector("#auth"), // The auth page itself
@@ -90,45 +188,13 @@ const elements = {
     emojiDizzy: document.querySelector("#emojiDizzy"), // Dizzy
     emojiExpressionless: document.querySelector("#emojiExpressionless"), // Expressionless
     /* Emotes */
-    // Diep.io & Arras.io
-    emoteSpectator: document.querySelector("#emoteSpectator"), // Spectator
-    emoteBasic: document.querySelector("#emoteBasic"), // Basic
-    emoteBooster: document.querySelector("#emoteBooster"), // Booster
-    emoteRanger: document.querySelector("#emoteRanger"), // Ranger
-    emoteValrayvn: document.querySelector("#emoteValrayvn"), // Valrayvn
-    // Verify
-    emoteVerifyGuest: document.querySelector("#emoteVerifyGuest"), // Guest
-    emoteVerifyAlt: document.querySelector("#emoteVerifyAlt"), // Alt
-    emoteVerifyDirector: document.querySelector("#emoteVerifyDirector"), // Director
-    emoteVerifyTrial: document.querySelector("#emoteVerifyTrial"), // Trial
-    emoteVerifyManager: document.querySelector("#emoteVerifyManager"), // Manager
-    emoteVerifyDev: document.querySelector("#emoteVerifyDev"), // Dev
-    emoteVerifyTrash: document.querySelector("#emoteVerifyTrash"), // Trash
-    emoteVerifyYoutuber: document.querySelector("#emoteVerifyYoutuber"), // Youtuber
-    emoteVerifyMusician: document.querySelector("#emoteVerifyMusician"), // Musician
-    emoteVerifyArtist: document.querySelector("#emoteVerifyArtist"), // Artist
-    emoteVerifyBongis: document.querySelector("#emoteVerifyBongis"), // Bongis
-    emoteVerifyOldDev: document.querySelector("#emoteVerifyOldDev"), // Old Dev
-    // Trust
-    emoteExtremelyNotTrust: document.querySelector("#emoteExtremelyNotTrust"), // Extremely Not Trust
-    emoteNotTrust: document.querySelector("#emoteNotTrust"), // Not Trust
-    emoteMaybeTrust: document.querySelector("#emoteMaybeTrust"), // Maybe Trust
-    emoteYesTrust: document.querySelector("#emoteYesTrust"), // Yes Trust
-    emoteProbablyTrust: document.querySelector("#emoteProbablyTrust"), // Probably Trust
-    emoteSuperTrust: document.querySelector("#emoteSuperTrust"), // Super Trust
-    // Deltarune
-    emoteMlg: document.querySelector("#emoteMlg"), // MLG
-    emoteRalsei: document.querySelector("#emoteRalsei"), // Ralsei
-    // TTF
-    emoteTtfIdle: document.querySelector("#emoteTtfIdle"), // TTF Idle
-    emoteTtfSeizure: document.querySelector("#emoteTtfSeizure"), // TTF Seizure
-    emoteTtfSpin: document.querySelector("#emoteTtfSpin"), // TTF Spin
-    // Ripoffs / Bad
-    emoteBadSkull: document.querySelector("#emoteBadSkull"), // Bad Skull
-    emoteBadPepe: document.querySelector("#emoteBadPepe"), // Bad Pepe
-    // Memes
-    emoteSmart: document.querySelector("#emoteSmart"), // Smart
-    emoteClips: document.querySelector("#emoteClips"), // Clips
+    eDiep: document.querySelector("#eDiep"),
+    eVerify: document.querySelector("#eVerify"),
+    eTrust: document.querySelector("#eTrust"),
+    eDeltarune: document.querySelector("#eDeltarune"),
+    eTTF: document.querySelector("#eTTF"),
+    eGeneral: document.querySelector("#eGeneral"),
+    eMemes: document.querySelector("#eMemes"),
     // Terms of Service & Privacy Policy (TOS-PP)
     tosPp: document.querySelector("#tosPp"), // The Terms of Service & Privacy Policy UI
     openTosPp: document.querySelector("#openTosPp"), // Opens the Terms of Service & Privacy Policy UI
@@ -276,67 +342,10 @@ const messageCreateTextElement = (message, color) => {
     let lines = message.toString();
     lines = lines.split(/\r?\n|\\n/);
     const paragraphs = [];
-    lines.forEach(line => {
+    lines.forEach(line => { // Per paragraph
         let s = document.createElement("span"); // This used to be p
         s.className = "chat-message-line";
         // Split emotes
-        const emojis = { // Emoji - ClassList
-            "smile": "chat-emoji bi bi-emoji-smile-fill",
-            "neutral": "chat-emoji bi bi-emoji-neutral-fill",
-            "frown": "chat-emoji bi bi-emoji-frown-fill",
-            "angry": "chat-emoji bi bi-emoji-angry-fill",
-            "laughing": "chat-emoji bi bi-emoji-laughing-fill",
-            "surprise": "chat-emoji bi bi-emoji-surprise-fill",
-            "sunglasses": "chat-emoji bi bi-emoji-sunglasses-fill",
-            "hearteyes": "chat-emoji bi bi-emoji-heart-eyes-fill",
-            "kiss": "chat-emoji bi bi-emoji-kiss-fill",
-            "tear": "chat-emoji bi bi-emoji-tear-fill",
-            "wink": "chat-emoji bi bi-emoji-wink-fill",
-            "astonished": "chat-emoji bi bi-emoji-astonished-fill",
-            "dizzy": "chat-emoji bi bi-emoji-dizzy-fill",
-            "expressionless": "chat-emoji bi bi-emoji-expressionless-fill"
-        };
-        const emotes = { // Emote - SRC
-            // Diep.io / Arras
-            "spectator": "./emotes/spectator.png",
-            "basic": "./emotes/basic.png",
-            "booster": "./emotes/booster.png",
-            "ranger": "./emotes/ranger.png",
-            "valrayvn": "./emotes/valrayvn.jpg",
-            // Verify
-            "verifyguest": "./emotes/verifyguest.png",
-            "verifyalt": "./emotes/verifyalt.png",
-            "verifydirector": "./emotes/verifydirector.png",
-            "verifytrial": "./emotes/verifytrial.png",
-            "verifymanager": "./emotes/verifymanager.png",
-            "verifydev": "./emotes/verifydev.png",
-            "verifytrash": "./emotes/verifytrash.png",
-            "verifyyoutuber": "./emotes/verifyyoutuber.png",
-            "verifymusician": "./emotes/verifymusician.png",
-            "verifyartist": "./emotes/verifyartist.png",
-            "verifybongis": "./emotes/verifybongis.png",
-            "verifyolddev": "./emotes/verifyolddev.png",
-            // Trust
-            "extremelynottrust": "./emotes/extremelynottrust.png",
-            "nottrust": "./emotes/nottrust.png",
-            "maybetrust": "./emotes/maybetrust.png",
-            "yestrust": "./emotes/yestrust.png",
-            "probablytrust": "./emotes/probablytrust.png",
-            "supertrust": "./emotes/supertrust.png",
-            // Deltarune
-            "mlg": "./emotes/mlg.png",
-            "ralsei": "./emotes/ralsei.png",
-            // TTF
-            "ttfidle": "./emotes/ttfidle.gif",
-            "ttfseizure": "./emotes/ttfseizure.gif",
-            "ttfspin": "./emotes/ttfspin.gif",
-            // Ripoffs / Bad
-            "badskull": "./emotes/badskull.png",
-            "badpepe": "./emotes/badpepe.png",
-            // Memes
-            "smart": "./emotes/smart.gif",
-            "clips": "./emotes/clips.gif",
-        };
         let reconstructed = [];
         let previousWasEmote = false;
         const emoteSplit = line.split(":");
@@ -345,7 +354,7 @@ const messageCreateTextElement = (message, color) => {
         const pElement = document.createElement(`p`);
         pElement.textContent = emoteSplit[0];
         s.appendChild(pElement);
-        for (let i = 1; i < emoteSplit.length; i++) { // Fix the XML vulnerability
+        for (let i = 1; i < emoteSplit.length; i++) { // Per emote
             // Check if it's an emoji
             if (Object.keys(emojis).includes(emoteSplit[i])) {
                 previousWasEmote = true;
@@ -353,18 +362,19 @@ const messageCreateTextElement = (message, color) => {
                 const emojiElement = document.createElement(`i`);
                 emojiElement.className = `${emojis[emoteSplit[i]]}`;
                 s.appendChild(emojiElement);
-            } else if (Object.keys(emotes).includes(emoteSplit[i])) { // Check if it's an emote
+            } else if (Object.keys(allEmotes).includes(emoteSplit[i])) { // Check if it's an emote
                 previousWasEmote = true;
                 // reconstructed.push(`<img class="chat-emote" src="${emotes[emoteSplit[i]]}">`);
                 const emoteElement = document.createElement(`img`);
                 emoteElement.className = `chat-emote`;
-                emoteElement.src = `${emotes[emoteSplit[i]]}`;
+                emoteElement.src = `${allEmotes[emoteSplit[i]]}`;
                 s.appendChild(emoteElement);
             } else if (i > 0 && !previousWasEmote) {
                 previousWasEmote = false;
                 // reconstructed.push(":" + emoteSplit[i]);
                 const pElement = document.createElement(`p`);
                 pElement.textContent = ":" + emoteSplit[i];
+                if (emoteSplit[i - 1][emoteSplit[i - 1].length - 1] === " ") pElement.style.marginLeft = `4px`;
                 s.appendChild(pElement);
             } else {
                 previousWasEmote = false;
@@ -495,34 +505,88 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
 };
 
 const listAllUsers = () => {
-    elements.users.innerHTML = `<h2 style="text-align: center; color: white; user-select: none;">Online Friends</h2>`;
-    if (collectedUsers.friends.length < 1) {
-        elements.users.innerHTML += `<p style="text-align: center; color: white; user-select: none;">Nobody here!</p>`;
-    } else {
+    elements.users.innerHTML = ``;
+    if (collectedUsers.friends.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Friends</h2>`;
         collectedUsers.friends.forEach((friend) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            createUserInList(friend.id, friend.aID, friend.name, friend.bio, friend.pfp, true, friend.neo).onclick = (e) => { createToast("You can't view profiles yet."); };
+            const userInList = createUserInList(friend.id, friend.aID, friend.name, friend.bio, friend.pfp, true, friend.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
+        elements.users.innerHTML += `<hr>`;
     };
-    elements.users.innerHTML += `<hr>`;
-    elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Online People</h2>`
-    if (collectedUsers.users.length < 1) {
-        elements.users.innerHTML += `<p style="text-align: center; color: white; user-select: none;">Nobody here!</p>`;
-    } else {
+    if (collectedUsers.developers.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Developers</h2>`;
+        collectedUsers.developers.forEach((developer) => {
+            // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
+            const userInList = createUserInList(developer.id, developer.aID, developer.name, developer.bio, developer.pfp, true, developer.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
+        });
+        elements.users.innerHTML += `<hr>`;
+    };
+    if (collectedUsers.admins.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Admins</h2>`;
+        collectedUsers.admins.forEach((admin) => {
+            // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
+            const userInList = createUserInList(admin.id, admin.aID, admin.name, admin.bio, admin.pfp, true, admin.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
+        });
+        elements.users.innerHTML += `<hr>`;
+    };
+    if (collectedUsers.overseers.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Overseers</h2>`;
+        collectedUsers.overseers.forEach((overseer) => {
+            // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
+            const userInList = createUserInList(overseer.id, overseer.aID, overseer.name, overseer.bio, overseer.pfp, true, overseer.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
+        });
+        elements.users.innerHTML += `<hr>`;
+    };
+    if (collectedUsers.underseers.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Underseers</h2>`;
+        collectedUsers.underseers.forEach((underseer) => {
+            // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
+            const userInList = createUserInList(underseer.id, underseer.aID, underseer.name, underseer.bio, underseer.pfp, true, underseer.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
+        });
+        elements.users.innerHTML += `<hr>`;
+    };
+    if (collectedUsers.helpers.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Helpers</h2>`;
+        collectedUsers.helpers.forEach((helper) => {
+            // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
+            const userInList = createUserInList(helper.id, helper.aID, helper.name, helper.bio, helper.pfp, true, helper.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
+        });
+        elements.users.innerHTML += `<hr>`;
+    };
+    if (collectedUsers.users.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Users</h2>`;
         collectedUsers.users.forEach((user) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            createUserInList(user.id, user.aID, user.name, user.bio, user.pfp, true, user.neo).onclick = (e) => { createToast("You can't view profiles yet."); };
+            const userInList = createUserInList(user.id, user.aID, user.name, user.bio, user.pfp, true, user.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
+        elements.users.innerHTML += `<hr>`;
     };
-    elements.users.innerHTML += `<hr>`;
-    elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Guests</h2>`
-    if (collectedUsers.guests.length < 1) {
-        elements.users.innerHTML += `<p style="text-align: center; color: white; user-select: none;">Nobody here!</p>`;
-    } else {
+    if (collectedUsers.guests.length > 0) {
+        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Guests</h2>`;
         collectedUsers.guests.forEach((guest) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            createUserInList(guest.id, guest.aID, guest.name, guest.bio, guest.pfp, false, guest.neo).onclick = (e) => { createToast("You can't view profiles yet."); };
+            const userInList = createUserInList(guest.id, guest.aID, guest.name, guest.bio, guest.pfp, false, guest.neo);
+            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
+    };
+    if (collectedUsers.guests.length < 1 &&
+        collectedUsers.users.length < 1 &&
+        collectedUsers.helpers.length < 1 &&
+        collectedUsers.underseers.length < 1 &&
+        collectedUsers.overseers.length < 1 &&
+        collectedUsers.admins.length < 1 &&
+        collectedUsers.developers.length < 1 &&
+        collectedUsers.friends.length < 1
+    ) {
+        elements.users.innerHTML += `<p style="text-align: center; color: white; user-select: none;">Nobody here!</p>`;
     };
 };
 
@@ -593,14 +657,14 @@ const wsOpen = () => {
     elements.loading.classList.add("hidden");
     elements.main.classList.remove("hidden");
     console.log(`Connected to the server!`);
-    setTimeout(() => {
+    setInterval(() => {
         ws.send(JSON.stringify({ "type": "ping" }));
     }, 30);
 };
 
-const wsMessage = (data) => {
-    let isBinary = data.data instanceof ArrayBuffer || data.data instanceof Blob;
-    if (!isBinary) {
+const wsMessage = (data, isBinary) => {
+    let isBinaryTrue = isBinary || data.data instanceof ArrayBuffer || data.data instanceof Blob;
+    if (!isBinaryTrue) {
         try {
             const message = JSON.parse(data.data.toString());
             switch (message.type) {
@@ -632,6 +696,11 @@ const wsMessage = (data) => {
                     collectedUsers = {
                         guests: message.guests,
                         users: message.users,
+                        helpers: message.helpers,
+                        underseers: message.underseers,
+                        overseers: message.overseers,
+                        admins: message.admins,
+                        developers: message.developers,
                         friends: message.friends
                     };
                     listAllUsers();
@@ -670,6 +739,11 @@ const wsMessage = (data) => {
                         collectedUsers = {
                             guests: message.guests,
                             users: message.users,
+                            helpers: message.helpers,
+                            underseers: message.underseers,
+                            overseers: message.overseers,
+                            admins: message.admins,
+                            developers: message.developers,
                             friends: message.friends
                         };
                         listAllUsers();
@@ -852,6 +926,7 @@ elements.main.onclick = (e) => {
 elements.barEmote.onclick = (e) => {
     elements.emoteList.classList.contains("hidden") ? elements.emoteList.classList.remove("hidden") : elements.emoteList.classList.add("hidden");
 };
+
 /* Emote onclicks */
 elements.emojiSmile.onclick = (e) => {
     elements.barMessage.value += ":smile:";
@@ -896,112 +971,129 @@ elements.emojiExpressionless.onclick = (e) => {
     elements.barMessage.value += ":expressionless:";
 };
 /* Thank god thats over */
-/* Oh shit nvm its not lmao */
+// /* Oh shit nvm its not lmao */
 
-/* Emote onclicks */
-// Diep.io / Arras.io
-elements.emoteSpectator.onclick = (e) => {
-    elements.barMessage.value += ":spectator:";
+const createNewEmote = (emoteList, emoteKey) => {
+    const emoteElement = document.createElement("img");
+    emoteElement.className = "emote";
+    emoteElement.src = allEmotes[emoteKey];
+    emoteElement.onclick = (e) => {
+        elements.barMessage.value += `:${emoteKey}:`;
+    };
+    emoteList.appendChild(emoteElement);
+    return emoteElement;
 };
-elements.emoteBasic.onclick = (e) => {
-    elements.barMessage.value += ":basic:";
-};
-elements.emoteBooster.onclick = (e) => {
-    elements.barMessage.value += ":booster:";
-};
-elements.emoteRanger.onclick = (e) => {
-    elements.barMessage.value += ":ranger:";
-};
-elements.emoteValrayvn.onclick = (e) => {
-    elements.barMessage.value += ":valrayvn:";
-};
-// Verify
-elements.emoteVerifyGuest.onclick = (e) => {
-    elements.barMessage.value += ":verifyguest:";
-};
-elements.emoteVerifyAlt.onclick = (e) => {
-    elements.barMessage.value += ":verifyalt:";
-};
-elements.emoteVerifyDirector.onclick = (e) => {
-    elements.barMessage.value += ":verifydirector:";
-};
-elements.emoteVerifyTrial.onclick = (e) => {
-    elements.barMessage.value += ":verifytrial:";
-};
-elements.emoteVerifyManager.onclick = (e) => {
-    elements.barMessage.value += ":verifymanager:";
-};
-elements.emoteVerifyDev.onclick = (e) => {
-    elements.barMessage.value += ":verifydev:";
-};
-elements.emoteVerifyTrash.onclick = (e) => {
-    elements.barMessage.value += ":verifytrash:";
-};
-elements.emoteVerifyYoutuber.onclick = (e) => {
-    elements.barMessage.value += ":verifyyoutuber:";
-};
-elements.emoteVerifyMusician.onclick = (e) => {
-    elements.barMessage.value += ":verifymusician:";
-};
-elements.emoteVerifyArtist.onclick = (e) => {
-    elements.barMessage.value += ":verifyartist:";
-};
-elements.emoteVerifyBongis.onclick = (e) => {
-    elements.barMessage.value += ":verifybongis:";
-};
-elements.emoteVerifyOldDev.onclick = (e) => {
-    elements.barMessage.value += ":verifyolddev:";
-};
-// Trust
-elements.emoteExtremelyNotTrust.onclick = (e) => {
-    elements.barMessage.value += ":extremelynottrust:";
-};
-elements.emoteNotTrust.onclick = (e) => {
-    elements.barMessage.value += ":nottrust:";
-};
-elements.emoteMaybeTrust.onclick = (e) => {
-    elements.barMessage.value += ":maybetrust:";
-};
-elements.emoteYesTrust.onclick = (e) => {
-    elements.barMessage.value += ":yestrust:";
-};
-elements.emoteProbablyTrust.onclick = (e) => {
-    elements.barMessage.value += ":probablytrust:";
-};
-elements.emoteSuperTrust.onclick = (e) => {
-    elements.barMessage.value += ":supertrust:";
-};
-// Deltarune
-elements.emoteMlg.onclick = (e) => {
-    elements.barMessage.value += ":mlg:";
-};
-elements.emoteRalsei.onclick = (e) => {
-    elements.barMessage.value += ":ralsei:";
-};
-// TTF
-elements.emoteTtfIdle.onclick = (e) => {
-    elements.barMessage.value += ":ttfidle:";
-};
-elements.emoteTtfSeizure.onclick = (e) => {
-    elements.barMessage.value += ":ttfseizure:";
-};
-elements.emoteTtfSpin.onclick = (e) => {
-    elements.barMessage.value += ":ttfspin:";
-};
-// Ripoffs / Bad
-elements.emoteBadSkull.onclick = (e) => {
-    elements.barMessage.value += ":badskull:";
-};
-elements.emoteBadPepe.onclick = (e) => {
-    elements.barMessage.value += ":badpepe:";
-};
-// Memes
-elements.emoteSmart.onclick = (e) => {
-    elements.barMessage.value += ":smart:";
-};
-elements.emoteClips.onclick = (e) => {
-    elements.barMessage.value += ":clips:";
-};
+
+Object.keys(emotes).forEach((emoteCategory) => {
+    Object.keys(emotes[emoteCategory]).forEach((emote) => {
+        createNewEmote(elements[emoteCategory], emote);
+    });
+});
+
+// /* Emote onclicks */
+// // Diep.io / Arras.io
+// elements.emoteSpectator.onclick = (e) => {
+//     elements.barMessage.value += ":spectator:";
+// };
+// elements.emoteBasic.onclick = (e) => {
+//     elements.barMessage.value += ":basic:";
+// };
+// elements.emoteBooster.onclick = (e) => {
+//     elements.barMessage.value += ":booster:";
+// };
+// elements.emoteRanger.onclick = (e) => {
+//     elements.barMessage.value += ":ranger:";
+// };
+// elements.emoteValrayvn.onclick = (e) => {
+//     elements.barMessage.value += ":valrayvn:";
+// };
+// // Verify
+// elements.emoteVerifyGuest.onclick = (e) => {
+//     elements.barMessage.value += ":verifyguest:";
+// };
+// elements.emoteVerifyAlt.onclick = (e) => {
+//     elements.barMessage.value += ":verifyalt:";
+// };
+// elements.emoteVerifyDirector.onclick = (e) => {
+//     elements.barMessage.value += ":verifydirector:";
+// };
+// elements.emoteVerifyTrial.onclick = (e) => {
+//     elements.barMessage.value += ":verifytrial:";
+// };
+// elements.emoteVerifyManager.onclick = (e) => {
+//     elements.barMessage.value += ":verifymanager:";
+// };
+// elements.emoteVerifyDev.onclick = (e) => {
+//     elements.barMessage.value += ":verifydev:";
+// };
+// elements.emoteVerifyTrash.onclick = (e) => {
+//     elements.barMessage.value += ":verifytrash:";
+// };
+// elements.emoteVerifyYoutuber.onclick = (e) => {
+//     elements.barMessage.value += ":verifyyoutuber:";
+// };
+// elements.emoteVerifyMusician.onclick = (e) => {
+//     elements.barMessage.value += ":verifymusician:";
+// };
+// elements.emoteVerifyArtist.onclick = (e) => {
+//     elements.barMessage.value += ":verifyartist:";
+// };
+// elements.emoteVerifyBongis.onclick = (e) => {
+//     elements.barMessage.value += ":verifybongis:";
+// };
+// elements.emoteVerifyOldDev.onclick = (e) => {
+//     elements.barMessage.value += ":verifyolddev:";
+// };
+// // Trust
+// elements.emoteExtremelyNotTrust.onclick = (e) => {
+//     elements.barMessage.value += ":extremelynottrust:";
+// };
+// elements.emoteNotTrust.onclick = (e) => {
+//     elements.barMessage.value += ":nottrust:";
+// };
+// elements.emoteMaybeTrust.onclick = (e) => {
+//     elements.barMessage.value += ":maybetrust:";
+// };
+// elements.emoteYesTrust.onclick = (e) => {
+//     elements.barMessage.value += ":yestrust:";
+// };
+// elements.emoteProbablyTrust.onclick = (e) => {
+//     elements.barMessage.value += ":probablytrust:";
+// };
+// elements.emoteSuperTrust.onclick = (e) => {
+//     elements.barMessage.value += ":supertrust:";
+// };
+// // Deltarune
+// elements.emoteMlg.onclick = (e) => {
+//     elements.barMessage.value += ":mlg:";
+// };
+// elements.emoteRalsei.onclick = (e) => {
+//     elements.barMessage.value += ":ralsei:";
+// };
+// // TTF
+// elements.emoteTtfIdle.onclick = (e) => {
+//     elements.barMessage.value += ":ttfidle:";
+// };
+// elements.emoteTtfSeizure.onclick = (e) => {
+//     elements.barMessage.value += ":ttfseizure:";
+// };
+// elements.emoteTtfSpin.onclick = (e) => {
+//     elements.barMessage.value += ":ttfspin:";
+// };
+// // Ripoffs / Bad
+// elements.emoteBadSkull.onclick = (e) => {
+//     elements.barMessage.value += ":badskull:";
+// };
+// elements.emoteBadPepe.onclick = (e) => {
+//     elements.barMessage.value += ":badpepe:";
+// };
+// // Memes
+// elements.emoteSmart.onclick = (e) => {
+//     elements.barMessage.value += ":smart:";
+// };
+// elements.emoteClips.onclick = (e) => {
+//     elements.barMessage.value += ":clips:";
+// };
 /* this took too long, and adding new emotes is going to be annoying lmao */
 
 // Book
@@ -1135,12 +1227,14 @@ window.ondragover = (e) => {
 window.ondrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    uploadFile = e.dataTransfer.files[0];
-    uploadMime = uploadFile.type;
-    elements.imageConfirm.classList.remove("hidden");
-    elements.screen.classList.remove("hidden");
-    elements.barImage.value = "";
-    elements.imageConfirmImage.src = URL.createObjectURL(uploadFile);
+    if (e.dataTransfer.files.length > 0) {
+        uploadFile = e.dataTransfer.files[0];
+        uploadMime = uploadFile.type;
+        elements.imageConfirm.classList.remove("hidden");
+        elements.screen.classList.remove("hidden");
+        elements.barImage.value = "";
+        elements.imageConfirmImage.src = URL.createObjectURL(uploadFile);
+    };
 };
 
 elements.barClip.onclick = () => elements.barImage.click();
@@ -1156,7 +1250,11 @@ elements.barImage.onchange = () => {
 elements.openTosPp.onclick = () => {
     elements.tosPp.classList.remove("hidden");
     elements.screen.classList.remove("hidden");
-}
+};
+elements.altOpenTosPp.onclick = () => {
+    elements.tosPp.classList.remove("hidden");
+    elements.screen.classList.remove("hidden");
+};
 elements.closeTosPp.onclick = () => {
     elements.tosPp.classList.add("hidden");
     elements.screen.classList.add("hidden");

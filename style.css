@@ -629,6 +629,7 @@ a:visited:hover {
     cursor: pointer;
     border: 2px solid var(--accent-color);
     background-color: var(--highlight-color);
+    object-fit: cover;
 }
 
 .emoji:hover,
