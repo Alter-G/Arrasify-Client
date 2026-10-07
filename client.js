@@ -94,7 +94,8 @@ const emotes = { // Emote - SRC
         "yestrust": "./emotes/yestrust.png",
         "probablytrust": "./emotes/probablytrust.png",
         "supertrust": "./emotes/supertrust.png",
-        "eviljinn": "./emotes/eviljinn.png"
+        "eviljinn": "./emotes/eviljinn.png",
+        "deadchat": "./emotes/deadchat.png"
     },
     eDeltarune: {
         // Deltarune
@@ -131,10 +132,14 @@ const emotes = { // Emote - SRC
         "bird": "./emotes/bird.gif",
         "badapple": "./emotes/badapple.gif",
         "idk": "./emotes/idk.gif"
+    },
+    eCommunity: {
+        "dkg": "./emotes/dkg.png",
+        "peiple": "./emotes/peiple.jfif"
     }
 };
 
-const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eTTF, ...emotes.eGeneral, ...emotes.eMemes };
+const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eTTF, ...emotes.eGeneral, ...emotes.eMemes, ...emotes.eCommunity };
 
 const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
@@ -195,6 +200,7 @@ const elements = {
     eTTF: document.querySelector("#eTTF"),
     eGeneral: document.querySelector("#eGeneral"),
     eMemes: document.querySelector("#eMemes"),
+    eCommunity: document.querySelector("#eCommunity"),
     // Terms of Service & Privacy Policy (TOS-PP)
     tosPp: document.querySelector("#tosPp"), // The Terms of Service & Privacy Policy UI
     openTosPp: document.querySelector("#openTosPp"), // Opens the Terms of Service & Privacy Policy UI
@@ -970,8 +976,9 @@ elements.emojiDizzy.onclick = (e) => {
 elements.emojiExpressionless.onclick = (e) => {
     elements.barMessage.value += ":expressionless:";
 };
+
 /* Thank god thats over */
-// /* Oh shit nvm its not lmao */
+// /* Oh shi nvm its not lmao */
 
 const createNewEmote = (emoteList, emoteKey) => {
     const emoteElement = document.createElement("img");
