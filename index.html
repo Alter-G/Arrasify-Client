@@ -11,8 +11,9 @@
 
 <body class="theme-dark">
     <header>
-        <h1>Arrasify</h1>
+        <h1>Arrasify [v1.2]</h1>
         <div class="header-tools">
+            <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
             <i class="bi bi-bell header-icons" id="togglePings"></i>
             <i class="bi bi-book header-icons" id="helper"></i>
@@ -26,25 +27,18 @@
         <div id="users" class="hidden">
             <h2 style="text-align: center; color: white; user-select: none;">Online Friends</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Developers</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Admins</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Overseers</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Underseers</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Helpers</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Users</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
-            <hr>
             <h2 style="text-align: center; color: white; user-select: none;">Guests</h2>
             <p style="text-align: center; color: white; user-select: none;">Nobody here!</p>
             <!-- <div class="users-user">
@@ -183,8 +177,13 @@
     <div id="screen" class="hidden"></div>
     <div id="imageConfirm" class="hidden">
         <h2>Upload Confirmation</h2>
-        <p>Is the below image correct?</p>
+        <p>Is the below upload correct?</p>
         <img src="" alt="No image." id="imageConfirmImage">
+        <video id="imageConfirmVideo" controls>
+            <source src="" type="" id="imageConfirmVideoSource" />
+        </video>
+        <audio id="imageConfirmAudio" controls></audio>
+        <p class="message-red" id="imageConfirmError">[I can't preview this file.]</p>
         <div class="image-confirm-btns">
             <button class="confirm-btn" id="imageConfirmY">Confirm</button>
             <button class="cancel-btn" id="imageConfirmN">Cancel</button>
@@ -429,15 +428,34 @@
                 </div>
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
-                    <h2>7th October 2026 - Patch Update - v1.1</h2>
+                    <h2>16th October 2026 - Major Update - v1.2</h2>
+                    <p>New features</p>
+                    <ul>
+                        <li>Added pings.</li>
+                        <li>Added file upload limits of size 20MB.</li>
+                        <li>Added basic backend rate limiting.</li>
+                        <li>Added options. <!-- XT-X Options by Frums reference OOHHHHHHHHHHHHH --></li>
+                        <li>Added preference saving.</li>
+                        <li>Experimenting with themes.</li>
+                        <li>Minor visual changes to the user list.</li>
+                    </ul>
+                    <p>Bug fixes</p>
+                    <ul>
+                        <li>Fixed the incorrect logout of certain users, resulting in 'ghost logins'.</li>
+                        <li>Fixed the slowmode being bypassable.</li>
+                    </ul>
+                    <p>
+                        Expect profiles and compact mode next update.
+                    </p>
+                    <h2>7th October 2026 - Minor Update - v1.1.2</h2>
                     <p>New features</p>
                     <ul>
                         <li>Added an additional three emotes. Expect more.</li>
                     </ul>
                     <p>Bug fixes</p>
                     <ul>
-                        <li>Fixed the /data create subcommand not working correctly.</li>
-                        <li>Fixed the /data edit name subcommand not working correctly.</li>
+                        <li>Fixed the <code>/data create</code> subcommand not working correctly.</li>
+                        <li>Fixed the <code>/data edit name</code> subcommand not working correctly.</li>
                     </ul>
                     <h2>6th October 2026 - Minor Update - v1.1.1</h2>
                     <p>New features</p>
@@ -466,7 +484,7 @@
                             made a lot of things break).</li>
                     </ul>
                     <p>
-                        If Arrasify has stopped working for you since v1.1, check to make sure our
+                        If Arrasify has stopped working for you since v1.1.0, check to make sure our
                         <a href="https://arrasify.alter-g.workers.dev/">server</a> or subsequent endpoints are
                         not blacklisted on your network.
                     </p>
@@ -474,7 +492,7 @@
                         If Arrasify is down at any point, you can
                         <a href="https://mlg-inc.vercel.app/verify">visit my personal site</a> to check for updates.
                     </p>
-                    <h2>5th October 2026 - Major Update - v1.1</h2>
+                    <h2>5th October 2026 - Major Update - v1.1.0</h2>
                     <p>Arrasify has migrated servers, meaning they shouldn't go offline as easily.</p>
                     <p>Developer's note: things may still be unstable for a few days as things go back to normal.</p>
                     <h2>18th September 2026 - Patch Update - v1.0.1</h2>
@@ -490,7 +508,7 @@
                         <li>Fixed guests being in the 'online users' section when they log out.</li>
                         <li>Fixed the auto scroll not activating at the right moment.</li>
                     </ul>
-                    <h2>17th September 2026 - Major Update - v1.0</h2>
+                    <h2>17th September 2026 - Major Update - v1.0.0</h2>
                     <p>New features</p>
                     <ul>
                         <li>Full release.</li>
@@ -499,7 +517,7 @@
                     <ul>
                         <li>Minimal adjustmenets.</li>
                     </ul>
-                    <h2>16th September 2026 - Minor Update - v0.1</h2>
+                    <h2>16th September 2026 - Minor Update - v0.1.0</h2>
                     <p>New features</p>
                     <ul>
                         <li>Early release.</li>
@@ -728,6 +746,62 @@
                     <h3>Developer+ Commands</h3>
                     <p>There's no exclusive developer commands yet.</p>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="options" class="hidden">
+        <div class="optionsHeader">
+            <h1>Options</h1>
+            <i class="bi bi-x-square" id="optionsClose"></i>
+        </div>
+        <h2><i class="bi bi-grid-1x2"></i> View</h2>
+        <div class="toggles">
+            <div class="toggle">
+                <div class="toggleHeader">
+                    <i class="bi bi-toggle-on" id="viewUser"></i>
+                    <p>User List</p>
+                </div>
+                <p>Toggles the visibility of the user list on the left of the chat.</p>
+            </div>
+            <!-- <div class="viewToggle">
+                <div class="toggleHeader">
+                    <i class="bi bi-toggle-off" id="viewAdmin"></i>
+                    <p>Admin Panel</p>
+                </div>
+                <p>Toggles the draggable admin panel.</p>
+            </div> -->
+        </div>
+        <hr>
+        <h2><i class="bi bi-hammer"></i> Experimental</h2>
+        <div class="toggles">
+            <!-- <div class="toggle">
+                <div class="toggleHeader">
+                    <i class="bi bi-toggle-off" id="expTestTheme"></i>
+                    <p>Compact Mode</p>
+                </div>
+                <p>Attempt to make the chat smaller for devices that can't fit much on the screen.</p>
+            </div> -->
+            <div class="toggle">
+                <div class="toggleHeader">
+                    <i class="bi bi-toggle-off" id="expAbyss"></i>
+                    <p>Abyss Theme</p>
+                </div>
+                <p>Use Testing's custom-made theme.</p>
+            </div>
+            <div class="toggle">
+                <div class="toggleHeader">
+                    <i class="bi bi-toggle-on" id="expMixer"></i>
+                    <p>Mixer</p>
+                </div>
+                <p>Enable the mixer, which plays external audio from commands. Note that this doesn't do anything yet.
+                </p>
+            </div>
+            <div class="toggle">
+                <div class="toggleHeader">
+                    <i class="bi bi-toggle-off" id="expNight"></i>
+                    <p>Night Theme</p>
+                </div>
+                <p>Use MLG's custom-made theme.</p>
             </div>
         </div>
     </div>

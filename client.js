@@ -1,15 +1,28 @@
-// const homeAddress = window.location.href
-// const homeAddress = "arrasify.onrender.com/";
-const homeAddress = "arrasify.alter-g.workers.dev/";
-// const homeAddress = "127.0.0.1:8787/";
-const ws = new WebSocket(`wss://${homeAddress}`);
+let endpointAddress = "https://arrasify.alter-g.workers.dev";
+let socketAddress = "wss://arrasify.alter-g.workers.dev";
+
+// Localhost Setup
+// endpointAddress = "http://127.0.0.1:8787";
+// socketAddress = "ws://127.0.0.1:8787";
+
+const ws = new WebSocket(`${socketAddress}`);
 
 let settings = {
+    // Head toggles
     allow_pings: true,
-    dark_theme: true
+    dark_theme: true,
+    // Option toggles
+    show_users: true,
+    abyss_theme: false,
+    allow_mixer: true,
+    night_theme: false
 };
 
+if (localStorage.getItem("settings")) settings = JSON.parse(localStorage.getItem("settings"));
+else localStorage.setItem("settings", JSON.stringify(settings));
+
 let info = {
+    name: "-",
     timeout: 0,
     channel: "???"
 };
@@ -43,7 +56,15 @@ let messageReplyDM = false;
 // Upload-related things
 let uploadFile = undefined;
 let uploadMime = "application/octet-stream";
+let uploadSize = 0;
 let nextUpload = undefined;
+let readyFile = undefined;
+
+// Audio-related things
+const pingAudio = new Audio("./sfx/ping.mp3");
+let canPlayAudio = false;
+pingAudio.oncanplay = () => { canPlayAudio = true; };
+const dmAudio = new Audio("./sfx/dm.mp3");
 
 const emojis = { // Emoji - ClassList
     "smile": "chat-emoji bi bi-emoji-smile-fill",
@@ -144,6 +165,7 @@ const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emo
 const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
     // Header Bars
+    toggleOptions: document.querySelector("#toggleOptions"), // The element that, when clicked, opens the options.
     toggleDark: document.querySelector("#toggleDark"), // The element that, when clicked, toggles the dark/light theme. Dark by default
     togglePings: document.querySelector("#togglePings"), // Whether pings make a noise or not
     helper: document.querySelector("#helper"),
@@ -208,6 +230,10 @@ const elements = {
     // Upload Confirmation
     imageConfirm: document.querySelector("#imageConfirm"), // The image confirm ui container
     imageConfirmImage: document.querySelector("#imageConfirmImage"), // The image confirm preview image
+    imageConfirmVideo: document.querySelector("#imageConfirmVideo"), // The image confirm preview video
+    imageConfirmVideoSource: document.querySelector("#imageConfirmVideoSource"), // The image confirm preview video source
+    imageConfirmAudio: document.querySelector("#imageConfirmAudio"), // The image confirm preview audio
+    imageConfirmError: document.querySelector("#imageConfirmError"), // The image confirm error
     imageConfirmY: document.querySelector("#imageConfirmY"), // Image confirm yes button
     imageConfirmN: document.querySelector("#imageConfirmN"), // Image confirm no button
     // Media Enlarger
@@ -229,6 +255,13 @@ const elements = {
     bookAdminsContent: document.querySelector("#bookAdminsContent"),
     bookSupportContent: document.querySelector("#bookSupportContent"),
     bookCommandsContent: document.querySelector("#bookCommandsContent"),
+    // Options
+    options: document.querySelector("#options"), // The options menu.
+    optionsClose: document.querySelector("#optionsClose"), // The close options menu button.
+    optionsViewUser: document.querySelector("#viewUser"), // Toggle the viewing of the user list.
+    optionsExpAbyss: document.querySelector("#expAbyss"), // Toggle the Abyss theme. Overrides the current theme.
+    optionsExpNight: document.querySelector("#expNight"), // Toggle the Night theme. Overrides the current theme and abyss.
+    optionsExpMixer: document.querySelector("#expMixer"), // Toggle the hearing of the mixer.
     // Mod
     mod: document.querySelector("#mod"),
     modHeader: document.querySelector("#modHeader"),
@@ -238,6 +271,43 @@ const elements = {
     disconnectCode: document.querySelector("#disconnectCode"),
     // Toasts
     toasts: document.querySelector("#toasts"),
+};
+
+// Load settings
+if (settings.allow_pings) elements.togglePings.className = "bi bi-bell header-icons";
+else elements.togglePings.className = "bi bi-bell-slash header-icons";
+if (settings.dark_theme) {
+    elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
+    document.body.classList.remove("theme-light");
+    document.body.classList.add("theme-dark");
+} else {
+    elements.toggleDark.className = "bi bi-sun-fill header-icons";
+    document.body.classList.remove("theme-dark");
+    document.body.classList.add("theme-light");
+};
+if (settings.show_users) {
+    elements.optionsViewUser.className = "bi bi-toggle-on";
+} else {
+    elements.optionsViewUser.className = "bi bi-toggle-off";
+};
+if (settings.abyss_theme) {
+    elements.optionsExpAbyss.className = "bi bi-toggle-on";
+    document.body.classList.add("theme-abyss");
+} else {
+    elements.optionsExpAbyss.className = "bi bi-toggle-off";
+    document.body.classList.remove("theme-abyss");
+};
+if (settings.allow_mixer) {
+    elements.optionsExpMixer.className = "bi bi-toggle-on";
+} else {
+    elements.optionsExpMixer.className = "bi bi-toggle-off";
+};
+if (settings.night_theme) {
+    elements.optionsExpNight.className = "bi bi-toggle-on";
+    document.body.classList.add("theme-night");
+} else {
+    elements.optionsExpNight.className = "bi bi-toggle-off";
+    document.body.classList.remove("theme-night");
 };
 
 const createToast = (text) => {
@@ -352,7 +422,7 @@ const messageCreateTextElement = (message, color) => {
         let s = document.createElement("span"); // This used to be p
         s.className = "chat-message-line";
         // Split emotes
-        let reconstructed = [];
+        // let reconstructed = [];
         let previousWasEmote = false;
         const emoteSplit = line.split(":");
         // Initial text
@@ -390,6 +460,44 @@ const messageCreateTextElement = (message, color) => {
                 s.appendChild(pElement);
             };
             // p.appendChild(s);
+        };
+        // Loop every element to find a ping
+        // Pings are broken
+        // for (let i = 0; i < s.children.length; i++) {
+        //     if (s.children[i].tagName === "P") {
+        //         let possiblePings = s.children[i].textContent.split(" ");
+        //         possiblePings.forEach((possiblePing) => {
+        //             if (possiblePing[0] === "@") {
+        //                 if (possiblePings.length < 1) {
+        //                     s.removeChild(s.children[i]);
+        //                 };
+        //                 const pElement = document.createElement(`p`);
+        //                 pElement.textContent = possiblePing;
+        //                 pElement.className = "message-ping";
+        //                 s.insertBefore(pElement, s.children[i]);
+        //                 if (i < s.children.length - 1) s.children[i].style.marginRight = `4px`;
+        //                 if (possiblePings.length > 1) s.children[i].textContent = possiblePings.join(" ");
+        //             };
+        //         });
+        //     };
+        // };
+        const pingable = [
+            ...collectedUsers.guests,
+            ...collectedUsers.users,
+            ...collectedUsers.helpers,
+            ...collectedUsers.underseers,
+            ...collectedUsers.overseers,
+            ...collectedUsers.admins,
+            ...collectedUsers.developers
+        ].map(user => user.name);
+        let regEx = new RegExp(`(@${pingable.join("|@")})`, "g");
+        for (let i = 0; i < s.children.length; i++) {
+            if (s.children[i].tagName === "P") {
+                if (s.children[i].innerHTML.includes(`@${info.name}`)) {
+                    if (canPlayAudio && settings.allow_pings) { pingAudio.play(); };
+                };
+                s.children[i].innerHTML = s.children[i].innerHTML.replace(regEx, `<span class="message-ping">\$1</span>`);
+            };
         };
         // p.innerHTML = reconstructed.join("");
         // paragraphs.push(p);
@@ -441,6 +549,7 @@ const createMessageText = (user, pfp, verified, message, neo, color, timestamp, 
 
         elements.chatHistory.appendChild(messageElement);
         if (autoScroll) setTimeout(scrollChatHistory, 30);
+        if (settings.allow_pings && dm) dmAudio.play();
     };
 }
 
@@ -519,7 +628,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(friend.id, friend.aID, friend.name, friend.bio, friend.pfp, true, friend.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.developers.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Developers</h2>`;
@@ -528,7 +637,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(developer.id, developer.aID, developer.name, developer.bio, developer.pfp, true, developer.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.admins.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Admins</h2>`;
@@ -537,7 +646,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(admin.id, admin.aID, admin.name, admin.bio, admin.pfp, true, admin.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.overseers.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Overseers</h2>`;
@@ -546,7 +655,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(overseer.id, overseer.aID, overseer.name, overseer.bio, overseer.pfp, true, overseer.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.underseers.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Underseers</h2>`;
@@ -555,7 +664,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(underseer.id, underseer.aID, underseer.name, underseer.bio, underseer.pfp, true, underseer.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.helpers.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Helpers</h2>`;
@@ -564,7 +673,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(helper.id, helper.aID, helper.name, helper.bio, helper.pfp, true, helper.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.users.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Users</h2>`;
@@ -573,7 +682,7 @@ const listAllUsers = () => {
             const userInList = createUserInList(user.id, user.aID, user.name, user.bio, user.pfp, true, user.neo);
             userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
-        elements.users.innerHTML += `<hr>`;
+        //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.guests.length > 0) {
         elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Guests</h2>`;
@@ -599,7 +708,7 @@ const listAllUsers = () => {
 // GET and POST Requests
 const postTokenAuth = async () => {
     try {
-        const response = await fetch(`https://${homeAddress}auth`, {
+        const response = await fetch(`${endpointAddress}/auth`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -641,7 +750,8 @@ const payloadText = (content) => {
 const payloadUploadRequest = () => {
     return JSON.stringify({
         type: "uwarn",
-        mime: uploadMime
+        mime: uploadMime,
+        size: uploadSize
     });
 };
 
@@ -713,6 +823,16 @@ const wsMessage = (data, isBinary) => {
                     break;
                 };
                 case "greet": {
+                    collectedUsers = {
+                        guests: message.guests,
+                        users: message.users,
+                        helpers: message.helpers,
+                        underseers: message.underseers,
+                        overseers: message.overseers,
+                        admins: message.admins,
+                        developers: message.developers,
+                        friends: message.friends
+                    };
                     message.history.forEach((msg) => {
                         msg = JSON.parse(msg);
                         createMessageText(
@@ -735,6 +855,12 @@ const wsMessage = (data, isBinary) => {
                 case "uwarn": {
                     nextUpload = message;
                     break;
+                };
+                case "greenlight": {
+                    if (readyFile) {
+                        ws.send(readyFile);
+                        readyFile = undefined;
+                    };
                 };
                 case "auth": {
                     if (message.ok) {
@@ -797,6 +923,15 @@ const eVisitAsGuest = (e) => {
     elements.users.classList.remove("hidden");
     elements.viewport.classList.remove("hidden");
     elements.backToAuth.classList.remove("hidden");
+    if (settings.show_users) {
+        elements.optionsViewUser.className = "bi bi-toggle-on";
+        elements.users.classList.remove("hidden");
+        elements.viewport.style.width = "60%";
+    } else {
+        elements.optionsViewUser.className = "bi bi-toggle-off";
+        elements.users.classList.add("hidden");
+        elements.viewport.style.width = "80%";
+    };
     if (autoScroll) scrollChatHistory();
 };
 
@@ -811,11 +946,11 @@ const eCreateMessage = () => {
 };
 
 const eUploadFile = () => {
-    ws.send(payloadUploadRequest());
     const reader = new FileReader();
     reader.readAsArrayBuffer(uploadFile);
     reader.onload = () => {
-        ws.send(reader.result);
+        readyFile = reader.result;
+        ws.send(payloadUploadRequest());
     };
 };
 
@@ -849,23 +984,57 @@ const eAuthenticate = () => {
     elements.barToken.value = "";
 };
 
+const eHandlePreview = (url, mime) => {
+    elements.imageConfirmImage.classList.add("hidden");
+    elements.imageConfirmVideo.classList.add("hidden");
+    elements.imageConfirmAudio.classList.add("hidden");
+    elements.imageConfirmError.classList.add("hidden");
+    console.log(mime);
+    switch (mime.split("/")[0]) {
+        case "image": {
+            elements.imageConfirmImage.classList.remove("hidden");
+            elements.imageConfirmImage.src = url;
+            break;
+        };
+        case "audio": {
+            elements.imageConfirmAudio.classList.remove("hidden");
+            elements.imageConfirmAudio.src = url;
+            break;
+        };
+        case "video": {
+            elements.imageConfirmVideo.classList.remove("hidden");
+            elements.imageConfirmVideoSource.src = url;
+            elements.imageConfirmVideoSource.type = mime;
+            elements.imageConfirmVideo.load();
+            break;
+        };
+        default: {
+            elements.imageConfirmError.classList.remove("hidden");
+            break;
+        };
+    };
+};
+
 elements.backToAuth.onclick = () => {
     sessionID = "-";
     elements.backToAuth.classList.add("hidden");
     elements.users.classList.add("hidden");
     elements.viewport.classList.add("hidden");
     elements.auth.classList.remove("hidden");
+    elements.viewport.style.width = "60%";
     ws.send(payloadUnauth());
 };
 
 elements.togglePings.onclick = () => {
     settings.allow_pings = !settings.allow_pings;
+    localStorage.setItem("settings", JSON.stringify(settings));
     if (settings.allow_pings) elements.togglePings.className = "bi bi-bell header-icons";
     else elements.togglePings.className = "bi bi-bell-slash header-icons";
 };
 
 elements.toggleDark.onclick = () => {
     settings.dark_theme = !settings.dark_theme;
+    localStorage.setItem("settings", JSON.stringify(settings));
     if (settings.dark_theme) {
         elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
         document.body.classList.remove("theme-light");
@@ -914,6 +1083,7 @@ elements.barMessage.onpaste = (e) => {
         if (items[i].type.indexOf("image") !== -1) {
             uploadFile = items[i].getAsFile();
             uploadMime = uploadFile.type;
+            uploadSize = uploadFile.size;
             elements.imageConfirm.classList.remove("hidden");
             elements.screen.classList.remove("hidden");
             elements.barImage.value = "";
@@ -933,7 +1103,7 @@ elements.barEmote.onclick = (e) => {
     elements.emoteList.classList.contains("hidden") ? elements.emoteList.classList.remove("hidden") : elements.emoteList.classList.add("hidden");
 };
 
-/* Emote onclicks */
+/* Emoji onclicks */
 elements.emojiSmile.onclick = (e) => {
     elements.barMessage.value += ":smile:";
 };
@@ -977,9 +1147,8 @@ elements.emojiExpressionless.onclick = (e) => {
     elements.barMessage.value += ":expressionless:";
 };
 
-/* Thank god thats over */
-// /* Oh shi nvm its not lmao */
 
+/* Emotes and Onclick Events */
 const createNewEmote = (emoteList, emoteKey) => {
     const emoteElement = document.createElement("img");
     emoteElement.className = "emote";
@@ -996,112 +1165,6 @@ Object.keys(emotes).forEach((emoteCategory) => {
         createNewEmote(elements[emoteCategory], emote);
     });
 });
-
-// /* Emote onclicks */
-// // Diep.io / Arras.io
-// elements.emoteSpectator.onclick = (e) => {
-//     elements.barMessage.value += ":spectator:";
-// };
-// elements.emoteBasic.onclick = (e) => {
-//     elements.barMessage.value += ":basic:";
-// };
-// elements.emoteBooster.onclick = (e) => {
-//     elements.barMessage.value += ":booster:";
-// };
-// elements.emoteRanger.onclick = (e) => {
-//     elements.barMessage.value += ":ranger:";
-// };
-// elements.emoteValrayvn.onclick = (e) => {
-//     elements.barMessage.value += ":valrayvn:";
-// };
-// // Verify
-// elements.emoteVerifyGuest.onclick = (e) => {
-//     elements.barMessage.value += ":verifyguest:";
-// };
-// elements.emoteVerifyAlt.onclick = (e) => {
-//     elements.barMessage.value += ":verifyalt:";
-// };
-// elements.emoteVerifyDirector.onclick = (e) => {
-//     elements.barMessage.value += ":verifydirector:";
-// };
-// elements.emoteVerifyTrial.onclick = (e) => {
-//     elements.barMessage.value += ":verifytrial:";
-// };
-// elements.emoteVerifyManager.onclick = (e) => {
-//     elements.barMessage.value += ":verifymanager:";
-// };
-// elements.emoteVerifyDev.onclick = (e) => {
-//     elements.barMessage.value += ":verifydev:";
-// };
-// elements.emoteVerifyTrash.onclick = (e) => {
-//     elements.barMessage.value += ":verifytrash:";
-// };
-// elements.emoteVerifyYoutuber.onclick = (e) => {
-//     elements.barMessage.value += ":verifyyoutuber:";
-// };
-// elements.emoteVerifyMusician.onclick = (e) => {
-//     elements.barMessage.value += ":verifymusician:";
-// };
-// elements.emoteVerifyArtist.onclick = (e) => {
-//     elements.barMessage.value += ":verifyartist:";
-// };
-// elements.emoteVerifyBongis.onclick = (e) => {
-//     elements.barMessage.value += ":verifybongis:";
-// };
-// elements.emoteVerifyOldDev.onclick = (e) => {
-//     elements.barMessage.value += ":verifyolddev:";
-// };
-// // Trust
-// elements.emoteExtremelyNotTrust.onclick = (e) => {
-//     elements.barMessage.value += ":extremelynottrust:";
-// };
-// elements.emoteNotTrust.onclick = (e) => {
-//     elements.barMessage.value += ":nottrust:";
-// };
-// elements.emoteMaybeTrust.onclick = (e) => {
-//     elements.barMessage.value += ":maybetrust:";
-// };
-// elements.emoteYesTrust.onclick = (e) => {
-//     elements.barMessage.value += ":yestrust:";
-// };
-// elements.emoteProbablyTrust.onclick = (e) => {
-//     elements.barMessage.value += ":probablytrust:";
-// };
-// elements.emoteSuperTrust.onclick = (e) => {
-//     elements.barMessage.value += ":supertrust:";
-// };
-// // Deltarune
-// elements.emoteMlg.onclick = (e) => {
-//     elements.barMessage.value += ":mlg:";
-// };
-// elements.emoteRalsei.onclick = (e) => {
-//     elements.barMessage.value += ":ralsei:";
-// };
-// // TTF
-// elements.emoteTtfIdle.onclick = (e) => {
-//     elements.barMessage.value += ":ttfidle:";
-// };
-// elements.emoteTtfSeizure.onclick = (e) => {
-//     elements.barMessage.value += ":ttfseizure:";
-// };
-// elements.emoteTtfSpin.onclick = (e) => {
-//     elements.barMessage.value += ":ttfspin:";
-// };
-// // Ripoffs / Bad
-// elements.emoteBadSkull.onclick = (e) => {
-//     elements.barMessage.value += ":badskull:";
-// };
-// elements.emoteBadPepe.onclick = (e) => {
-//     elements.barMessage.value += ":badpepe:";
-// };
-// // Memes
-// elements.emoteSmart.onclick = (e) => {
-//     elements.barMessage.value += ":smart:";
-// };
-// elements.emoteClips.onclick = (e) => {
-//     elements.barMessage.value += ":clips:";
-// };
-/* this took too long, and adding new emotes is going to be annoying lmao */
 
 // Book
 elements.helper.onclick = (e) => {
@@ -1208,6 +1271,62 @@ elements.bookSupport.onclick = (e) => {
     elements.bookSupportContent.classList.remove("hidden");
 };
 
+// Options
+elements.toggleOptions.onclick = (e) => {
+    elements.screen.classList.remove("hidden");
+    elements.options.classList.remove("hidden");
+};
+elements.optionsClose.onclick = (e) => {
+    elements.screen.classList.add("hidden");
+    elements.options.classList.add("hidden");
+};
+elements.optionsViewUser.onclick = (e) => {
+    if (elements.auth.classList.contains("hidden")) {
+        settings.show_users = !settings.show_users;
+        localStorage.setItem("settings", JSON.stringify(settings));
+        if (settings.show_users) {
+            elements.optionsViewUser.className = "bi bi-toggle-on";
+            elements.users.classList.remove("hidden");
+            elements.viewport.style.width = "60%";
+        } else {
+            elements.optionsViewUser.className = "bi bi-toggle-off";
+            elements.users.classList.add("hidden");
+            elements.viewport.style.width = "80%";
+        };
+    }
+};
+elements.optionsExpAbyss.onclick = (e) => {
+    settings.abyss_theme = !settings.abyss_theme;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.abyss_theme) {
+        elements.optionsExpAbyss.className = "bi bi-toggle-on";
+        document.body.classList.add("theme-abyss");
+    } else {
+        elements.optionsExpAbyss.className = "bi bi-toggle-off";
+        document.body.classList.remove("theme-abyss");
+    };
+};
+elements.optionsExpMixer.onclick = (e) => {
+    settings.allow_mixer = !settings.allow_mixer;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.allow_mixer) {
+        elements.optionsExpMixer.className = "bi bi-toggle-on";
+    } else {
+        elements.optionsExpMixer.className = "bi bi-toggle-off";
+    };
+};
+elements.optionsExpNight.onclick = (e) => {
+    settings.night_theme = !settings.night_theme;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.night_theme) {
+        elements.optionsExpNight.className = "bi bi-toggle-on";
+        document.body.classList.add("theme-night");
+    } else {
+        elements.optionsExpNight.className = "bi bi-toggle-off";
+        document.body.classList.remove("theme-night");
+    };
+};
+
 elements.modHeader.onmousedown = (e) => {
     dragMod = true;
     modLocation.x = e.clientX;
@@ -1237,10 +1356,11 @@ window.ondrop = (e) => {
     if (e.dataTransfer.files.length > 0) {
         uploadFile = e.dataTransfer.files[0];
         uploadMime = uploadFile.type;
+        uploadSize = uploadFile.size;
         elements.imageConfirm.classList.remove("hidden");
         elements.screen.classList.remove("hidden");
         elements.barImage.value = "";
-        elements.imageConfirmImage.src = URL.createObjectURL(uploadFile);
+        eHandlePreview(URL.createObjectURL(uploadFile), uploadMime);
     };
 };
 
@@ -1248,10 +1368,11 @@ elements.barClip.onclick = () => elements.barImage.click();
 elements.barImage.onchange = () => {
     uploadFile = elements.barImage.files.item(0);
     uploadMime = uploadFile.type;
+    uploadSize = uploadFile.size;
     elements.imageConfirm.classList.remove("hidden");
     elements.screen.classList.remove("hidden");
     elements.barImage.value = "";
-    elements.imageConfirmImage.src = URL.createObjectURL(uploadFile);
+    eHandlePreview(URL.createObjectURL(uploadFile), uploadMime);
 };
 
 elements.openTosPp.onclick = () => {
