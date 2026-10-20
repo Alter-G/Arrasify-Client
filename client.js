@@ -156,7 +156,8 @@ const emotes = { // Emote - SRC
     },
     eCommunity: {
         "dkg": "./emotes/dkg.png",
-        "peiple": "./emotes/peiple.jfif"
+        "peiple": "./emotes/peiple.jfif",
+        "boykisser": "./emotes/boykisser.png"
     }
 };
 
@@ -249,12 +250,14 @@ const elements = {
     bookAdmins: document.querySelector("#bookAdmins"),
     bookSupport: document.querySelector("#bookSupport"),
     bookCommands: document.querySelector("#bookCommands"),
+    bookCredits: document.querySelector("#bookCredits"),
     // Content
     bookRulesContent: document.querySelector("#bookRulesContent"),
     bookChangelogContent: document.querySelector("#bookChangelogContent"),
     bookAdminsContent: document.querySelector("#bookAdminsContent"),
     bookSupportContent: document.querySelector("#bookSupportContent"),
     bookCommandsContent: document.querySelector("#bookCommandsContent"),
+    bookCreditsContent: document.querySelector("#bookCreditsContent"),
     // Options
     options: document.querySelector("#options"), // The options menu.
     optionsClose: document.querySelector("#optionsClose"), // The close options menu button.
@@ -262,6 +265,12 @@ const elements = {
     optionsExpAbyss: document.querySelector("#expAbyss"), // Toggle the Abyss theme. Overrides the current theme.
     optionsExpNight: document.querySelector("#expNight"), // Toggle the Night theme. Overrides the current theme and abyss.
     optionsExpMixer: document.querySelector("#expMixer"), // Toggle the hearing of the mixer.
+    // Profile
+    closeProfile: document.querySelector("#closeProfile"),
+    profile: document.querySelector("#profile"),
+    profilePfp: document.querySelector("#profilePfp"),
+    profileName: document.querySelector("#profileName"),
+    profileBio: document.querySelector("#profileBio"),
     // Mod
     mod: document.querySelector("#mod"),
     modHeader: document.querySelector("#modHeader"),
@@ -327,7 +336,7 @@ const scrollChatHistory = () => {
     elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
 };
 
-const messageCreateUserElement = (user, pfp, verified, neo, timestamp, message, aID, id, dm, canReply) => {
+const messageCreateUserElement = (user, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply) => {
     // User Info
     const chatUser = document.createElement("div"); // Includes the sender information, as well as buttons and the date/time of postage
     chatUser.className = "chat-user";
@@ -383,12 +392,29 @@ const messageCreateUserElement = (user, pfp, verified, neo, timestamp, message, 
         verifiedSymbol.className = "bi bi-check-circle user-verified";
         userInfo.appendChild(verifiedSymbol);
     };
-    userInfo.onclick = (e) => { createToast("You can't view profiles yet."); };
+    userInfo.onclick = (e) => {
+        if (aID == "-" || aID == "!") {
+            createToast("You can't view this profile.");
+        } else { // Invalid profiles do not have pfps
+            elements.profile.classList.remove("hidden");
+            elements.screen.classList.remove("hidden");
+            elements.profileName.innerText = user;
+            elements.profilePfp.src = pfp;
+            elements.profileBio.innerHTML = "";
+            if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
+            else {
+                let lines = bio.split(/\r?\n|\\n/);
+                lines.forEach((line) => {
+                    elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                });
+            };
+        };
+    };
 
     // Extra buttons and timestamp
     const time = document.createElement("p");
     let dateTime = new Date(timestamp);
-    time.innerText = `${dateTime.getHours() % 12 < 10 ? "0" : ""}${dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}`;
+    time.innerText = `${dateTime.getHours() % 13 < 10 ? "0" : ""}${dateTime.getHours() % 13 + 1}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 13 ? "AM" : "PM"}`;
 
     const messageActions = document.createElement("div");
     messageActions.className = "message-actions";
@@ -528,7 +554,7 @@ const messageCreateImageElement = (file) => {
     return chatMessage;
 };
 
-const createMessageText = (user, pfp, verified, message, neo, color, timestamp, aID, id, reply, dm, canReply) => {
+const createMessageText = (user, pfp, bio, verified, message, neo, color, timestamp, aID, id, reply, dm, canReply) => {
     if (message.toString() != "") {
         const messageElement = document.createElement("div");
         messageElement.className = `message${dm ? " dm" : ""}`;
@@ -537,7 +563,7 @@ const createMessageText = (user, pfp, verified, message, neo, color, timestamp, 
         replyText.className = "reply-text";
         if (reply != "-") replyText.innerText = reply;
 
-        const chatUser = messageCreateUserElement(user, pfp, verified, neo, timestamp, message, aID, id, dm, canReply);
+        const chatUser = messageCreateUserElement(user, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply);
         // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
         const chatMessage = messageCreateTextElement(message, color);
 
@@ -553,11 +579,11 @@ const createMessageText = (user, pfp, verified, message, neo, color, timestamp, 
     };
 }
 
-const createMessageUpload = (user, pfp, verified, file, neo, timestamp, aID, id) => {
+const createMessageUpload = (user, pfp, bio, verified, file, neo, timestamp, aID, id) => {
     const messageElement = document.createElement("div");
     messageElement.className = "message";
 
-    const chatUser = messageCreateUserElement(user, pfp, verified, neo, timestamp, "[Upload]", aID, id, false, true);
+    const chatUser = messageCreateUserElement(user, pfp, bio, verified, neo, timestamp, "[Upload]", aID, id, false, true);
     // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
     const chatImage = messageCreateImageElement(file);
 
@@ -611,10 +637,28 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
     const userName = document.createElement("p");
     userName.className = `user-name message-${neo}`;
     userName.innerText = name;
+    userName.onclick = (e) => {
+        if (aID == "-" || aID == "!") {
+            createToast("You can't view this profile.");
+        } else { // Invalid profiles do not have pfps
+            elements.profile.classList.remove("hidden");
+            elements.screen.classList.remove("hidden");
+            elements.profileName.innerText = name;
+            elements.profilePfp.src = pfp;
+            elements.profileBio.innerHTML = "";
+            if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
+            else {
+                let lines = bio.split(/\r?\n|\\n/);
+                lines.forEach((line) => {
+                    elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                });
+            };
+        };
+    };
 
     user.appendChild(userPfp);
     user.appendChild(userName);
-    if (verified) user.innerHTML += `<i class="bi bi-check-circle user-verified"></i>`;
+    if (verified) userName.insertAdjacentHTML("beforeend", `<i class="bi bi-check-circle user-verified"></i>`);
     elements.users.appendChild(user);
     return user;
 };
@@ -622,74 +666,66 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
 const listAllUsers = () => {
     elements.users.innerHTML = ``;
     if (collectedUsers.friends.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Friends</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Friends</h2>`);
         collectedUsers.friends.forEach((friend) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(friend.id, friend.aID, friend.name, friend.bio, friend.pfp, true, friend.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.developers.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Developers</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Developers</h2>`);
         collectedUsers.developers.forEach((developer) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(developer.id, developer.aID, developer.name, developer.bio, developer.pfp, true, developer.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.admins.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Admins</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Admins</h2>`);
         collectedUsers.admins.forEach((admin) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(admin.id, admin.aID, admin.name, admin.bio, admin.pfp, true, admin.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.overseers.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Overseers</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Overseers</h2>`);
         collectedUsers.overseers.forEach((overseer) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(overseer.id, overseer.aID, overseer.name, overseer.bio, overseer.pfp, true, overseer.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.underseers.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Underseers</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Underseers</h2>`);
         collectedUsers.underseers.forEach((underseer) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(underseer.id, underseer.aID, underseer.name, underseer.bio, underseer.pfp, true, underseer.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.helpers.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Helpers</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Helpers</h2>`);
         collectedUsers.helpers.forEach((helper) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(helper.id, helper.aID, helper.name, helper.bio, helper.pfp, true, helper.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.users.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Users</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Users</h2>`);
         collectedUsers.users.forEach((user) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(user.id, user.aID, user.name, user.bio, user.pfp, true, user.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
         //elements.users.innerHTML += `<hr>`;
     };
     if (collectedUsers.guests.length > 0) {
-        elements.users.innerHTML += `<h2 style="text-align: center; color: white; user-select: none;">Guests</h2>`;
+        elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Guests</h2>`);
         collectedUsers.guests.forEach((guest) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
             const userInList = createUserInList(guest.id, guest.aID, guest.name, guest.bio, guest.pfp, false, guest.neo);
-            userInList.onclick = (e) => { createToast("You can't view profiles yet."); };
         });
     };
     if (collectedUsers.guests.length < 1 &&
@@ -788,6 +824,7 @@ const wsMessage = (data, isBinary) => {
                     createMessageText(
                         message.sender.name,
                         message.sender.pfp,
+                        message.sender.bio,
                         message.sender.aID != "-",
                         message.content,
                         message.neo,
@@ -838,6 +875,7 @@ const wsMessage = (data, isBinary) => {
                         createMessageText(
                             msg.sender.name,
                             msg.sender.pfp,
+                            msg.sender.bio,
                             msg.sender.aID != "-",
                             msg.content,
                             msg.neo,
@@ -902,7 +940,7 @@ const wsMessage = (data, isBinary) => {
         } else {
             imgblob = data.data;
         };
-        createMessageUpload(nextUpload.sender.name, nextUpload.sender.pfp, nextUpload.sender.aID != "-", imgblob, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
+        createMessageUpload(nextUpload.sender.name, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
     };
 };
 
@@ -967,10 +1005,10 @@ const eInitiateReply = (user, message, id, dm) => {
 };
 
 const eUpdate = () => {
-    let displayTime = Math.trunc(info.timeout / 1000) + 1;
-    elements.chatInfo.innerText = info.timeout < 1 ? "No status." : `Slowmode: please wait ${displayTime}s...`;
+    let displayTime = `${info.timeout > 1000 * 60 ? (Math.trunc(info.timeout / 60000) + 1 + " minute(s)") : (Math.trunc(info.timeout / 1000) + 1 + " second(s)")}`;
+    elements.chatInfo.innerText = info.timeout < 1 ? "No status." : `Slowmode: please wait ${displayTime}...`;
     // elements.barMessage.disabled = info.timeout > 0;
-    elements.barMessage.placeholder = info.timeout > 0 ? `Please wait ${displayTime}s...` : "Enter your message to send here.";
+    elements.barMessage.placeholder = info.timeout > 0 ? `Please wait ${displayTime}...` : "Enter your message to send here.";
     elements.chatChannel.innerText = `Channel: ${info.channel}`;
     let scrollLeniency = elements.chatHistory.clientHeight / 3;
     autoScroll = elements.chatHistory.scrollTop + scrollLeniency >= elements.chatHistory.scrollHeight - elements.chatHistory.clientHeight;
@@ -1063,8 +1101,8 @@ elements.barSend.onclick = () => {
     if (info.timeout < 1) {
         eCreateMessage();
     } else {
-        let displayTime = Math.trunc(info.timeout / 1000) + 1;
-        createToast(`Please wait ${displayTime}s...`);
+        let displayTime = `${info.timeout > 1000 * 60 ? (Math.trunc(info.timeout / 60000) + 1 + " minute(s)") : (Math.trunc(info.timeout / 1000) + 1 + " second(s)")}`;
+        createToast(`Please wait ${displayTime}...`);
     };
 };
 elements.barMessage.onkeydown = (e) => {
@@ -1072,8 +1110,8 @@ elements.barMessage.onkeydown = (e) => {
         if (info.timeout < 1) {
             eCreateMessage();
         } else {
-            let displayTime = Math.trunc(info.timeout / 1000) + 1;
-            createToast(`Please wait ${displayTime}s...`);
+            let displayTime = `${info.timeout > 1000 * 60 ? (Math.trunc(info.timeout / 60000) + 1 + " minute(s)") : (Math.trunc(info.timeout / 1000) + 1 + " second(s)")}`;
+            createToast(`Please wait ${displayTime}...`);
         };
     };
 };
@@ -1187,12 +1225,15 @@ elements.bookRules.onclick = (e) => {
     elements.bookSupport.classList.add("book-side-option");
     elements.bookRules.classList.remove("book-side-option");
     elements.bookRules.classList.add("book-side-option-h");
+    elements.bookCredits.classList.remove("book-side-option-h");
+    elements.bookCredits.classList.add("book-side-option");
     // Content
     elements.bookRulesContent.classList.remove("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
     elements.bookCommandsContent.classList.add("hidden");
     elements.bookSupportContent.classList.add("hidden");
+    elements.bookCreditsContent.classList.add("hidden");
 };
 elements.bookChangelog.onclick = (e) => {
     // Tabs
@@ -1206,12 +1247,15 @@ elements.bookChangelog.onclick = (e) => {
     elements.bookRules.classList.add("book-side-option");
     elements.bookChangelog.classList.remove("book-side-option");
     elements.bookChangelog.classList.add("book-side-option-h");
+    elements.bookCredits.classList.remove("book-side-option-h");
+    elements.bookCredits.classList.add("book-side-option");
     // Content
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.remove("hidden");
     elements.bookAdminsContent.classList.add("hidden");
     elements.bookCommandsContent.classList.add("hidden");
     elements.bookSupportContent.classList.add("hidden");
+    elements.bookCreditsContent.classList.add("hidden");
 };
 elements.bookAdmins.onclick = (e) => {
     // Tabs
@@ -1225,12 +1269,15 @@ elements.bookAdmins.onclick = (e) => {
     elements.bookSupport.classList.add("book-side-option");
     elements.bookAdmins.classList.remove("book-side-option");
     elements.bookAdmins.classList.add("book-side-option-h");
+    elements.bookCredits.classList.remove("book-side-option-h");
+    elements.bookCredits.classList.add("book-side-option");
     // Content
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.remove("hidden");
     elements.bookCommandsContent.classList.add("hidden");
     elements.bookSupportContent.classList.add("hidden");
+    elements.bookCreditsContent.classList.add("hidden");
 };
 elements.bookCommands.onclick = (e) => {
     // Tabs
@@ -1244,12 +1291,15 @@ elements.bookCommands.onclick = (e) => {
     elements.bookSupport.classList.add("book-side-option");
     elements.bookCommands.classList.remove("book-side-option");
     elements.bookCommands.classList.add("book-side-option-h");
+    elements.bookCredits.classList.remove("book-side-option-h");
+    elements.bookCredits.classList.add("book-side-option");
     // Content
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
     elements.bookCommandsContent.classList.remove("hidden");
     elements.bookSupportContent.classList.add("hidden");
+    elements.bookCreditsContent.classList.add("hidden");
 };
 elements.bookSupport.onclick = (e) => {
     // Tabs
@@ -1263,12 +1313,44 @@ elements.bookSupport.onclick = (e) => {
     elements.bookChangelog.classList.add("book-side-option");
     elements.bookSupport.classList.remove("book-side-option");
     elements.bookSupport.classList.add("book-side-option-h");
+    elements.bookCredits.classList.remove("book-side-option-h");
+    elements.bookCredits.classList.add("book-side-option");
     // Content
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
     elements.bookCommandsContent.classList.add("hidden");
     elements.bookSupportContent.classList.remove("hidden");
+    elements.bookCreditsContent.classList.add("hidden");
+};
+
+elements.bookCredits.onclick = (e) => {
+    // Tabs
+    elements.bookAdmins.classList.remove("book-side-option-h");
+    elements.bookAdmins.classList.add("book-side-option");
+    elements.bookCommands.classList.remove("book-side-option-h");
+    elements.bookCommands.classList.add("book-side-option");
+    elements.bookRules.classList.remove("book-side-option-h");
+    elements.bookRules.classList.add("book-side-option");
+    elements.bookChangelog.classList.remove("book-side-option-h");
+    elements.bookChangelog.classList.add("book-side-option");
+    elements.bookCredits.classList.remove("book-side-option");
+    elements.bookCredits.classList.add("book-side-option-h");
+    elements.bookSupport.classList.remove("book-side-option-h");
+    elements.bookSupport.classList.add("book-side-option");
+    // Content
+    elements.bookRulesContent.classList.add("hidden");
+    elements.bookChangelogContent.classList.add("hidden");
+    elements.bookAdminsContent.classList.add("hidden");
+    elements.bookCommandsContent.classList.add("hidden");
+    elements.bookCreditsContent.classList.remove("hidden");
+    elements.bookSupportContent.classList.add("hidden");
+};
+
+// Profile
+elements.closeProfile.onclick = (e) => {
+    elements.screen.classList.add("hidden");
+    elements.profile.classList.add("hidden");
 };
 
 // Options

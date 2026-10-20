@@ -11,7 +11,7 @@
 
 <body class="theme-dark">
     <header>
-        <h1>Arrasify [v1.2]</h1>
+        <h1>Arrasify [v1.2.1]</h1>
         <div class="header-tools">
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
@@ -297,6 +297,8 @@
                 <hr>
                 <h1>Advanced</h1>
                 <p id="bookCommands" class="book-side-option"><i class="bi bi-journal-text"></i> Commands</p>
+                <h1>Misc</h1>
+                <p id="bookCredits" class="book-side-option"><i class="bi bi-award"></i> Credits</p>
             </div>
             <div class="book-content">
                 <div id="bookRulesContent">
@@ -304,9 +306,8 @@
                     <h2>What Isn't Allowed</h2>
                     <h3>Spamming</h3>
                     <p>
-                        Pretty obvious. If multiple users deem you to be spamming, either through messages or commands,
-                        stop
-                        immediately. If continued, you will receive punishment.
+                        If multiple users deem you to be spamming, either through messages or commands,
+                        stop immediately. If continued, you will receive punishment.
                     </p>
                     <h3>Advertising</h3>
                     <p>
@@ -316,29 +317,24 @@
                     <h3>Language</h3>
                     <p>
                         Most of us speak English, but other languages are allowed. However, refrain from using extreme
-                        slurs and hateful words. One or two are fine, but if you send too many, you will likely be
-                        punished. This rule ties into hate & prejudice.
+                        slurs and hateful words. This rule ties into hate & prejudice.
                     </p>
                     <p>
                         This rule is lenient, so read the audience before you post.
                     </p>
                     <h3>Media</h3>
                     <p>
-                        Refrain from posting graphic imagery, implied innuendos, NSFW content, and anything that you
-                        think
-                        people would likely get uncomfortable with. Punishment is usually immediate, so think before you
-                        post.
+                        Refrain from posting graphic imagery, implied innuendos, NSFW content, extreme gore and/or
+                        violence, and anything that you think people would likely get uncomfortable with.
                     </p>
                     <h3>Hate & Prejudice</h3>
                     <p>
                         Any kind of prejudice or hate towards anyone, especially catered to specific groups, will
-                        usually be
-                        warned. If continued, expect exponential punishment.
+                        usually be warned. If continued, expect exponential punishment.
                     </p>
                     <p>
                         This rule includes, but is not limited to racism, homophobia, transphobia, anti-religion, and
-                        health
-                        conditions. Make sure your message comes across the right way before posting.
+                        ableism. Make sure your message comes across the right way before posting.
                     </p>
                     <h3>Evasion</h3>
                     <p>
@@ -352,12 +348,13 @@
                     <h3>Direct Messages</h3>
                     <p>
                         Don't send anything inappropriate in DMs. Yes, it's an unmonitored area, but if the user is
-                        uncomfortable, depending on what is said, you can and will probably get punished.
+                        uncomfortable, depending on what is said, you can and will get punished.
                     </p>
                     <h3>Shady People</h3>
                     <p>
                         Anyone already confirmed to be suspicious, proven to broken any aforementioned rules, or done
-                        something not appropriate, will be removed without hesitation.
+                        something not appropriate, will be removed without hesitation. It is recommended to not interact
+                        with these people.
                     </p>
                     <hr>
                     <p>
@@ -428,7 +425,23 @@
                 </div>
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
-                    <h2>16th October 2026 - Major Update - v1.2</h2>
+                    <h2>20th October 2026 - Minor Update - v1.2.1</h2>
+                    <p>New features</p>
+                    <ul>
+                        <li>Added profile viewing.</li>
+                        <li>Added basic bio editing with <code>/bio</code>.</li>
+                        <li>Added credits. <!-- XC-X Credits by Frums reference OOHHHHHHHHHHHHH (x2) --></li>
+                        <li>Shrunk the sliders in the options.</li>
+                    </ul>
+                    <p>Bug fixes</p>
+                    <ul>
+                        <li>Fixed the incorrect logout of certain users, resulting in 'ghost logins'.</li>
+                        <li>Fixed the incorrect display of certain elements that showcase timestamps or duration.</li>
+                    </ul>
+                    <p>
+                        Expect UI updates over the next few versions.
+                    </p>
+                    <h2>16th October 2026 - Major Update - v1.2.0</h2>
                     <p>New features</p>
                     <ul>
                         <li>Added pings.</li>
@@ -441,12 +454,8 @@
                     </ul>
                     <p>Bug fixes</p>
                     <ul>
-                        <li>Fixed the incorrect logout of certain users, resulting in 'ghost logins'.</li>
                         <li>Fixed the slowmode being bypassable.</li>
                     </ul>
-                    <p>
-                        Expect profiles and compact mode next update.
-                    </p>
                     <h2>7th October 2026 - Minor Update - v1.1.2</h2>
                     <p>New features</p>
                     <ul>
@@ -693,6 +702,9 @@
                     <h4>/pfp [param1]</h4>
                     <p>Set your account's profile picture.</p>
                     <h5>With [param1] - image url</h5>
+                    <h4>/bio [param1]</h4>
+                    <p>Set your account's bio.</p>
+                    <h5>With [param1] - bio</h5>
                     <h4>/block [param1] [param2]</h4>
                     <p>Block user messages from sending to you.</p>
                     <h5>With [param1] - "add" and [param2] - account ID</h5>
@@ -746,6 +758,73 @@
                     <h3>Developer+ Commands</h3>
                     <p>There's no exclusive developer commands yet.</p>
                 </div>
+                <div id="bookCreditsContent" class="hidden">
+                    <h1>Misc - Credits</h1>
+                    <h2>Contributors</h2>
+                    <p>Original Idea</p>
+                    <ul>
+                        <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
+                    </ul>
+                    <p>Original Developers</p>
+                    <ul>
+                        <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
+                        <li>Flowey</li>
+                        <li>Testing</li>
+                    </ul>
+                    <p>Badges</p>
+                    <ul>
+                        <li><a href="https://www.youtube.com/channel/UClSjjHu1p16hGxcbfz51haA">Double Squared (d2)</a>
+                        </li>
+                    </ul>
+                    <p>Emotes</p>
+                    <ul>
+                        <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
+                        <li>Testing</li>
+                        <li>3AM Experiences</li>
+                        <li><a href="https://www.youtube.com/arrasio">Neph, Damocles & XX</a></li>
+                        <li><a href="https://www.youtube.com/channel/UClSjjHu1p16hGxcbfz51haA">Double Squared (d2)</a>
+                        </li>
+                        <li><a href="https://www.youtube.com/@toby-fox-music">Toby Fox</a></li>
+                        <li>Dragon King Gaming (DKG)</li>
+                    </ul>
+                    <p>Special Thanks</p>
+                    <ul>
+                        <li>Testing</li>
+                        <li>Flowey</li>
+                        <li><a href="https://www.youtube.com/@MASSIVEBIRD">BIRD (Mushroom)</a></li>
+                        <li>A Person</li>
+                        <li>Dragon King Gaming (DKG)</li>
+                        <li>What</li>
+                        <li><a href="https://www.youtube.com/channel/UClSjjHu1p16hGxcbfz51haA">Double Squared (d2)</a>
+                        </li>
+                    </ul>
+                    <h2>Personal Note</h2>
+                    <p>
+                        Thank you to everyone who has contributed to shape both Arras Verify and Arrasify into what it
+                        is today. This community has given more than it has received, and I hope to remedy that by
+                        providing free updates and a service everyone can rely on. Granted, I may not be able to do that
+                        all the time due to a new life outside of this free service, but I will provide where able. If
+                        you are interested in contributing, feel free to suggest features or inquire further about
+                        additional roles.
+                    </p>
+                    <p>
+                        (This project is run separately from Arras.io and is not affiliated or influenced by the
+                        creators. This is a 100% unmonetized passion project.)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="profile" class="hidden">
+        <div class="profile-top">
+            <h1>Profile Viewer</h1>
+            <i class="bi bi-x-octagon" id="closeProfile"></i>
+        </div>
+        <div class="profile-data">
+            <img src="./emotes/mlg.png" id="profilePfp">
+            <h2 id="profileName">Name</h2>
+            <div id="profileBio">
+                <p>No bio provided.</p>
             </div>
         </div>
     </div>
@@ -757,14 +836,14 @@
         <h2><i class="bi bi-grid-1x2"></i> View</h2>
         <div class="toggles">
             <div class="toggle">
-                <div class="toggleHeader">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-on" id="viewUser"></i>
                     <p>User List</p>
                 </div>
                 <p>Toggles the visibility of the user list on the left of the chat.</p>
             </div>
             <!-- <div class="viewToggle">
-                <div class="toggleHeader">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-off" id="viewAdmin"></i>
                     <p>Admin Panel</p>
                 </div>
@@ -775,21 +854,21 @@
         <h2><i class="bi bi-hammer"></i> Experimental</h2>
         <div class="toggles">
             <!-- <div class="toggle">
-                <div class="toggleHeader">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-off" id="expTestTheme"></i>
                     <p>Compact Mode</p>
                 </div>
                 <p>Attempt to make the chat smaller for devices that can't fit much on the screen.</p>
             </div> -->
             <div class="toggle">
-                <div class="toggleHeader">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-off" id="expAbyss"></i>
                     <p>Abyss Theme</p>
                 </div>
                 <p>Use Testing's custom-made theme.</p>
             </div>
             <div class="toggle">
-                <div class="toggleHeader">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-on" id="expMixer"></i>
                     <p>Mixer</p>
                 </div>
@@ -797,7 +876,7 @@
                 </p>
             </div>
             <div class="toggle">
-                <div class="toggleHeader">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-off" id="expNight"></i>
                     <p>Night Theme</p>
                 </div>
