@@ -128,7 +128,20 @@ const emotes = { // Emote - SRC
         "kindness": "./emotes/kindness.png",
         "patience": "./emotes/patience.png",
         "integrity": "./emotes/integrity.png",
-        "perseverence": "./emotes/perseverence.png"
+        "perseverence": "./emotes/perseverence.png",
+        "wave": "./emotes/wave.gif",
+        "gaster": "./emotes/gaster.gif",
+    },
+    eRetro: {
+        "bongisalt": "./emotes/bongisalt.png",
+        "bongisguest": "./emotes/bongisguest.png",
+        "bongisdirector": "./emotes/bongisdirector.png",
+        "bongistrial": "./emotes/bongistrial.png",
+        "bongismanager": "./emotes/bongismanager.png",
+        "bongisdeveloper": "./emotes/bongisdeveloper.png",
+        "bongisyoutuber": "./emotes/bongisyoutuber.png",
+        "bongistrash": "./emotes/bongistrash.png",
+        "bongisfish": "./emotes/bongisfish.png",
     },
     eTTF: {
         // TTF
@@ -152,16 +165,24 @@ const emotes = { // Emote - SRC
         "duck": "./emotes/duck.gif",
         "bird": "./emotes/bird.gif",
         "badapple": "./emotes/badapple.gif",
-        "idk": "./emotes/idk.gif"
+        "idk": "./emotes/idk.gif",
+        "deadchatskeleton": "./emotes/deadchatskeleton.gif",
+        "wirewalls": "./emotes/wirewalls.gif",
+        "clark": "./emotes/clark.gif",
+        "waaaaat": "./emotes/waaaaat.png"
     },
     eCommunity: {
         "dkg": "./emotes/dkg.png",
         "peiple": "./emotes/peiple.jfif",
-        "boykisser": "./emotes/boykisser.png"
+        "boykisser": "./emotes/boykisser.png",
+        "arraspolice": "./emotes/arraspolice.gif",
+        "chained": "./emotes/chained.jpeg",
+        "testing": "./emotes/testing.jpeg",
+        "stipid": "./emotes/stipid.jpeg",
     }
 };
 
-const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eTTF, ...emotes.eGeneral, ...emotes.eMemes, ...emotes.eCommunity };
+const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eRetro, ...emotes.eTTF, ...emotes.eGeneral, ...emotes.eMemes, ...emotes.eCommunity };
 
 const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
@@ -220,6 +241,7 @@ const elements = {
     eVerify: document.querySelector("#eVerify"),
     eTrust: document.querySelector("#eTrust"),
     eDeltarune: document.querySelector("#eDeltarune"),
+    eRetro: document.querySelector("#eRetro"),
     eTTF: document.querySelector("#eTTF"),
     eGeneral: document.querySelector("#eGeneral"),
     eMemes: document.querySelector("#eMemes"),
@@ -405,7 +427,10 @@ const messageCreateUserElement = (user, pfp, bio, verified, neo, timestamp, mess
             else {
                 let lines = bio.split(/\r?\n|\\n/);
                 lines.forEach((line) => {
-                    elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                    const p = document.createElement("p");
+                    p.innerText = line;
+                    elements.profileBio.appendChild(p);
+                    // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
                 });
             };
         };
@@ -414,7 +439,7 @@ const messageCreateUserElement = (user, pfp, bio, verified, neo, timestamp, mess
     // Extra buttons and timestamp
     const time = document.createElement("p");
     let dateTime = new Date(timestamp);
-    time.innerText = `${dateTime.getHours() % 13 < 10 ? "0" : ""}${dateTime.getHours() % 13 + 1}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 13 ? "AM" : "PM"}`;
+    time.innerText = `${dateTime.getHours() < 10 ? "0" : ""}${dateTime.getHours() == 12 ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}`;
 
     const messageActions = document.createElement("div");
     messageActions.className = "message-actions";
@@ -601,7 +626,7 @@ const createMessageSimple = (message, timestamp, color) => {
     messageElement.className = `message`;
 
     let dateTime = new Date(timestamp);
-    const messageWithTime = `${dateTime.getHours() % 12 < 10 ? "0" : ""}${dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"} ${message}`;
+    const messageWithTime = `${dateTime.getHours() < 10 ? "0" : ""}${dateTime.getHours() == 12 ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"} ${message}`;
 
     const chatMessage = messageCreateTextElement(messageWithTime, color);
     messageElement.appendChild(chatMessage);
@@ -650,7 +675,10 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
             else {
                 let lines = bio.split(/\r?\n|\\n/);
                 lines.forEach((line) => {
-                    elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                    const p = document.createElement("p");
+                    p.innerText = line;
+                    elements.profileBio.appendChild(p);
+                    // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
                 });
             };
         };

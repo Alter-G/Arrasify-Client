@@ -11,7 +11,7 @@
 
 <body class="theme-dark">
     <header>
-        <h1>Arrasify [v1.2.1]</h1>
+        <h1>Arrasify [v1.2.2]</h1>
         <div class="header-tools">
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
@@ -156,6 +156,10 @@
         <p>Credit to Toby Fox</p>
         <p>Some drawn by MLG</p>
         <div class="emotes" id="eDeltarune">
+        </div>
+        <h3>Retro</h3>
+        <p>Credit to Bongis</p>
+        <div class="emotes" id="eRetro">
         </div>
         <h3>TTF</h3>
         <p>Credit to Dragon King Gaming (DKG)</p>
@@ -425,6 +429,35 @@
                 </div>
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
+                    <h2>29th October 2026 - Minor Update - v1.2.2</h2>
+                    <p>New features</p>
+                    <ul>
+                        <li>
+                            Added 19 new emotes, and a new category for one of our users, <a
+                                href="https://www.pixilart.com/bongis">Bongis</a>.
+                        </li>
+                        <li>Added a new <code>/kick</code> command, available to admins+ for testing purposes.</li>
+                        <ul>
+                            <li>If you encounter the ghost account bug, use this command to quickly remove it without
+                                restarting the server.</li>
+                        </ul>
+                        <li>Added a new <code>/findghosts</code> command, available to developers.</li>
+                        <li>Increased emote size by twice their previous amount.</li>
+                    </ul>
+                    <p>Bug fixes</p>
+                    <ul>
+                        <li>Fixed the time being displayed incorrectly again.</li>
+                        <li>Fixed the bio allowing the injection of HTML.</li>
+                        <ul>
+                            <li>
+                                No, this was not a feature to begin with. Sorry, Testing.
+                            </li>
+                        </ul>
+                        <li>
+                            Fixed some profile pictures and emotes squishing to accomodate the requested image size.
+                        </li>
+                    </ul>
+                    <p>If ghost accounts are not fixed, do not fret, as I am actively trying to fixing them.</p>
                     <h2>20th October 2026 - Minor Update - v1.2.1</h2>
                     <p>New features</p>
                     <ul>
@@ -436,7 +469,6 @@
                     </ul>
                     <p>Bug fixes</p>
                     <ul>
-                        <li>Fixed the incorrect logout of certain users, resulting in 'ghost logins'.</li>
                         <li>Fixed the incorrect display of certain elements that showcase timestamps or duration.</li>
                     </ul>
                     <p>
@@ -751,13 +783,17 @@
                     <h4>/server [param1] [param2]</h4>
                     <p>Allows the editing of certain server settings. Not fully implemented.</p>
                     <h5>With [param1] - "sudo" and [param2] - message</h5>
+                    <h4>/kick [param1]</h4>
+                    <p>Kick a specific account.</p>
+                    <h5>With [param1] - account name</h5>
                     <h4>/killall</h4>
                     <p>Kill every account connection at once.</p>
                     <h4>/restart</h4>
                     <p>Restart the entire server.</p>
                     <hr>
                     <h3>Developer+ Commands</h3>
-                    <p>There's no exclusive developer commands yet.</p>
+                    <h4>/findghosts</h4>
+                    <p>Tries to estimate how many ghost accounts currently exist. For debugging purposes.</p>
                 </div>
                 <div id="bookCreditsContent" class="hidden">
                     <h1>Misc - Credits</h1>
@@ -787,6 +823,7 @@
                         </li>
                         <li><a href="https://www.youtube.com/@toby-fox-music">Toby Fox</a></li>
                         <li>Dragon King Gaming (DKG)</li>
+                        <li><a href="https://www.pixilart.com/bongis">Bongis</a></li>
                     </ul>
                     <p>Special Thanks</p>
                     <ul>
@@ -798,6 +835,7 @@
                         <li>What</li>
                         <li><a href="https://www.youtube.com/channel/UClSjjHu1p16hGxcbfz51haA">Double Squared (d2)</a>
                         </li>
+                        <li><a href="https://www.pixilart.com/bongis">Bongis</a></li>
                     </ul>
                     <h2>Personal Note</h2>
                     <p>

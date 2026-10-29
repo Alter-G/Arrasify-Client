@@ -521,8 +521,8 @@ a:visited:hover {
     object-fit: cover;
     user-select: none;
     -webkit-user-drag: none;
-    width: 50px;
-    height: 50px;
+    width: 100px;
+    height: 100px;
 }
 
 .chat-image {
@@ -703,7 +703,7 @@ a:visited:hover {
     max-width: 200px;
     width: 200px;
     padding: 20px;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 #imageConfirm audio {
@@ -755,7 +755,7 @@ a:visited:hover {
     width: 30vw;
     height: 30vw;
     padding: 20px;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 #book {
