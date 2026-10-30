@@ -5,6 +5,13 @@ let socketAddress = "wss://arrasify.alter-g.workers.dev";
 // endpointAddress = "http://127.0.0.1:8787";
 // socketAddress = "ws://127.0.0.1:8787";
 
+let bad = [];
+let r = await fetch("./bad.jsonc");
+if (r.ok) {
+    bad = JSON.parse((await r.text()).replace(/\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/g, (m, g) => g ? "" : m));
+}
+console.log("Profanity filter loaded.");
+
 const ws = new WebSocket(`${socketAddress}`);
 
 let settings = {
@@ -14,8 +21,10 @@ let settings = {
     // Option toggles
     show_users: true,
     abyss_theme: false,
+    night_theme: false,
+    aqua_theme: false,
+    // Experimental toggles
     allow_mixer: true,
-    night_theme: false
 };
 
 if (localStorage.getItem("settings")) settings = JSON.parse(localStorage.getItem("settings"));
@@ -65,6 +74,7 @@ const pingAudio = new Audio("./sfx/ping.mp3");
 let canPlayAudio = false;
 pingAudio.oncanplay = () => { canPlayAudio = true; };
 const dmAudio = new Audio("./sfx/dm.mp3");
+const mixAudio = new Audio();
 
 const emojis = { // Emoji - ClassList
     "smile": "chat-emoji bi bi-emoji-smile-fill",
@@ -284,8 +294,9 @@ const elements = {
     options: document.querySelector("#options"), // The options menu.
     optionsClose: document.querySelector("#optionsClose"), // The close options menu button.
     optionsViewUser: document.querySelector("#viewUser"), // Toggle the viewing of the user list.
-    optionsExpAbyss: document.querySelector("#expAbyss"), // Toggle the Abyss theme. Overrides the current theme.
-    optionsExpNight: document.querySelector("#expNight"), // Toggle the Night theme. Overrides the current theme and abyss.
+    optionsTAbyss: document.querySelector("#tAbyss"), // Toggle the Abyss theme. Overrides the current theme.
+    optionsTNight: document.querySelector("#tNight"), // Toggle the Night theme. Overrides the current theme and any before.
+    optionsTAqua: document.querySelector("#tAqua"), // Toggle the Aqua theme. Overrides the current theme and any before.
     optionsExpMixer: document.querySelector("#expMixer"), // Toggle the hearing of the mixer.
     // Profile
     closeProfile: document.querySelector("#closeProfile"),
@@ -322,23 +333,30 @@ if (settings.show_users) {
     elements.optionsViewUser.className = "bi bi-toggle-off";
 };
 if (settings.abyss_theme) {
-    elements.optionsExpAbyss.className = "bi bi-toggle-on";
+    elements.optionsTAbyss.className = "bi bi-toggle-on";
     document.body.classList.add("theme-abyss");
 } else {
-    elements.optionsExpAbyss.className = "bi bi-toggle-off";
+    elements.optionsTAbyss.className = "bi bi-toggle-off";
     document.body.classList.remove("theme-abyss");
+};
+if (settings.night_theme) {
+    elements.optionsTNight.className = "bi bi-toggle-on";
+    document.body.classList.add("theme-night");
+} else {
+    elements.optionsTNight.className = "bi bi-toggle-off";
+    document.body.classList.remove("theme-night");
+};
+if (settings.aqua_theme) {
+    elements.optionsTAqua.className = "bi bi-toggle-on";
+    document.body.classList.add("theme-aqua");
+} else {
+    elements.optionsTAqua.className = "bi bi-toggle-off";
+    document.body.classList.remove("theme-aqua");
 };
 if (settings.allow_mixer) {
     elements.optionsExpMixer.className = "bi bi-toggle-on";
 } else {
     elements.optionsExpMixer.className = "bi bi-toggle-off";
-};
-if (settings.night_theme) {
-    elements.optionsExpNight.className = "bi bi-toggle-on";
-    document.body.classList.add("theme-night");
-} else {
-    elements.optionsExpNight.className = "bi bi-toggle-off";
-    document.body.classList.remove("theme-night");
 };
 
 const createToast = (text) => {
@@ -358,7 +376,7 @@ const scrollChatHistory = () => {
     elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
 };
 
-const messageCreateUserElement = (user, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply) => {
+const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply) => {
     // User Info
     const chatUser = document.createElement("div"); // Includes the sender information, as well as buttons and the date/time of postage
     chatUser.className = "chat-user";
@@ -401,7 +419,7 @@ const messageCreateUserElement = (user, pfp, bio, verified, neo, timestamp, mess
             <circle xmlns=${svgNS} cx="50" cy="55" r="30" fill="var(--primary-color)" />
             <circle xmlns=${svgNS} cx="50" cy="45" r="25" fill="var(--accent-color)" />
         `;
-    }
+    };
 
     const userName = document.createElement("p");
     userName.innerText = `${dm ? "[Direct] " : ""}${user}`;
@@ -409,6 +427,43 @@ const messageCreateUserElement = (user, pfp, bio, verified, neo, timestamp, mess
 
     userInfo.appendChild(userPfp);
     userInfo.appendChild(userName);
+    switch (auth) {
+        case 2: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "user-badge";
+            userBadge.src = "./badges/helper.png";
+            userInfo.appendChild(userBadge);
+            break;
+        };
+        case 3: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "user-badge";
+            userBadge.src = "./badges/underseer.png";
+            userInfo.appendChild(userBadge);
+            break;
+        };
+        case 4: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "user-badge";
+            userBadge.src = "./badges/overseer.png";
+            userInfo.appendChild(userBadge);
+            break;
+        };
+        case 5: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "user-badge";
+            userBadge.src = "./badges/admin.png";
+            userInfo.appendChild(userBadge);
+            break;
+        };
+        case 6: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "user-badge";
+            userBadge.src = "./badges/developer.png";
+            userInfo.appendChild(userBadge);
+            break;
+        };
+    };
     if (verified) {
         let verifiedSymbol = document.createElement("i");
         verifiedSymbol.className = "bi bi-check-circle user-verified";
@@ -469,13 +524,14 @@ const messageCreateTextElement = (message, color) => {
     let lines = message.toString();
     lines = lines.split(/\r?\n|\\n/);
     const paragraphs = [];
+    const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
     lines.forEach(line => { // Per paragraph
         let s = document.createElement("span"); // This used to be p
         s.className = "chat-message-line";
         // Split emotes
         // let reconstructed = [];
         let previousWasEmote = false;
-        const emoteSplit = line.split(":");
+        const emoteSplit = line.replace(badRegex, (m) => "*".repeat(m.length)).split(":");
         // Initial text
         // reconstructed.push(emoteSplit[0]);
         const pElement = document.createElement(`p`);
@@ -552,6 +608,14 @@ const messageCreateTextElement = (message, color) => {
         };
         // p.innerHTML = reconstructed.join("");
         // paragraphs.push(p);
+        if (s.children.item(0).innerText === "") s.removeChild(s.children.item(0));
+        if (s.children.item(s.children.length - 1).innerText === "") s.removeChild(s.children.item(s.children.length - 1));
+        if (s.children.item(0).tagName === "IMG" && s.children.length < 2) {
+            s.children.item(0).style.width = "100px";
+            s.children.item(0).style.height = "100px";
+        } else if (s.children.item(0).tagName === "I" && s.children.length < 2) {
+            s.children.item(0).style.fontSize = `40px`;
+        };
         paragraphs.push(s);
     });
     paragraphs.forEach(pgs => {
@@ -579,7 +643,31 @@ const messageCreateImageElement = (file) => {
     return chatMessage;
 };
 
-const createMessageText = (user, pfp, bio, verified, message, neo, color, timestamp, aID, id, reply, dm, canReply) => {
+const messageCreateAudioElement = (file) => {
+    const chatMessage = document.createElement("div");
+    chatMessage.className = `chat-message`;
+    let audioElement = document.createElement("audio");
+    audioElement.className = "chat-audio";
+    let fileUrl = URL.createObjectURL(file);
+    audioElement.src = fileUrl;
+    audioElement.setAttribute("controls", true);
+    chatMessage.appendChild(audioElement);
+    return chatMessage;
+};
+
+const messageCreateVideoElement = (file) => {
+    const chatMessage = document.createElement("div");
+    chatMessage.className = `chat-message`;
+    let videoElement = document.createElement("video");
+    videoElement.className = "chat-video";
+    let fileUrl = URL.createObjectURL(file);
+    videoElement.src = fileUrl;
+    videoElement.setAttribute("controls", true);
+    chatMessage.appendChild(videoElement);
+    return chatMessage;
+};
+
+const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, timestamp, aID, id, reply, dm, canReply) => {
     if (message.toString() != "") {
         const messageElement = document.createElement("div");
         messageElement.className = `message${dm ? " dm" : ""}`;
@@ -588,7 +676,7 @@ const createMessageText = (user, pfp, bio, verified, message, neo, color, timest
         replyText.className = "reply-text";
         if (reply != "-") replyText.innerText = reply;
 
-        const chatUser = messageCreateUserElement(user, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply);
+        const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply);
         // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
         const chatMessage = messageCreateTextElement(message, color);
 
@@ -604,18 +692,36 @@ const createMessageText = (user, pfp, bio, verified, message, neo, color, timest
     };
 }
 
-const createMessageUpload = (user, pfp, bio, verified, file, neo, timestamp, aID, id) => {
+const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, timestamp, aID, id) => {
     const messageElement = document.createElement("div");
     messageElement.className = "message";
 
-    const chatUser = messageCreateUserElement(user, pfp, bio, verified, neo, timestamp, "[Upload]", aID, id, false, true);
+    const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, "[Upload]", aID, id, false, true);
+    let chatMedia = undefined
     // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
-    const chatImage = messageCreateImageElement(file);
+    console.log(mime);
+    switch (mime.split("/")[0]) {
+        case "image":
+            chatMedia = messageCreateImageElement(file);
+            break;
+        case "audio":
+            chatMedia = messageCreateAudioElement(file);
+            break;
+        case "video":
+            chatMedia = messageCreateVideoElement(file);
+            break;
+        default:
+            chatMedia = document.createElement("div");
+            chatMedia.className = "chat-message";
+            chatMedia.innerHTML = `<p>[Unknown media]</p>`
+            break;
+    };
+
 
     messageElement.appendChild(chatUser);
     // HR element to separate the sender from the message content
     messageElement.appendChild(document.createElement("hr"));
-    messageElement.appendChild(chatImage);
+    messageElement.appendChild(chatMedia);
 
     elements.chatHistory.appendChild(messageElement);
     if (autoScroll) setTimeout(scrollChatHistory, 30);
@@ -851,6 +957,7 @@ const wsMessage = (data, isBinary) => {
                 case "text": {
                     createMessageText(
                         message.sender.name,
+                        message.sender.auth,
                         message.sender.pfp,
                         message.sender.bio,
                         message.sender.aID != "-",
@@ -902,6 +1009,7 @@ const wsMessage = (data, isBinary) => {
                         msg = JSON.parse(msg);
                         createMessageText(
                             msg.sender.name,
+                            msg.sender.auth,
                             msg.sender.pfp,
                             msg.sender.bio,
                             msg.sender.aID != "-",
@@ -927,7 +1035,27 @@ const wsMessage = (data, isBinary) => {
                         ws.send(readyFile);
                         readyFile = undefined;
                     };
+                    break;
                 };
+                case "clearall": {
+                    elements.chatHistory.innerHTML = ``;
+                    break;
+                };
+                case "mix": {
+                    if (settings.allow_mixer) {
+                        mixAudio.crossOrigin = "anonymous";
+                        mixAudio.src = `${message.src}`;
+                        mixAudio.onload = (e) => {
+                            mixAudio.play().catch((e) => {
+                                createToast(`Could not play requested audio: ${e.message}`);
+                            });
+                        };
+                        mixAudio.onerror = (e) => {
+                            createToast(`Could not play requested audio: ${mixAudio.error.message} (code ${mixAudio.error.code})`);
+                        };
+                    };
+                    break;
+                }
                 case "auth": {
                     if (message.ok) {
                         elements.auth.classList.add("hidden");
@@ -968,13 +1096,14 @@ const wsMessage = (data, isBinary) => {
         } else {
             imgblob = data.data;
         };
-        createMessageUpload(nextUpload.sender.name, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
+        createMessageUpload(nextUpload.sender.name, nextUpload.sender.auth, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
     };
 };
 
 const wsClose = (e) => {
     elements.disconnect.classList.remove("hidden");
     elements.screen.classList.remove("hidden");
+    elements.loading.classList.add("hidden");
     elements.disconnectCode.innerText = `Exit code: ${e.code ? e.code : "No code given."}`;
     elements.disconnectReason.innerText = `Reason: ${e.reason ? e.reason : "No reason given."}`;
     createToast(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason ? e.reason : "No reason given."}`);
@@ -1055,7 +1184,6 @@ const eHandlePreview = (url, mime) => {
     elements.imageConfirmVideo.classList.add("hidden");
     elements.imageConfirmAudio.classList.add("hidden");
     elements.imageConfirmError.classList.add("hidden");
-    console.log(mime);
     switch (mime.split("/")[0]) {
         case "image": {
             elements.imageConfirmImage.classList.remove("hidden");
@@ -1126,7 +1254,7 @@ elements.cancelReply.onclick = (e) => {
     elements.chatReply.classList.add("hidden");
 };
 elements.barSend.onclick = () => {
-    if (info.timeout < 1) {
+    if (info.timeout < 1 || elements.barMessage.value[0] == "/") {
         eCreateMessage();
     } else {
         let displayTime = `${info.timeout > 1000 * 60 ? (Math.trunc(info.timeout / 60000) + 1 + " minute(s)") : (Math.trunc(info.timeout / 1000) + 1 + " second(s)")}`;
@@ -1135,7 +1263,7 @@ elements.barSend.onclick = () => {
 };
 elements.barMessage.onkeydown = (e) => {
     if (e.key == "Enter") {
-        if (info.timeout < 1) {
+        if (info.timeout < 1 || elements.barMessage.value[0] == "/") {
             eCreateMessage();
         } else {
             let displayTime = `${info.timeout > 1000 * 60 ? (Math.trunc(info.timeout / 60000) + 1 + " minute(s)") : (Math.trunc(info.timeout / 1000) + 1 + " second(s)")}`;
@@ -1405,15 +1533,37 @@ elements.optionsViewUser.onclick = (e) => {
         };
     }
 };
-elements.optionsExpAbyss.onclick = (e) => {
+elements.optionsTAbyss.onclick = (e) => {
     settings.abyss_theme = !settings.abyss_theme;
     localStorage.setItem("settings", JSON.stringify(settings));
     if (settings.abyss_theme) {
-        elements.optionsExpAbyss.className = "bi bi-toggle-on";
+        elements.optionsTAbyss.className = "bi bi-toggle-on";
         document.body.classList.add("theme-abyss");
     } else {
-        elements.optionsExpAbyss.className = "bi bi-toggle-off";
+        elements.optionsTAbyss.className = "bi bi-toggle-off";
         document.body.classList.remove("theme-abyss");
+    };
+};
+elements.optionsTNight.onclick = (e) => {
+    settings.night_theme = !settings.night_theme;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.night_theme) {
+        elements.optionsTNight.className = "bi bi-toggle-on";
+        document.body.classList.add("theme-night");
+    } else {
+        elements.optionsTNight.className = "bi bi-toggle-off";
+        document.body.classList.remove("theme-night");
+    };
+};
+elements.optionsTAqua.onclick = (e) => {
+    settings.aqua_theme = !settings.aqua_theme;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.aqua_theme) {
+        elements.optionsTAqua.className = "bi bi-toggle-on";
+        document.body.classList.add("theme-aqua");
+    } else {
+        elements.optionsTAqua.className = "bi bi-toggle-off";
+        document.body.classList.remove("theme-aqua");
     };
 };
 elements.optionsExpMixer.onclick = (e) => {
@@ -1423,17 +1573,6 @@ elements.optionsExpMixer.onclick = (e) => {
         elements.optionsExpMixer.className = "bi bi-toggle-on";
     } else {
         elements.optionsExpMixer.className = "bi bi-toggle-off";
-    };
-};
-elements.optionsExpNight.onclick = (e) => {
-    settings.night_theme = !settings.night_theme;
-    localStorage.setItem("settings", JSON.stringify(settings));
-    if (settings.night_theme) {
-        elements.optionsExpNight.className = "bi bi-toggle-on";
-        document.body.classList.add("theme-night");
-    } else {
-        elements.optionsExpNight.className = "bi bi-toggle-off";
-        document.body.classList.remove("theme-night");
     };
 };
 
@@ -1521,3 +1660,5 @@ ws.onclose = (e) => wsClose(e);
 ws.onerror = (e) => wsClose(e);
 
 eUpdate();
+
+createToast(`30th October 2026 AWST: We have updated our license for more clarity.`);

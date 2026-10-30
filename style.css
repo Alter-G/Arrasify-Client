@@ -86,6 +86,16 @@
     --white-color: white;
 }
 
+.theme-aqua {
+    --primary-color: #003f42;
+    --secondary-color: #00191a;
+    --accent-color: #00cdd8;
+    --highlight-color: #009e96;
+    --midtone-color: #007f85;
+    --text-color: #10ffff;
+    --white-color: white;
+}
+
 .message-rainbow {
     animation: animRainbow 5s infinite linear !important;
 }
@@ -399,6 +409,13 @@ a:visited:hover {
     color: var(--text-color);
 }
 
+.user-badge {
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+    object-fit: contain;
+}
+
 .user-actions {
     display: flex;
     flex-direction: row;
@@ -521,13 +538,23 @@ a:visited:hover {
     object-fit: cover;
     user-select: none;
     -webkit-user-drag: none;
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
 }
 
 .chat-image {
     width: 12%;
     height: 12%;
+}
+
+.chat-audio {
+    width: 50%;
+    height: 50px;
+}
+
+.chat-video {
+    width: 50%;
+    height: 50%;
 }
 
 #chatReply {
@@ -703,7 +730,7 @@ a:visited:hover {
     max-width: 200px;
     width: 200px;
     padding: 20px;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 #imageConfirm audio {
@@ -755,7 +782,7 @@ a:visited:hover {
     width: 30vw;
     height: 30vw;
     padding: 20px;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 #book {

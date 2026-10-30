@@ -11,7 +11,7 @@
 
 <body class="theme-dark">
     <header>
-        <h1>Arrasify [v1.2.2]</h1>
+        <h1>Arrasify [v1.3.0]</h1>
         <div class="header-tools">
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
@@ -108,8 +108,9 @@
                 By using a token, or using our service as a guest, you agree to our <a id="openTosPp">Terms of Service
                     and Privacy Policy</a>.
             </p>
-            <p>This site was made solo, from the ground up by <a href="https://mlg-inc.vercel.app">MLG.</a><br>Original
-                idea taken from Arras Verify, by MLG,
+            <p>This site was made solo, from the ground up by <a href="https://mlg-inc.vercel.app">MLG</a>.<br>Original
+                idea taken from <a href="https://vercel-tinkering.vercel.app/">Arras Verify</a>, by <a
+                    href="https://mlg-inc.vercel.app/">MLG</a>,
                 Flowey, and Testing.
             </p>
         </div>
@@ -202,6 +203,7 @@
         <div class="tos-pp-header">
             <i id="closeTosPp" class="bi bi-caret-left-square icon-button"></i>
         </div>
+        <p>[Last updated 30th of October, 2026.]</p>
         <h1>Terms of Service</h1>
         <p>
             By using our service, you automatically accept the terms of use listed below. If at any point you do not
@@ -217,8 +219,13 @@
         <h2>License</h2>
         <p>
             The media presented by this service, which includes but is not limited to; media, texts, concepts,
-            banners, badges, and titles, are reserved for use with this service only, and as such are licensed under
-            'All Rights Reserved'. You cannot create, monetize or redistribute materials and content as-is.
+            banners, badges, and titles, created by the developers of this service, are reserved for use with this
+            service only, and as such are licensed under 'All Rights Reserved'. You cannot create, monetize or
+            redistribute materials and content as-is.
+        </p>
+        <p>
+            Any media taken or based off other property or services is owned by the original creators and follows their
+            own licenses. We do not claim ownership or status over that property and respect the original creators.
         </p>
         <h2>Tokens</h2>
         <p>
@@ -429,8 +436,58 @@
                 </div>
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
+                    <h2>30th October 2026 - Major Update - v1.3.0</h2>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added video uploads.</li>
+                        <li>Added audio uploads.</li>
+                        <li>Added badges for directors+.</li>
+                        <li>Added a new <code>/g</code> command, available to admins+.</li>
+                        <ul>
+                            <li>
+                                You can disable the effects of <code>/g</code> in the settings with the "mixer" option.
+                            </li>
+                        </ul>
+                        <li>Added notifications for logging in and out.</li>
+                        <li>Added a basic profanity filter.</li>
+                        <ul>
+                            <li>Do not try to find a way around it.</li>
+                        </ul>
+                        <li>Added a new "aqua" theme made by commaL.</li>
+                        <li>Added a new <code>/clearall</code> command, available to helpers+.</li>
+                        <li>Added a new <code>/slowmode</code> command, available to overseers+.</li>
+                        <li>Added a new <code>/g</code> command, available to admins+.</li>
+                        <li>Added a new <code>both</code> type for <code>/mute</code> in <code>param1</code>.</li>
+                        <li>Rearranged some of the functions on the backend for better security.</li>
+                        <li>The <code>/findghosts</code> command is now accessible to admins+.</li>
+                        <li>Changed themes to have their own category in settings.</li>
+                        <li>Made some slight adjustments to the changelogs bullet-point titles.</li>
+                        <li>Made some slight adjustments to the credits bullet-point titles.</li>
+                        <li>Changed slowmode being ignored if your message is a command.</li>
+                        <li>Changed emote size back to normal, and instead made emotes twice as big if sent on their
+                            own, or normal size otherwise.</li>
+                        <li>Made emojis double the size than normal if sent on their own.</li>
+                        <li>
+                            Titles are now off by default, in favor of badges. You can still toggle them on manually.
+                        </li>
+                        <li>Updated our license agreement to be more clear about third-party material.</li>
+                        <ul>
+                            <li>
+                                Nothing changed about our Terms of Service or Privacy Policy, but we figured we would
+                                mention it anyway.
+                            </li>
+                        </ul>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>Fixed the image preview cutting the sides of images.</li>
+                        <li>Fixed the image enlarger cutting the sides of images.</li>
+                        <li>
+                            Fixed upload mutes saving their upload timer to the text timer instead of the upload timer.
+                        </li>
+                    </ul>
                     <h2>29th October 2026 - Minor Update - v1.2.2</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>
                             Added 19 new emotes, and a new category for one of our users, <a
@@ -444,7 +501,7 @@
                         <li>Added a new <code>/findghosts</code> command, available to developers.</li>
                         <li>Increased emote size by twice their previous amount.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Fixed the time being displayed incorrectly again.</li>
                         <li>Fixed the bio allowing the injection of HTML.</li>
@@ -459,7 +516,7 @@
                     </ul>
                     <p>If ghost accounts are not fixed, do not fret, as I am actively trying to fixing them.</p>
                     <h2>20th October 2026 - Minor Update - v1.2.1</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Added profile viewing.</li>
                         <li>Added basic bio editing with <code>/bio</code>.</li>
@@ -467,7 +524,7 @@
                         <li>Added one new emote.</li>
                         <li>Shrunk the sliders in the options.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Fixed the incorrect display of certain elements that showcase timestamps or duration.</li>
                     </ul>
@@ -475,7 +532,7 @@
                         Expect UI updates over the next few versions.
                     </p>
                     <h2>16th October 2026 - Major Update - v1.2.0</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Added pings.</li>
                         <li>Added file upload limits of size 20MB.</li>
@@ -485,29 +542,29 @@
                         <li>Experimenting with themes.</li>
                         <li>Minor visual changes to the user list.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Fixed the slowmode being bypassable.</li>
                     </ul>
                     <h2>7th October 2026 - Minor Update - v1.1.2</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Added an additional three emotes. Expect more.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Fixed the <code>/data create</code> subcommand not working correctly.</li>
                         <li>Fixed the <code>/data edit name</code> subcommand not working correctly.</li>
                     </ul>
                     <h2>6th October 2026 - Minor Update - v1.1.1</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Added new emotes.</li>
                         <li>Reworked how emotes were created client-side.</li>
                         <li>The user list is now organized by authentication level.</li>
                         <li>You can now view the Terms of Service and Privacy Policy while authenticated.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Image uploads now work again.</li>
                         <li>Fixed the server not logging out or removing inactive users.</li>
@@ -538,12 +595,12 @@
                     <p>Arrasify has migrated servers, meaning they shouldn't go offline as easily.</p>
                     <p>Developer's note: things may still be unstable for a few days as things go back to normal.</p>
                     <h2>18th September 2026 - Patch Update - v1.0.1</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Added a new "creator" subcommand to <code>/data edit</code>.</li>
                         <li>Muting users now broadcasts to the entire chat.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Patched roles below developer being able to modify auth to anything they want.</li>
                         <li>Fixed some users persisting in the user list when they leave.</li>
@@ -551,16 +608,16 @@
                         <li>Fixed the auto scroll not activating at the right moment.</li>
                     </ul>
                     <h2>17th September 2026 - Major Update - v1.0.0</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Full release.</li>
                     </ul>
-                    <p>Bug fixes</p>
+                    <h3>Bug fixes</h3>
                     <ul>
                         <li>Minimal adjustmenets.</li>
                     </ul>
                     <h2>16th September 2026 - Minor Update - v0.1.0</h2>
-                    <p>New features</p>
+                    <h3>New features</h3>
                     <ul>
                         <li>Early release.</li>
                     </ul>
@@ -748,6 +805,8 @@
                     <h5>With [param1] - instance ID and [param2] - message</h5>
                     <hr>
                     <h3>Helper+ Commands</h3>
+                    <h4>/clearall</h4>
+                    <p>Clears all chat messages, uploads, DMs, and broadcasts for everyone.</p>
                     <h4>/muteguests</h4>
                     <p>Toggles the muting of all guests in the current channel.</p>
                     <h4>/broadcast [param1]</h4>
@@ -757,6 +816,7 @@
                     <p>Mute a specific user, for text or uploads, for a specified duration. Use 0s to unmute.</p>
                     <h5>With [param1] - "text" and [param2] - account ID and [param3] - duration + unit</h5>
                     <h5>With [param1] - "upload" and [param2] - account ID and [param3] - duration + unit</h5>
+                    <h5>With [param1] - "both" and [param2] - account ID and [param3] - duration + unit</h5>
                     <hr>
                     <h3>Underseer+ Commands</h3>
                     <h4>/data [param1] [param2] [param3] [param4] </h4>
@@ -777,11 +837,21 @@
                     <h5>With [param1] - "delete" and [param2] - database ID</h5>
                     <hr>
                     <h3>Overseer+ Commands</h3>
-                    <p>There's no exclusive overseer commands yet.</p>
+                    <h4>/slowmode [param1]</h4>
+                    <p>Change the global slowmode.</p>
+                    <h5>With [param1] - seconds</h5>
                     <hr>
                     <h3>Admin+ Commands</h3>
+                    <h4>/findghosts</h4>
+                    <p>Tries to estimate how many ghost accounts currently exist, and lists their names.</p>
+                    <h4>/g [param1]</h4>
+                    <p>
+                        Plays a sound to everyone that is online. Sounds have to be from a predetermined list of
+                        options. That may change in the future.
+                    </p>
+                    <h5>With [param1] - file name</h5>
                     <h4>/server [param1] [param2]</h4>
-                    <p>Allows the editing of certain server settings. Not fully implemented.</p>
+                    <p>Allows the editing of certain server settings.</p>
                     <h5>With [param1] - "sudo" and [param2] - message</h5>
                     <h4>/kick [param1]</h4>
                     <p>Kick a specific account.</p>
@@ -792,28 +862,33 @@
                     <p>Restart the entire server.</p>
                     <hr>
                     <h3>Developer+ Commands</h3>
-                    <h4>/findghosts</h4>
-                    <p>Tries to estimate how many ghost accounts currently exist. For debugging purposes.</p>
+                    <p>There are no current exclusive developer commands.</p>
                 </div>
                 <div id="bookCreditsContent" class="hidden">
                     <h1>Misc - Credits</h1>
                     <h2>Contributors</h2>
-                    <p>Original Idea</p>
+                    <h3>Original Idea</h3>
                     <ul>
                         <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
                     </ul>
-                    <p>Original Developers</p>
+                    <h3>Original Developers</h3>
                     <ul>
                         <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
                         <li>Flowey</li>
                         <li>Testing</li>
                     </ul>
-                    <p>Badges</p>
+                    <h3>Badges</h3>
                     <ul>
                         <li><a href="https://www.youtube.com/channel/UClSjjHu1p16hGxcbfz51haA">Double Squared (d2)</a>
                         </li>
                     </ul>
-                    <p>Emotes</p>
+                    <h3>Themes</h3>
+                    <ul>
+                        <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
+                        <li>Testing</li>
+                        <li>commaL</li>
+                    </ul>
+                    <h3>Emotes</h3>
                     <ul>
                         <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
                         <li>Testing</li>
@@ -825,7 +900,7 @@
                         <li>Dragon King Gaming (DKG)</li>
                         <li><a href="https://www.pixilart.com/bongis">Bongis</a></li>
                     </ul>
-                    <p>Special Thanks</p>
+                    <h3>Special Thanks</h3>
                     <ul>
                         <li>Testing</li>
                         <li>Flowey</li>
@@ -890,36 +965,40 @@
             </div> -->
         </div>
         <hr>
-        <h2><i class="bi bi-hammer"></i> Experimental</h2>
+        <h2><i class="bi bi-palette-fill"></i> Themes</h2>
         <div class="toggles">
-            <!-- <div class="toggle">
-                <div class="toggle-header">
-                    <i class="bi bi-toggle-off" id="expTestTheme"></i>
-                    <p>Compact Mode</p>
-                </div>
-                <p>Attempt to make the chat smaller for devices that can't fit much on the screen.</p>
-            </div> -->
             <div class="toggle">
                 <div class="toggle-header">
-                    <i class="bi bi-toggle-off" id="expAbyss"></i>
+                    <i class="bi bi-toggle-off" id="tAbyss"></i>
                     <p>Abyss Theme</p>
                 </div>
                 <p>Use Testing's custom-made theme.</p>
             </div>
             <div class="toggle">
                 <div class="toggle-header">
-                    <i class="bi bi-toggle-on" id="expMixer"></i>
-                    <p>Mixer</p>
-                </div>
-                <p>Enable the mixer, which plays external audio from commands. Note that this doesn't do anything yet.
-                </p>
-            </div>
-            <div class="toggle">
-                <div class="toggle-header">
-                    <i class="bi bi-toggle-off" id="expNight"></i>
+                    <i class="bi bi-toggle-off" id="tNight"></i>
                     <p>Night Theme</p>
                 </div>
                 <p>Use MLG's custom-made theme.</p>
+            </div>
+            <div class="toggle">
+                <div class="toggle-header">
+                    <i class="bi bi-toggle-off" id="tAqua"></i>
+                    <p>Aqua Theme</p>
+                </div>
+                <p>Use commaL's custom-made theme.</p>
+            </div>
+        </div>
+        <hr>
+        <h2><i class="bi bi-hammer"></i> Experimental</h2>
+        <div class="toggles">
+            <div class="toggle">
+                <div class="toggle-header">
+                    <i class="bi bi-toggle-on" id="expMixer"></i>
+                    <p>Mixer</p>
+                </div>
+                <p>Enable the mixer, which plays external audio from commands.
+                </p>
             </div>
         </div>
     </div>
