@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="theme-dark">
+<body class="theme-seasonal-dark">
     <header>
-        <h1>Arrasify [v1.3.0]</h1>
+        <h1>Arrasify [v1.3.1]</h1>
         <div class="header-tools">
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
@@ -436,27 +436,67 @@
                 </div>
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
+                    <p>Note: all changelogs are made in the AWST timezone.</p>
+                    <h2>31st October 2026 - Halloween</h2>
+                    <p>We are now celebrating the spooky season! 🎃</p>
+                    <ul>
+                        <li>
+                            A brand-new Halloween-based theme has been added to all UI elements, changing the classic
+                            colors to orange (or purple if it's in dark mode!) and black.
+                        </li>
+                        <ul>
+                            <li>
+                                If you do not like the current seasonal theme, you can always toggle it off in the
+                                settings.
+                            </li>
+                        </ul>
+                        <li>All users now temporarily have lime-colored messages.</li>
+                    </ul>
+                    <p>
+                        The event will be over in a day or two, along with the theme and the message color changes, so
+                        make the most of it! 👻
+                    </p>
+                    <h2>31st October 2026 - Minor Update - v1.3.1</h2>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added a new <code>/neo</code> command, available to developers.</li>
+                        <li>Added a disclaimer at the top of the changelog regarding the timezone.</li>
+                        <li>Changed how the server handles accounts when they disconnect.</li>
+                        <li>Changed how the termination of connections is handled.</li>
+                        <li>Slightly adjusted the filtered words list.</li>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>Fixed <code>/g</code> not working.</li>
+                        <li>Fixed the filter not blocking replies with blacklisted words.</li>
+                        <ul>
+                            <li>
+                                Do note on the backend that nothing is filtered, and it only applies to the frontend.
+                            </li>
+                        </ul>
+                        <li>Fixed the previous changelogs not being fully accurate.</li>
+                        <li>Fixed replies on uploads not showing.</li>
+                    </ul>
                     <h2>30th October 2026 - Major Update - v1.3.0</h2>
                     <h3>New features</h3>
                     <ul>
                         <li>Added video uploads.</li>
                         <li>Added audio uploads.</li>
                         <li>Added badges for directors+.</li>
-                        <li>Added a new <code>/g</code> command, available to admins+.</li>
-                        <ul>
-                            <li>
-                                You can disable the effects of <code>/g</code> in the settings with the "mixer" option.
-                            </li>
-                        </ul>
                         <li>Added notifications for logging in and out.</li>
                         <li>Added a basic profanity filter.</li>
                         <ul>
                             <li>Do not try to find a way around it.</li>
                         </ul>
                         <li>Added a new "aqua" theme made by commaL.</li>
+                        <li>Added a new <code>/g</code> command, available to admins+.</li>
+                        <ul>
+                            <li>
+                                You can disable the effects of <code>/g</code> in the settings with the "mixer" option.
+                            </li>
+                        </ul>
                         <li>Added a new <code>/clearall</code> command, available to helpers+.</li>
                         <li>Added a new <code>/slowmode</code> command, available to overseers+.</li>
-                        <li>Added a new <code>/g</code> command, available to admins+.</li>
                         <li>Added a new <code>both</code> type for <code>/mute</code> in <code>param1</code>.</li>
                         <li>Rearranged some of the functions on the backend for better security.</li>
                         <li>The <code>/findghosts</code> command is now accessible to admins+.</li>
@@ -862,7 +902,13 @@
                     <p>Restart the entire server.</p>
                     <hr>
                     <h3>Developer+ Commands</h3>
-                    <p>There are no current exclusive developer commands.</p>
+                    <h4>/neo [param1] [param2] [param3]</h4>
+                    <p>Change the NEO of accounts, in either messages or names.</p>
+                    <h5>With [param1] - "name" and [param2] - neo</h5>
+                    <h5>With [param1] - "message" and [param2] - neo</h5>
+                    <h5>With [param1] - instance id and [param2] - "name" and [param3] - neo</h5>
+                    <h5>With [param1] - instance id and [param2] - "message" and [param3] - neo</h5>
+                    <!-- <p>There are no current exclusive developer commands.</p> -->
                 </div>
                 <div id="bookCreditsContent" class="hidden">
                     <h1>Misc - Credits</h1>
@@ -998,6 +1044,14 @@
                     <p>Mixer</p>
                 </div>
                 <p>Enable the mixer, which plays external audio from commands.
+                </p>
+            </div>
+            <div class="toggle">
+                <div class="toggle-header">
+                    <i class="bi bi-toggle-on" id="expSeasonalTheme"></i>
+                    <p>Seasonal Theme</p>
+                </div>
+                <p>Enable the current seasonal theme if there is one.
                 </p>
             </div>
         </div>

@@ -46,6 +46,26 @@
     --hyperlink-clicked-hover: rgb(228, 164, 222);
 }
 
+.theme-seasonal-light {
+    --primary-color: black;
+    --secondary-color: #2b0b05;
+    --accent-color: #e22900;
+    --highlight-color: #641904;
+    --midtone-color: #2b0b05;
+    --text-color: #dc6541;
+    --white-color: white;
+}
+
+.theme-seasonal-dark {
+    --primary-color: black;
+    --secondary-color: #27052b;
+    --accent-color: #de00e2;
+    --highlight-color: #3f0464;
+    --midtone-color: #27052b;
+    --text-color: #cd41dc;
+    --white-color: white;
+}
+
 .theme-dark {
     --primary-color: rgb(1, 22, 47);
     --secondary-color: rgb(0, 29, 55);

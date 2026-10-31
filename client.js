@@ -25,9 +25,10 @@ let settings = {
     aqua_theme: false,
     // Experimental toggles
     allow_mixer: true,
+    seasonal_theme: true
 };
 
-if (localStorage.getItem("settings")) settings = JSON.parse(localStorage.getItem("settings"));
+if (localStorage.getItem("settings")) settings = { ...JSON.parse(localStorage.getItem("settings")) };
 else localStorage.setItem("settings", JSON.stringify(settings));
 
 let info = {
@@ -298,6 +299,7 @@ const elements = {
     optionsTNight: document.querySelector("#tNight"), // Toggle the Night theme. Overrides the current theme and any before.
     optionsTAqua: document.querySelector("#tAqua"), // Toggle the Aqua theme. Overrides the current theme and any before.
     optionsExpMixer: document.querySelector("#expMixer"), // Toggle the hearing of the mixer.
+    optionsExpSeasonalTheme: document.querySelector("#expSeasonalTheme"), // Toggle the Seasonal Theme if there is one.
     // Profile
     closeProfile: document.querySelector("#closeProfile"),
     profile: document.querySelector("#profile"),
@@ -320,12 +322,22 @@ if (settings.allow_pings) elements.togglePings.className = "bi bi-bell header-ic
 else elements.togglePings.className = "bi bi-bell-slash header-icons";
 if (settings.dark_theme) {
     elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
-    document.body.classList.remove("theme-light");
-    document.body.classList.add("theme-dark");
+    if (!settings.seasonal_theme) {
+        document.body.classList.remove("theme-light");
+        document.body.classList.add("theme-dark");
+    } else {
+        document.body.classList.remove("theme-seasonal-light");
+        document.body.classList.add("theme-seasonal-dark");
+    }
 } else {
     elements.toggleDark.className = "bi bi-sun-fill header-icons";
-    document.body.classList.remove("theme-dark");
-    document.body.classList.add("theme-light");
+    if (!settings.seasonal_theme) {
+        document.body.classList.remove("theme-dark");
+        document.body.classList.add("theme-light");
+    } else {
+        document.body.classList.remove("theme-seasonal-dark");
+        document.body.classList.add("theme-seasonal-light");
+    }
 };
 if (settings.show_users) {
     elements.optionsViewUser.className = "bi bi-toggle-on";
@@ -357,6 +369,11 @@ if (settings.allow_mixer) {
     elements.optionsExpMixer.className = "bi bi-toggle-on";
 } else {
     elements.optionsExpMixer.className = "bi bi-toggle-off";
+};
+if (settings.seasonal_theme) {
+    elements.optionsExpSeasonalTheme.className = "bi bi-toggle-on";
+} else {
+    elements.optionsExpSeasonalTheme.className = "bi bi-toggle-off";
 };
 
 const createToast = (text) => {
@@ -494,7 +511,7 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
     // Extra buttons and timestamp
     const time = document.createElement("p");
     let dateTime = new Date(timestamp);
-    time.innerText = `${dateTime.getHours() < 10 ? "0" : ""}${dateTime.getHours() == 12 ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}`;
+    time.innerText = `${dateTime.getHours() < 10 ? "0" : ""}${(dateTime.getHours() == 12 || dateTime.getHours() == 0) ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}`;
 
     const messageActions = document.createElement("div");
     messageActions.className = "message-actions";
@@ -674,7 +691,8 @@ const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, 
 
         const replyText = document.createElement("p");
         replyText.className = "reply-text";
-        if (reply != "-") replyText.innerText = reply;
+        const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
+        if (reply != "-") replyText.innerText = reply.replace(badRegex, (m) => "*".repeat(m.length).split(":"));
 
         const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply);
         // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
@@ -696,10 +714,13 @@ const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, ti
     const messageElement = document.createElement("div");
     messageElement.className = "message";
 
+    // const replyText = document.createElement("p");
+    // replyText.className = "reply-text";
+    // if (reply != "-") replyText.innerText = reply;
+
     const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, "[Upload]", aID, id, false, true);
-    let chatMedia = undefined
+    let chatMedia = undefined;
     // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
-    console.log(mime);
     switch (mime.split("/")[0]) {
         case "image":
             chatMedia = messageCreateImageElement(file);
@@ -713,10 +734,11 @@ const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, ti
         default:
             chatMedia = document.createElement("div");
             chatMedia.className = "chat-message";
-            chatMedia.innerHTML = `<p>[Unknown media]</p>`
+            const p = document.createElement("p");
+            p.innerText = `[Unknown upload].`;
+            chatMedia.appendChild(p);
             break;
     };
-
 
     messageElement.appendChild(chatUser);
     // HR element to separate the sender from the message content
@@ -732,7 +754,7 @@ const createMessageSimple = (message, timestamp, color) => {
     messageElement.className = `message`;
 
     let dateTime = new Date(timestamp);
-    const messageWithTime = `${dateTime.getHours() < 10 ? "0" : ""}${dateTime.getHours() == 12 ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"} ${message}`;
+    const messageWithTime = `${dateTime.getHours() < 10 ? "0" : ""}${(dateTime.getHours() == 12 || dateTime.getHours() == 0) ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}${message}`;
 
     const chatMessage = messageCreateTextElement(messageWithTime, color);
     messageElement.appendChild(chatMessage);
@@ -1043,10 +1065,13 @@ const wsMessage = (data, isBinary) => {
                 };
                 case "mix": {
                     if (settings.allow_mixer) {
-                        mixAudio.crossOrigin = "anonymous";
+                        // mixAudio.crossOrigin = "anonymous";
                         mixAudio.src = `${message.src}`;
-                        mixAudio.onload = (e) => {
-                            mixAudio.play().catch((e) => {
+                        mixAudio.load();
+                        mixAudio.oncanplay = (r) => {
+                            mixAudio.play().then((e) => {
+                                createToast(`Now playing: "${message.src.split("/").pop()}"`);
+                            }).catch((e) => {
                                 createToast(`Could not play requested audio: ${e.message}`);
                             });
                         };
@@ -1096,7 +1121,7 @@ const wsMessage = (data, isBinary) => {
         } else {
             imgblob = data.data;
         };
-        createMessageUpload(nextUpload.sender.name, nextUpload.sender.auth, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
+        createMessageUpload(nextUpload.sender.name, nextUpload.auth, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
     };
 };
 
@@ -1105,9 +1130,9 @@ const wsClose = (e) => {
     elements.screen.classList.remove("hidden");
     elements.loading.classList.add("hidden");
     elements.disconnectCode.innerText = `Exit code: ${e.code ? e.code : "No code given."}`;
-    elements.disconnectReason.innerText = `Reason: ${e.reason ? e.reason : "No reason given."}`;
-    createToast(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason ? e.reason : "No reason given."}`);
-    console.error(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason ? e.reason : "No reason given."}`);
+    elements.disconnectReason.innerText = `Reason: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unexpected error, or the servers are down." : "No reason given."}`;
+    createToast(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unexpected error, or the servers are down." : "No reason given."}`);
+    console.error(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unexpected error, or the servers are down." : "No reason given."}`);
 };
 
 // e functions are for events
@@ -1155,7 +1180,8 @@ const eInitiateReply = (user, message, id, dm) => {
     let sampleSize = 80;
     let sample = message.slice(0, sampleSize);
     if (sample.length == sampleSize) sample += "-...";
-    elements.replyContent.innerText = `${sample}`;
+    const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
+    elements.replyContent.innerText = `${sample.replace(badRegex, (m) => "*".repeat(m.length)).split(":")}`;
     messageReplyID = id;
     messageReplyDM = dm;
     if (autoScroll) setTimeout(scrollChatHistory, 30);
@@ -1231,12 +1257,22 @@ elements.toggleDark.onclick = () => {
     localStorage.setItem("settings", JSON.stringify(settings));
     if (settings.dark_theme) {
         elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
-        document.body.classList.remove("theme-light");
-        document.body.classList.add("theme-dark");
+        if (!settings.seasonal_theme) {
+            document.body.classList.remove("theme-light");
+            document.body.classList.add("theme-dark");
+        } else {
+            document.body.classList.remove("theme-seasonal-light");
+            document.body.classList.add("theme-seasonal-dark");
+        }
     } else {
         elements.toggleDark.className = "bi bi-sun-fill header-icons";
-        document.body.classList.remove("theme-dark");
-        document.body.classList.add("theme-light");
+        if (!settings.seasonal_theme) {
+            document.body.classList.remove("theme-dark");
+            document.body.classList.add("theme-light");
+        } else {
+            document.body.classList.remove("theme-seasonal-dark");
+            document.body.classList.add("theme-seasonal-light");
+        }
     };
 };
 
@@ -1575,6 +1611,33 @@ elements.optionsExpMixer.onclick = (e) => {
         elements.optionsExpMixer.className = "bi bi-toggle-off";
     };
 };
+elements.optionsExpSeasonalTheme.onclick = (e) => {
+    settings.seasonal_theme = !settings.seasonal_theme;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.seasonal_theme) {
+        elements.optionsExpSeasonalTheme.className = "bi bi-toggle-on";
+        document.body.classList.remove("theme-light");
+        document.body.classList.remove("theme-dark");
+        if (settings.dark_theme) {
+            document.body.classList.remove("theme-seasonal-light");
+            document.body.classList.add("theme-seasonal-dark");
+        } else {
+            document.body.classList.remove("theme-seasonal-dark");
+            document.body.classList.add("theme-seasonal-light");
+        }
+    } else {
+        elements.optionsExpSeasonalTheme.className = "bi bi-toggle-off";
+        document.body.classList.remove("theme-seasonal-light");
+        document.body.classList.remove("theme-seasonal-dark");
+        if (settings.dark_theme) {
+            document.body.classList.remove("theme-light");
+            document.body.classList.add("theme-dark");
+        } else {
+            document.body.classList.remove("theme-dark");
+            document.body.classList.add("theme-light");
+        }
+    }
+};
 
 elements.modHeader.onmousedown = (e) => {
     dragMod = true;
@@ -1657,7 +1720,6 @@ elements.imageConfirmY.onclick = () => {
 ws.onopen = () => wsOpen();
 ws.onmessage = (e, isBinary) => wsMessage(e, isBinary);
 ws.onclose = (e) => wsClose(e);
-ws.onerror = (e) => wsClose(e);
 
 eUpdate();
 
