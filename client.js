@@ -31,6 +31,8 @@ let settings = {
 if (localStorage.getItem("settings")) settings = { ...JSON.parse(localStorage.getItem("settings")) };
 else localStorage.setItem("settings", JSON.stringify(settings));
 
+settings.seasonal_theme = false;
+
 let info = {
     name: "-",
     timeout: 0,
@@ -1257,22 +1259,22 @@ elements.toggleDark.onclick = () => {
     localStorage.setItem("settings", JSON.stringify(settings));
     if (settings.dark_theme) {
         elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
-        if (!settings.seasonal_theme) {
-            document.body.classList.remove("theme-light");
-            document.body.classList.add("theme-dark");
-        } else {
-            document.body.classList.remove("theme-seasonal-light");
-            document.body.classList.add("theme-seasonal-dark");
-        }
+        // if (!settings.seasonal_theme) {
+        document.body.classList.remove("theme-light");
+        document.body.classList.add("theme-dark");
+        // } else {
+        //     document.body.classList.remove("theme-seasonal-light");
+        //     document.body.classList.add("theme-seasonal-dark");
+        // }
     } else {
         elements.toggleDark.className = "bi bi-sun-fill header-icons";
-        if (!settings.seasonal_theme) {
-            document.body.classList.remove("theme-dark");
-            document.body.classList.add("theme-light");
-        } else {
-            document.body.classList.remove("theme-seasonal-dark");
-            document.body.classList.add("theme-seasonal-light");
-        }
+        // if (!settings.seasonal_theme) {
+        document.body.classList.remove("theme-dark");
+        document.body.classList.add("theme-light");
+        // } else {
+        //     document.body.classList.remove("theme-seasonal-dark");
+        //     document.body.classList.add("theme-seasonal-light");
+        // }
     };
 };
 
@@ -1616,26 +1618,26 @@ elements.optionsExpSeasonalTheme.onclick = (e) => {
     localStorage.setItem("settings", JSON.stringify(settings));
     if (settings.seasonal_theme) {
         elements.optionsExpSeasonalTheme.className = "bi bi-toggle-on";
-        document.body.classList.remove("theme-light");
-        document.body.classList.remove("theme-dark");
-        if (settings.dark_theme) {
-            document.body.classList.remove("theme-seasonal-light");
-            document.body.classList.add("theme-seasonal-dark");
-        } else {
-            document.body.classList.remove("theme-seasonal-dark");
-            document.body.classList.add("theme-seasonal-light");
-        }
+        // document.body.classList.remove("theme-light");
+        // document.body.classList.remove("theme-dark");
+        // if (settings.dark_theme) {
+        //     document.body.classList.remove("theme-seasonal-light");
+        //     document.body.classList.add("theme-seasonal-dark");
+        // } else {
+        //     document.body.classList.remove("theme-seasonal-dark");
+        //     document.body.classList.add("theme-seasonal-light");
+        // }
     } else {
         elements.optionsExpSeasonalTheme.className = "bi bi-toggle-off";
-        document.body.classList.remove("theme-seasonal-light");
-        document.body.classList.remove("theme-seasonal-dark");
-        if (settings.dark_theme) {
-            document.body.classList.remove("theme-light");
-            document.body.classList.add("theme-dark");
-        } else {
-            document.body.classList.remove("theme-dark");
-            document.body.classList.add("theme-light");
-        }
+        // document.body.classList.remove("theme-seasonal-light");
+        // document.body.classList.remove("theme-seasonal-dark");
+        // if (settings.dark_theme) {
+        //     document.body.classList.remove("theme-light");
+        //     document.body.classList.add("theme-dark");
+        // } else {
+        //     document.body.classList.remove("theme-dark");
+        //     document.body.classList.add("theme-light");
+        // }
     }
 };
 
