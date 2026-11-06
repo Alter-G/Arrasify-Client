@@ -20,12 +20,13 @@ let settings = {
     dark_theme: true,
     // Option toggles
     show_users: true,
+    show_ui: false,
     abyss_theme: false,
     night_theme: false,
     aqua_theme: false,
     // Experimental toggles
     allow_mixer: true,
-    seasonal_theme: true
+    seasonal_theme: false
 };
 
 if (localStorage.getItem("settings")) settings = { ...JSON.parse(localStorage.getItem("settings")) };
@@ -199,6 +200,7 @@ const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emo
 
 const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
+    sheet: document.querySelector("#sheet"), // The style sheet for everything
     // Header Bars
     toggleOptions: document.querySelector("#toggleOptions"), // The element that, when clicked, opens the options.
     toggleDark: document.querySelector("#toggleDark"), // The element that, when clicked, toggles the dark/light theme. Dark by default
@@ -297,6 +299,7 @@ const elements = {
     options: document.querySelector("#options"), // The options menu.
     optionsClose: document.querySelector("#optionsClose"), // The close options menu button.
     optionsViewUser: document.querySelector("#viewUser"), // Toggle the viewing of the user list.
+    optionsViewUI: document.querySelector("#viewUI"), // Toggle the viewing of the new UI.
     optionsTAbyss: document.querySelector("#tAbyss"), // Toggle the Abyss theme. Overrides the current theme.
     optionsTNight: document.querySelector("#tNight"), // Toggle the Night theme. Overrides the current theme and any before.
     optionsTAqua: document.querySelector("#tAqua"), // Toggle the Aqua theme. Overrides the current theme and any before.
@@ -321,6 +324,7 @@ const elements = {
 
 // Load settings
 if (settings.allow_pings) elements.togglePings.className = "bi bi-bell header-icons";
+if (settings.show_ui) elements.sheet.href = "overhaul.css";
 else elements.togglePings.className = "bi bi-bell-slash header-icons";
 if (settings.dark_theme) {
     elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
@@ -345,6 +349,11 @@ if (settings.show_users) {
     elements.optionsViewUser.className = "bi bi-toggle-on";
 } else {
     elements.optionsViewUser.className = "bi bi-toggle-off";
+};
+if (settings.show_ui) {
+    elements.optionsViewUI.className = "bi bi-toggle-on";
+} else {
+    elements.optionsViewUI.className = "bi bi-toggle-off";
 };
 if (settings.abyss_theme) {
     elements.optionsTAbyss.className = "bi bi-toggle-on";
@@ -1148,11 +1157,11 @@ const eVisitAsGuest = (e) => {
     if (settings.show_users) {
         elements.optionsViewUser.className = "bi bi-toggle-on";
         elements.users.classList.remove("hidden");
-        elements.viewport.style.width = "60%";
+        elements.viewport.style.width = "80%";
     } else {
         elements.optionsViewUser.className = "bi bi-toggle-off";
         elements.users.classList.add("hidden");
-        elements.viewport.style.width = "80%";
+        elements.viewport.style.width = "100%";
     };
     if (autoScroll) scrollChatHistory();
 };
@@ -1243,7 +1252,7 @@ elements.backToAuth.onclick = () => {
     elements.users.classList.add("hidden");
     elements.viewport.classList.add("hidden");
     elements.auth.classList.remove("hidden");
-    elements.viewport.style.width = "60%";
+    elements.viewport.style.width = "80%";
     ws.send(payloadUnauth());
 };
 
@@ -1319,7 +1328,7 @@ elements.barMessage.onpaste = (e) => {
             elements.imageConfirm.classList.remove("hidden");
             elements.screen.classList.remove("hidden");
             elements.barImage.value = "";
-            elements.imageConfirmImage.src = URL.createObjectURL(uploadFile);
+            eHandlePreview(URL.createObjectURL(uploadFile), uploadMime);
         };
     }
 };
@@ -1563,13 +1572,24 @@ elements.optionsViewUser.onclick = (e) => {
         if (settings.show_users) {
             elements.optionsViewUser.className = "bi bi-toggle-on";
             elements.users.classList.remove("hidden");
-            elements.viewport.style.width = "60%";
+            elements.viewport.style.width = "80%";
         } else {
             elements.optionsViewUser.className = "bi bi-toggle-off";
             elements.users.classList.add("hidden");
-            elements.viewport.style.width = "80%";
+            elements.viewport.style.width = "100%";
         };
     }
+};
+elements.optionsViewUI.onclick = (e) => {
+    settings.show_ui = !settings.show_ui;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.show_ui) {
+        elements.optionsViewUI.className = "bi bi-toggle-on";
+        elements.sheet.href = "overhaul.css";
+    } else {
+        elements.optionsViewUI.className = "bi bi-toggle-off";
+        elements.sheet.href = "style.css";
+    };
 };
 elements.optionsTAbyss.onclick = (e) => {
     settings.abyss_theme = !settings.abyss_theme;

@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arrasify</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" id="sheet">
+    <!-- <link rel="stylesheet" href="overhaul.css"> -->
 </head>
 
 <body class="theme-seasonal-dark">
     <header>
-        <h1>Arrasify [v1.3.1]</h1>
+        <h1>Arrasify [v1.3.2]</h1>
         <div class="header-tools">
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
@@ -437,6 +438,27 @@
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
                     <p>Note: all changelogs are made in the AWST timezone.</p>
+                    <h2>7th November 2026 - Minor Update - v1.3.2</h2>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added a new option to try out the UI rework.</li>
+                        <ul>
+                            <li>We will be making the UI progressively more accessible to mobile users. This will
+                                include changes to the overall UI for everyone.</li>
+                        </ul>
+                        <li>Added further rate limit protections.</li>
+                        <ul>
+                            <li><s>please stop deep frying my servers and thank you in advance :)</s></li>
+                        </ul>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>Adjusted the leniency of the cooldown server-side so less crashes happen.</li>
+                        <li>Fixed the pasting of media not correctly showing the right preview.</li>
+                    </ul>
+                    <p>I am actively working on making the server less vulnerable to crashes and exploitation. There
+                        might be less content updates while this is happening, but it will improve the overall user
+                        experience and fix the prominent bugs.</p>
                     <h2>3rd November 2026 - Halloween is over!</h2>
                     <p>Thank you for participating in our Halloween event! Stay tuned for the next.</p>
                     <h2>31st October 2026 - Halloween</h2>
@@ -1003,6 +1025,13 @@
                     <p>User List</p>
                 </div>
                 <p>Toggles the visibility of the user list on the left of the chat.</p>
+            </div>
+            <div class="toggle">
+                <div class="toggle-header">
+                    <i class="bi bi-toggle-on" id="viewUI"></i>
+                    <p>New UI</p>
+                </div>
+                <p>Try out the new UI currently in development.</p>
             </div>
             <!-- <div class="viewToggle">
                 <div class="toggle-header">
