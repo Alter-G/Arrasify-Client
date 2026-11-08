@@ -305,8 +305,8 @@ a:visited:hover {
 }
 
 .auth-bar {
-    width: calc(50%);
-    height: clamp(10px, calc(2vw + 2vh), 50px);
+    width: clamp(50%, calc(2vw + 2vh), 50%);
+    height: clamp(30px, calc(2vw + 2vh), 50px);
     display: flex;
     flex-direction: row;
 }
@@ -332,13 +332,12 @@ a:visited:hover {
 .auth-bar button {
     background-color: var(--highlight-color);
     border: 2px solid var(--accent-color);
-    width: auto;
-    height: 100%;
-    aspect-ratio: 1 / 1;
+    width: clamp(30px, calc(2vw + 2vh), 50px);
+    height: clamp(30px, calc(2vw + 2vh), 50px);
     margin-left: 5px;
     border-radius: 100%;
     color: var(--white-color);
-    font-size: clamp(10px, calc(1vw + 1vh), 50px);
+    font-size: clamp(20px, calc(1vw + 1vh), 50px);
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -389,6 +388,7 @@ a:visited:hover {
 
 #users {
     width: 20%;
+    min-width: 140px;
     height: calc(100% - 4px);
     margin: 0;
     margin-right: -2px;
@@ -401,6 +401,8 @@ a:visited:hover {
     display: flex;
     flex-direction: row;
     width: calc(100% - 20px);
+    min-width: 100px;
+    min-height: 27px;
     height: 10%;
     justify-content: center;
     align-items: center;
@@ -414,11 +416,19 @@ a:visited:hover {
     margin-left: 10px;
     color: var(--text-color);
     cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .user-pfp {
-    width: clamp(10px, calc(2vw + 2vh), 50px);
-    height: clamp(10px, calc(2vw + 2vh), 50px);
+    width: clamp(10px, calc(1.5vw + 1.5vh), 50px);
+    height: clamp(10px, calc(1.5vw + 1.5vh), 50px);
+    min-width: 20px;
+    min-height: 20px;
     border-radius: 100%;
 }
 
@@ -451,7 +461,8 @@ a:visited:hover {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 10px);
+    border: 2px solid var(--accent-color);
 }
 
 #chat {
@@ -485,8 +496,7 @@ a:visited:hover {
 
 #chatHistory {
     width: 100%;
-    min-height: calc(90% - 22px - 50px);
-    height: calc(90% - 22px);
+    height: calc(100% - clamp(30px, calc(2vw + 2vh), 50px) * 2);
     overflow-y: scroll;
     scroll-behavior: smooth;
     overflow-x: hidden;
@@ -494,12 +504,12 @@ a:visited:hover {
 }
 
 .message {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
     padding: 10px;
     background-color: var(--highlight-color);
-    width: calc(100% - 60px);
+    width: calc(100% - 40px);
     border-radius: 10px;
 }
 
@@ -520,6 +530,7 @@ a:visited:hover {
     color: var(--text-color);
     align-items: center;
     justify-content: space-between;
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 15px);
 }
 
 .user-info {
@@ -528,10 +539,11 @@ a:visited:hover {
     align-items: center;
     user-select: none;
     cursor: pointer;
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 15px);
 }
 
 .message-actions {
-    font-size: 30px;
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 30px);
     color: var(--white-color);
     cursor: pointer;
 }
@@ -539,12 +551,14 @@ a:visited:hover {
 .chat-message {
     color: var(--text-color);
     word-wrap: normal;
+    height: min-content;
 }
 
 .chat-message-lines {
     display: flex;
     flex-direction: column;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+    margin-top: 0px;
     overflow-wrap: break-word;
 }
 
@@ -556,19 +570,35 @@ a:visited:hover {
     padding: 0;
     overflow-wrap: break-word;
     word-wrap: break-word;
+    width: fit-content;
+    text-align: center;
+    padding-top: clamp(0px, calc(1.5vw + 1.5vh), 5px);
+    padding-bottom: clamp(0px, calc(1.5vw + 1.5vh), 5px);
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 15px);
 }
 
 .chat-emoji {
-    font-size: 20px;
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 20px);
     margin: 5px;
+}
+
+.big-emoji {
+    font-size: clamp(20px, calc(1.5vw + 1.5vh), 40px);
 }
 
 .chat-emote {
     object-fit: cover;
     user-select: none;
     -webkit-user-drag: none;
-    width: 50px;
-    height: 50px;
+    width: clamp(20px, calc(1.5vw + 1.5vh), 50px);
+    height: clamp(20px, calc(1.5vw + 1.5vh), 50px);
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.big-emote {
+    width: clamp(40px, calc(3vw + 3vh), 100px);
+    height: clamp(40px, calc(3vw + 3vh), 100px);
 }
 
 .chat-image {
@@ -620,30 +650,52 @@ a:visited:hover {
 
 .chat-bar {
     width: 100%;
-    height: 50px;
+    height: clamp(30px, calc(2vw + 2vh), 50px);
     display: flex;
     flex-direction: row;
-    margin-top: 10px;
-    padding-bottom: 10px;
+    anchor-name: --scroll-anchor;
 }
 
 #barMessage {
     box-sizing: border-box;
-    width: calc(100% - 3 * (50px + 5px));
-    height: 100%;
+    width: calc(100% - 3 * (clamp(30px, calc(2vw + 2vh), 50px) + 5px));
+    height: clamp(30px, calc(2vw + 2vh), 50px);
     outline: none !important;
     border-radius: 0px;
     background-color: var(--highlight-color);
-    border: 2px solid var(--accent-color);
+    border: none !important;
     color: var(--text-color);
-    font-size: 20px;
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 20px);
     text-indent: 10px;
     caret-color: var(--white-color);
-    anchor-name: --scroll-anchor;
 }
 
 #barMessage::placeholder {
     color: var(--text-color);
+}
+
+#userContext {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: clamp(200px, calc(15vw + 15vh), 300px);
+    background-color: var(--primary-color);
+    border: 2px solid var(--accent-color);
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.context-option {
+    background-color: var(--accent-color);
+    color: var(--white-color);
+    padding: 10px;
+    border-bottom: 2px solid var(--primary-color);
+    margin: 0;
+    cursor: pointer;
+}
+
+.context-option:hover {
+    background-color: var(--text-color);
 }
 
 #scrollButton {
@@ -674,8 +726,8 @@ a:visited:hover {
     transform: translateX(calc(-100%));
     margin-bottom: 20px;
     overflow-y: scroll;
-    width: 240px;
-    height: 150px;
+    width: clamp(200px, calc(15vw + 15vh), 300px);
+    height: clamp(100px, calc(15vw + 15vh), 200px);
     padding: 10px;
     background-color: var(--highlight-color);
     border: 2px solid var(--accent-color);
@@ -697,7 +749,7 @@ a:visited:hover {
 .emoteEmojis,
 .emotes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(50px, 20px));
+    grid-template-columns: repeat(auto-fit, minmax(40px, 30px));
     justify-content: center;
     gap: 5px;
     margin-left: 5px;
@@ -708,9 +760,9 @@ a:visited:hover {
 .emote {
     display: flex;
     color: var(--white-color);
-    font-size: 20px;
-    width: 40px;
-    height: 40px;
+    font-size: clamp(20px, calc(1.5vw + 1.5vh), 30px);
+    width: clamp(30px, calc(1.5vw + 1.5vh), 40px);
+    height: clamp(30px, calc(1.5vw + 1.5vh), 40px);
     text-align: center;
     justify-content: center;
     align-items: center;
@@ -729,12 +781,12 @@ a:visited:hover {
 .chat-bar button {
     background-color: var(--highlight-color);
     border: 2px solid var(--accent-color);
-    width: 50px;
-    height: 50px;
+    width: clamp(30px, calc(2vw + 2vh), 50px);
+    height: clamp(30px, calc(2vw + 2vh), 50px);
     margin-left: 5px;
     border-radius: 100%;
     color: var(--white-color);
-    font-size: 20px;
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 20px);
     cursor: pointer;
 }
 
@@ -742,32 +794,27 @@ a:visited:hover {
     position: absolute;
     display: flex;
     flex-direction: column;
-    top: calc(50% - 240px);
-    left: calc(50% - 220px);
-    background-color: var(--accent-color);
+    width: 90%;
+    height: 90%;
+    top: 5%;
+    left: 5%;
+    background-color: var(--primary-color);
+    border: 2px solid var(--accent-color);
     color: var(--white-color);
-    min-width: 400px;
-    min-height: 200px;
     z-index: 2001;
     justify-content: center;
     align-items: center;
-    padding: 20px;
 }
 
 #imageConfirm img {
-    background-color: var(--accent-color);
-    min-width: 200px;
-    max-width: 200px;
-    width: 200px;
-    padding: 20px;
+    width: 50%;
+    height: 50%;
     object-fit: contain;
 }
 
 #imageConfirm audio {
-    background-color: var(--accent-color);
-    min-width: 300px;
-    max-width: 300px;
-    width: 300px;
+    width: 30%;
+    height: 50px;
     padding: 20px;
     border-radius: 0px;
     outline: none !important;
@@ -775,11 +822,8 @@ a:visited:hover {
 }
 
 #imageConfirm video {
-    background-color: var(--accent-color);
-    min-width: 400px;
-    max-width: 400px;
-    width: 400px;
-    padding: 20px;
+    width: 50%;
+    height: 50%;
 }
 
 .image-confirm-btns {

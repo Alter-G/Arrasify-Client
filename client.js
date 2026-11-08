@@ -20,7 +20,7 @@ let settings = {
     dark_theme: true,
     // Option toggles
     show_users: true,
-    show_ui: false,
+    show_ui: true,
     abyss_theme: false,
     night_theme: false,
     aqua_theme: false,
@@ -32,12 +32,18 @@ let settings = {
 if (localStorage.getItem("settings")) settings = { ...JSON.parse(localStorage.getItem("settings")) };
 else localStorage.setItem("settings", JSON.stringify(settings));
 
-settings.seasonal_theme = false;
+settings.show_ui = true;
+
+let userContextInfo = {
+    iID: "-",
+    aID: "-"
+};
 
 let info = {
     name: "-",
     timeout: 0,
-    channel: "???"
+    channel: "???",
+    auth: 0
 };
 
 let collectedUsers = {
@@ -61,6 +67,7 @@ let id = ""; // Tells you what account you are. Is also the part after the hasht
 let sessionID = "-"; // Super important. Do NOT give this away, or your account will be temporarily hijacked
 let autoScroll = true;
 let lastScrollY = 0;
+let maximizeUsers = false;
 
 // Text-related things
 let messageReplyID = "-"; // - for none
@@ -202,6 +209,7 @@ const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
     sheet: document.querySelector("#sheet"), // The style sheet for everything
     // Header Bars
+    toggleUsers: document.querySelector("#toggleUsers"), // Toggle the visibility of the user list, whilst making it fullscreen and hiding the chat.
     toggleOptions: document.querySelector("#toggleOptions"), // The element that, when clicked, opens the options.
     toggleDark: document.querySelector("#toggleDark"), // The element that, when clicked, toggles the dark/light theme. Dark by default
     togglePings: document.querySelector("#togglePings"), // Whether pings make a noise or not
@@ -311,6 +319,12 @@ const elements = {
     profilePfp: document.querySelector("#profilePfp"),
     profileName: document.querySelector("#profileName"),
     profileBio: document.querySelector("#profileBio"),
+    // Context
+    userContext: document.querySelector("#userContext"),
+    userContextKick: document.querySelector("#userContextKick"),
+    userContextCopyIID: document.querySelector("#userContextCopyIID"),
+    userContextCopyAID: document.querySelector("#userContextCopyAID"),
+    userContextCancel: document.querySelector("#userContextCancel"),
     // Mod
     mod: document.querySelector("#mod"),
     modHeader: document.querySelector("#modHeader"),
@@ -324,6 +338,7 @@ const elements = {
 
 // Load settings
 if (settings.allow_pings) elements.togglePings.className = "bi bi-bell header-icons";
+else elements.togglePings.className = "bi bi-bell-slash header-icons";
 if (settings.show_ui) elements.sheet.href = "overhaul.css";
 else elements.togglePings.className = "bi bi-bell-slash header-icons";
 if (settings.dark_theme) {
@@ -352,8 +367,12 @@ if (settings.show_users) {
 };
 if (settings.show_ui) {
     elements.optionsViewUI.className = "bi bi-toggle-on";
+    if (settings.show_users) elements.viewport.style.width = "80%";
+    else elements.viewport.style.width = "100%";
 } else {
     elements.optionsViewUI.className = "bi bi-toggle-off";
+    if (settings.show_users) elements.viewport.style.width = "60%";
+    else elements.viewport.style.width = "80%";
 };
 if (settings.abyss_theme) {
     elements.optionsTAbyss.className = "bi bi-toggle-on";
@@ -404,7 +423,7 @@ const scrollChatHistory = () => {
     elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
 };
 
-const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply) => {
+const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply) => {
     // User Info
     const chatUser = document.createElement("div"); // Includes the sender information, as well as buttons and the date/time of postage
     chatUser.className = "chat-user";
@@ -517,6 +536,22 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
                 });
             };
         };
+    };
+    userInfo.oncontextmenu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        elements.userContext.classList.remove("hidden");
+        if (info.auth > 4) elements.userContextKick.classList.remove("hidden");
+        else elements.userContextKick.classList.add("hidden");
+        elements.userContext.style.top = e.pageY + "px";
+        elements.userContext.style.left = e.pageX + "px";
+        userContextInfo = {
+            iID,
+            aID
+        };
+    };
+    userInfo.oncontextlost = (e) => {
+        elements.userContext.classList.add("hidden");
     };
 
     // Extra buttons and timestamp
@@ -639,10 +674,12 @@ const messageCreateTextElement = (message, color) => {
         if (s.children.item(0).innerText === "") s.removeChild(s.children.item(0));
         if (s.children.item(s.children.length - 1).innerText === "") s.removeChild(s.children.item(s.children.length - 1));
         if (s.children.item(0).tagName === "IMG" && s.children.length < 2) {
-            s.children.item(0).style.width = "100px";
-            s.children.item(0).style.height = "100px";
+            // s.children.item(0).style.width = "100px";
+            // s.children.item(0).style.height = "100px";
+            s.children.item(0).classList.add("big-emote");
         } else if (s.children.item(0).tagName === "I" && s.children.length < 2) {
-            s.children.item(0).style.fontSize = `40px`;
+            s.children.item(0).classList.add("big-emoji");
+            // s.children.item(0).style.fontSize = `${parseFloat(window.getComputedStyle(s.children[0]).fontSize)}px`;
         };
         paragraphs.push(s);
     });
@@ -695,7 +732,7 @@ const messageCreateVideoElement = (file) => {
     return chatMessage;
 };
 
-const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, timestamp, aID, id, reply, dm, canReply) => {
+const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, timestamp, iID, aID, id, reply, dm, canReply) => {
     if (message.toString() != "") {
         const messageElement = document.createElement("div");
         messageElement.className = `message${dm ? " dm" : ""}`;
@@ -705,7 +742,7 @@ const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, 
         const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
         if (reply != "-") replyText.innerText = reply.replace(badRegex, (m) => "*".repeat(m.length).split(":"));
 
-        const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, message, aID, id, dm, canReply);
+        const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply);
         // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
         const chatMessage = messageCreateTextElement(message, color);
 
@@ -721,7 +758,7 @@ const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, 
     };
 }
 
-const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, timestamp, aID, id) => {
+const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, timestamp, iID, aID, id) => {
     const messageElement = document.createElement("div");
     messageElement.className = "message";
 
@@ -729,7 +766,7 @@ const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, ti
     // replyText.className = "reply-text";
     // if (reply != "-") replyText.innerText = reply;
 
-    const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, "[Upload]", aID, id, false, true);
+    const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, "[Upload]", iID, aID, id, false, true);
     let chatMedia = undefined;
     // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
     switch (mime.split("/")[0]) {
@@ -802,25 +839,48 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
     userName.className = `user-name message-${neo}`;
     userName.innerText = name;
     userName.onclick = (e) => {
-        if (aID == "-" || aID == "!") {
-            createToast("You can't view this profile.");
-        } else { // Invalid profiles do not have pfps
-            elements.profile.classList.remove("hidden");
-            elements.screen.classList.remove("hidden");
-            elements.profileName.innerText = name;
-            elements.profilePfp.src = pfp;
-            elements.profileBio.innerHTML = "";
-            if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
-            else {
-                let lines = bio.split(/\r?\n|\\n/);
-                lines.forEach((line) => {
-                    const p = document.createElement("p");
-                    p.innerText = line;
-                    elements.profileBio.appendChild(p);
-                    // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
-                });
+        e.preventDefault();
+        e.stopPropagation();
+        switch (e.button) {
+            case 0: {
+                if (aID == "-" || aID == "!") {
+                    createToast("You can't view this profile.");
+                } else { // Invalid profiles do not have pfps
+                    elements.profile.classList.remove("hidden");
+                    elements.screen.classList.remove("hidden");
+                    elements.profileName.innerText = name;
+                    elements.profilePfp.src = pfp;
+                    elements.profileBio.innerHTML = "";
+                    if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
+                    else {
+                        let lines = bio.split(/\r?\n|\\n/);
+                        lines.forEach((line) => {
+                            const p = document.createElement("p");
+                            p.innerText = line;
+                            elements.profileBio.appendChild(p);
+                            // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                        });
+                    };
+                };
+                break;
             };
         };
+    };
+    userName.oncontextmenu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        elements.userContext.classList.remove("hidden");
+        if (info.auth > 4) elements.userContextKick.classList.remove("hidden");
+        else elements.userContextKick.classList.add("hidden");
+        elements.userContext.style.top = e.pageY + "px";
+        elements.userContext.style.left = e.pageX + "px";
+        userContextInfo = {
+            iID: id,
+            aID
+        };
+    };
+    userName.oncontextlost = (e) => {
+        elements.userContext.classList.add("hidden");
     };
 
     user.appendChild(userPfp);
@@ -978,7 +1038,7 @@ const wsOpen = () => {
     console.log(`Connected to the server!`);
     setInterval(() => {
         ws.send(JSON.stringify({ "type": "ping" }));
-    }, 30);
+    }, 200);
 };
 
 const wsMessage = (data, isBinary) => {
@@ -998,6 +1058,7 @@ const wsMessage = (data, isBinary) => {
                         message.neo,
                         message.color,
                         message.timestamp,
+                        message.sender.iID,
                         message.sender.aID,
                         message.id,
                         message.reply,
@@ -1050,6 +1111,7 @@ const wsMessage = (data, isBinary) => {
                             msg.neo,
                             msg.color,
                             msg.timestamp,
+                            msg.sender.iID,
                             msg.aID,
                             msg.id,
                             msg.reply,
@@ -1132,7 +1194,7 @@ const wsMessage = (data, isBinary) => {
         } else {
             imgblob = data.data;
         };
-        createMessageUpload(nextUpload.sender.name, nextUpload.auth, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.aID, nextUpload.id);
+        createMessageUpload(nextUpload.sender.name, nextUpload.auth, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.iID, nextUpload.sender.aID, nextUpload.id);
     };
 };
 
@@ -1157,11 +1219,13 @@ const eVisitAsGuest = (e) => {
     if (settings.show_users) {
         elements.optionsViewUser.className = "bi bi-toggle-on";
         elements.users.classList.remove("hidden");
-        elements.viewport.style.width = "80%";
+        if (settings.show_ui) elements.viewport.style.width = "80%";
+        else elements.viewport.style.width = "60%";
     } else {
         elements.optionsViewUser.className = "bi bi-toggle-off";
         elements.users.classList.add("hidden");
-        elements.viewport.style.width = "100%";
+        if (settings.show_ui) elements.viewport.style.width = "100%";
+        else elements.viewport.style.width = "80%";
     };
     if (autoScroll) scrollChatHistory();
 };
@@ -1208,6 +1272,69 @@ const eUpdate = () => {
     autoScroll = elements.chatHistory.scrollTop + scrollLeniency >= elements.chatHistory.scrollHeight - elements.chatHistory.clientHeight;
     if (!autoScroll) elements.scrollButton.classList.remove("invisible");
     else elements.scrollButton.classList.add("invisible");
+    // if (settings.show_ui) {
+    //     if ((window.innerWidth <= 600 && !maximizeUsers) || (!settings.show_users && window.innerWidth > 600)) {
+    //         elements.users.classList.add("hidden");
+    //         elements.viewport.style.width = "100%";
+    //     } else if (elements.auth.classList.contains("hidden")) {
+    //         elements.users.classList.remove("hidden");
+    //         elements.viewport.style.width = "80%";
+    //     };
+    // };
+    // if (window.innerWidth < 600) {
+    //     if (settings.show_ui && elements.auth.classList.contains("hidden")) {
+    //         elements.toggleUsers.classList.remove("hidden");
+    //     } else {
+    //         elements.toggleUsers.classList.add("hidden");
+    //     };
+    // } else {
+    //     if (elements.auth.classList.contains("hidden") && elements.users.classList.contains("hidden")) elements.users.classList.remove("hidden");
+    //     elements.users.style.width = "20%";
+    //     elements.viewport.style.width = "80%";
+    // };
+    // Visibility of user list and viewport
+    if (!elements.auth.classList.contains("hidden")) {
+        if (!elements.users.classList.contains("hidden")) elements.users.classList.add("hidden");
+        if (!elements.viewport.classList.contains("hidden")) elements.viewport.classList.add("hidden");
+    } else {
+        if (!maximizeUsers) {
+            if (elements.users.classList.contains("hidden")) elements.users.classList.add("hidden");
+            if (elements.viewport.classList.contains("hidden")) elements.viewport.classList.add("hidden");
+            if (settings.show_ui) {
+                elements.users.style.width = "20%";
+                elements.viewport.style.width = "80%";
+                if (window.innerWidth >= 600) {
+                    if (elements.users.classList.contains("hidden")) elements.users.classList.remove("hidden");
+                };
+            };
+        } else {
+            // elements.viewport.classList.add("hidden");
+            // elements.users.classList.remove("hidden");
+            // elements.users.style.width = "100%";
+            if (settings.show_ui) {
+                if (!elements.viewport.classList.contains("hidden")) elements.viewport.classList.add("hidden");
+                if (elements.users.classList.contains("hidden")) elements.users.classList.remove("hidden");
+                elements.users.style.width = "100%";
+            };
+        };
+    };
+    // Whether we can maximize the user list
+    if (settings.show_ui) {
+        if (window.innerWidth < 600 || !settings.show_users) {
+            if (elements.toggleUsers.classList.contains("hidden")) elements.toggleUsers.classList.remove("hidden");
+            if (!elements.users.classList.contains("hidden") && !maximizeUsers) elements.users.classList.add("hidden");
+            // if (!elements.users.classList.contains("hidden")) elements.users.classList.add("hidden");
+            elements.viewport.style.width = "100%";
+        } else {
+            if (!elements.toggleUsers.classList.contains("hidden")) elements.toggleUsers.classList.add("hidden");
+            if (maximizeUsers) {
+                maximizeUsers = false;
+                if (elements.viewport.classList.contains("hidden")) elements.viewport.classList.remove("hidden");
+                elements.viewport.style.width = "80%";
+                elements.users.style.width = "20%";
+            };
+        };
+    };
     requestAnimationFrame(eUpdate);
 };
 
@@ -1246,13 +1373,18 @@ const eHandlePreview = (url, mime) => {
     };
 };
 
+document.onclick = (e) => {
+    if (e.target !== elements.userContext && !elements.userContext.classList.contains("hidden")) {
+        elements.userContext.classList.add("hidden");
+    };
+};
+
 elements.backToAuth.onclick = () => {
     sessionID = "-";
     elements.backToAuth.classList.add("hidden");
     elements.users.classList.add("hidden");
     elements.viewport.classList.add("hidden");
     elements.auth.classList.remove("hidden");
-    elements.viewport.style.width = "80%";
     ws.send(payloadUnauth());
 };
 
@@ -1406,6 +1538,27 @@ Object.keys(emotes).forEach((emoteCategory) => {
         createNewEmote(elements[emoteCategory], emote);
     });
 });
+elements.userContextKick.onclick = (e) => {
+    ws.send(JSON.stringify({
+        type: "text",
+        content: `/kick ${userContextInfo.iID}`
+    }));
+    createToast(`Kicked the account!`);
+    elements.userContext.classList.add("hidden");
+};
+elements.userContextCopyIID.onclick = (e) => {
+    navigator.clipboard.writeText(userContextInfo.iID);
+    createToast(`Copied the Instance ID!`);
+    elements.userContext.classList.add("hidden");
+};
+elements.userContextCopyAID.onclick = (e) => {
+    navigator.clipboard.writeText(userContextInfo.aID);
+    createToast(`Copied the Account ID!`);
+    elements.userContext.classList.add("hidden");
+};
+elements.userContextCancel.onclick = (e) => {
+    elements.userContext.classList.add("hidden");
+};
 
 // Book
 elements.helper.onclick = (e) => {
@@ -1556,6 +1709,19 @@ elements.closeProfile.onclick = (e) => {
     elements.profile.classList.add("hidden");
 };
 
+elements.toggleUsers.onclick = (e) => {
+    maximizeUsers = !maximizeUsers;
+    if (maximizeUsers) {
+        elements.viewport.classList.add("hidden");
+        elements.users.classList.remove("hidden");
+        elements.users.style.width = "100%";
+    } else {
+        elements.viewport.classList.remove("hidden");
+        elements.users.classList.add("hidden");
+        elements.users.style.width = "20%";
+    };
+};
+
 // Options
 elements.toggleOptions.onclick = (e) => {
     elements.screen.classList.remove("hidden");
@@ -1569,16 +1735,20 @@ elements.optionsViewUser.onclick = (e) => {
     if (elements.auth.classList.contains("hidden")) {
         settings.show_users = !settings.show_users;
         localStorage.setItem("settings", JSON.stringify(settings));
-        if (settings.show_users) {
-            elements.optionsViewUser.className = "bi bi-toggle-on";
-            elements.users.classList.remove("hidden");
-            elements.viewport.style.width = "80%";
-        } else {
-            elements.optionsViewUser.className = "bi bi-toggle-off";
-            elements.users.classList.add("hidden");
-            elements.viewport.style.width = "100%";
+        if (!maximizeUsers) {
+            if (settings.show_users) {
+                elements.optionsViewUser.className = "bi bi-toggle-on";
+                elements.users.classList.remove("hidden");
+                if (settings.show_ui) elements.viewport.style.width = "100%";
+                else elements.viewport.style.width = "60%";
+            } else {
+                elements.optionsViewUser.className = "bi bi-toggle-off";
+                elements.users.classList.add("hidden");
+                if (settings.show_ui) elements.viewport.style.width = "100%";
+                else elements.viewport.style.width = "80%";
+            };
         };
-    }
+    };
 };
 elements.optionsViewUI.onclick = (e) => {
     settings.show_ui = !settings.show_ui;
@@ -1586,9 +1756,13 @@ elements.optionsViewUI.onclick = (e) => {
     if (settings.show_ui) {
         elements.optionsViewUI.className = "bi bi-toggle-on";
         elements.sheet.href = "overhaul.css";
+        if (settings.show_users) elements.viewport.style.width = "80%";
+        else elements.viewport.style.width = "100%";
     } else {
         elements.optionsViewUI.className = "bi bi-toggle-off";
         elements.sheet.href = "style.css";
+        if (settings.show_users) elements.viewport.style.width = "60%";
+        else elements.viewport.style.width = "80%";
     };
 };
 elements.optionsTAbyss.onclick = (e) => {

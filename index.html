@@ -12,8 +12,9 @@
 
 <body class="theme-seasonal-dark">
     <header>
-        <h1>Arrasify [v1.3.2]</h1>
+        <h1>Arrasify [v1.3.3]</h1>
         <div class="header-tools">
+            <i class="bi bi-person header-icons" id="toggleUsers"></i>
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
             <i class="bi bi-bell header-icons" id="togglePings"></i>
@@ -116,6 +117,12 @@
             </p>
         </div>
     </main>
+    <div id="userContext" class="hidden">
+        <p class="context-option hidden" id="userContextKick">Kick Account</p>
+        <p class="context-option" id="userContextCopyIID">Copy Instance ID</p>
+        <p class="context-option" id="userContextCopyAID">Copy Account ID</p>
+        <p class="context-option" id="userContextCancel">Cancel</p>
+    </div>
     <div id="scrollButton" class="invisible">
         <i class="bi bi-arrow-down"></i>
     </div>
@@ -438,6 +445,36 @@
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
                     <p>Note: all changelogs are made in the AWST timezone.</p>
+                    <h2>8th November 2026 - Minor Update - v1.3.3</h2>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added packet rate limiting.</li>
+                        <li>Reduced average client packet window from ~30ms to ~170ms.</li>
+                        <ul>
+                            <li>This may make things such as cooldowns slightly longer client-side.</li>
+                        </ul>
+                        <li>Added a new <code>/packet</code> command, available to users+.</li>
+                        <li>Added a new context menu when you right-click people's names, to make commands easier.</li>
+                        <li>Made some visual changes to the new UI. It should be usable on vertical devices.</li>
+                        <ul>
+                            <li>
+                                The UI rework will now be on by default. The UI will be leaving the testing phase soon
+                                and become permanent.
+                            </li>
+                            <li>On smaller devices the user list will automatically be hidden.</li>
+                            <ul>
+                                <li>You'll get an option to maximize it on the navigation bar.</li>
+                            </ul>
+                        </ul>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>None.</li>
+                    </ul>
+                    <p>
+                        Whilst there are now new packet limitations in place the site may still be down later today
+                        whilst it recovers the limit, but the following days, assuming it works, it should be fine.
+                    </p>
                     <h2>7th November 2026 - Minor Update - v1.3.2</h2>
                     <h3>New features</h3>
                     <ul>
@@ -849,6 +886,8 @@
                     <h5>With [param1] - account name</h5>
                     <hr>
                     <h3>User+ Commands</h3>
+                    <h4>/packet</h4>
+                    <p>Returns the average rate your client is sending packets.</p>
                     <h4>/ignoreguests</h4>
                     <p>Toggle ignoring guest messages on the client-side.</p>
                     <h4>/title</h4>
