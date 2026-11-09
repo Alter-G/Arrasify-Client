@@ -32,8 +32,6 @@ let settings = {
 if (localStorage.getItem("settings")) settings = { ...JSON.parse(localStorage.getItem("settings")) };
 else localStorage.setItem("settings", JSON.stringify(settings));
 
-settings.show_ui = true;
-
 let userContextInfo = {
     iID: "-",
     aID: "-"
@@ -84,8 +82,13 @@ let readyFile = undefined;
 const pingAudio = new Audio("./sfx/ping.mp3");
 let canPlayAudio = false;
 pingAudio.oncanplay = () => { canPlayAudio = true; };
+const importantAudio = new Audio("./sfx/important.mp3");
 const dmAudio = new Audio("./sfx/dm.mp3");
 const mixAudio = new Audio();
+
+// Misc
+let contextHoldStart = 0;
+const contextHoldTimeframe = 1000; // 1 second
 
 const emojis = { // Emoji - ClassList
     "smile": "chat-emoji bi bi-emoji-smile-fill",
@@ -111,6 +114,7 @@ const emotes = { // Emote - SRC
         "basic": "./emotes/basic.png",
         "booster": "./emotes/booster.png",
         "ranger": "./emotes/ranger.png",
+        "youtuber": "./emotes/youtuber.png",
         "valrayvn": "./emotes/valrayvn.jpg"
     },
     eVerify: {
@@ -136,6 +140,7 @@ const emotes = { // Emote - SRC
         "yestrust": "./emotes/yestrust.png",
         "probablytrust": "./emotes/probablytrust.png",
         "supertrust": "./emotes/supertrust.png",
+        "absolutelytrust": "./emotes/absolutelytrust",
         "eviljinn": "./emotes/eviljinn.png",
         "deadchat": "./emotes/deadchat.png"
     },
@@ -143,6 +148,8 @@ const emotes = { // Emote - SRC
         // Deltarune
         "mlg": "./emotes/mlg.png",
         "ralsei": "./emotes/ralsei.png",
+        "pansei": "./emotes/pansei.jpg",
+        "spamton": "./emotes/spamton.gif",
         "determination": "./emotes/determination.png",
         "jaorange": "./emotes/jaorange.png",
         "justice": "./emotes/justice.png",
@@ -190,9 +197,12 @@ const emotes = { // Emote - SRC
         "deadchatskeleton": "./emotes/deadchatskeleton.gif",
         "wirewalls": "./emotes/wirewalls.gif",
         "clark": "./emotes/clark.gif",
-        "waaaaat": "./emotes/waaaaat.png"
+        "waaaaat": "./emotes/waaaaat.png",
+        "concrete_proof": "./emotes/concrete_proof.png",
+        "thinking": "./emotes/thinking.gif"
     },
     eCommunity: {
+        "aperson": "./emotes/aperson.jpeg",
         "dkg": "./emotes/dkg.png",
         "peiple": "./emotes/peiple.jfif",
         "boykisser": "./emotes/boykisser.png",
@@ -200,6 +210,11 @@ const emotes = { // Emote - SRC
         "chained": "./emotes/chained.jpeg",
         "testing": "./emotes/testing.jpeg",
         "stipid": "./emotes/stipid.jpeg",
+        "weather": "./emotes/weather.png",
+        "crazy": "./emotes/crazy.gif",
+        "shegendarysquare": "./emotes/shegendarysquare.gif",
+        "spin": "./emotes/spin.gif",
+        "optical": "./emotes/optical.gif"
     }
 };
 
@@ -516,28 +531,7 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
         verifiedSymbol.className = "bi bi-check-circle user-verified";
         userInfo.appendChild(verifiedSymbol);
     };
-    userInfo.onclick = (e) => {
-        if (aID == "-" || aID == "!") {
-            createToast("You can't view this profile.");
-        } else { // Invalid profiles do not have pfps
-            elements.profile.classList.remove("hidden");
-            elements.screen.classList.remove("hidden");
-            elements.profileName.innerText = user;
-            elements.profilePfp.src = pfp;
-            elements.profileBio.innerHTML = "";
-            if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
-            else {
-                let lines = bio.split(/\r?\n|\\n/);
-                lines.forEach((line) => {
-                    const p = document.createElement("p");
-                    p.innerText = line;
-                    elements.profileBio.appendChild(p);
-                    // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
-                });
-            };
-        };
-    };
-    userInfo.oncontextmenu = (e) => {
+    const openContext = (e) => {
         e.preventDefault();
         e.stopPropagation();
         elements.userContext.classList.remove("hidden");
@@ -549,6 +543,38 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
             iID,
             aID
         };
+    }
+    userInfo.ontouchstart = (e) => {
+        contextHoldStart = Date.now();
+    };
+    userInfo.onclick = (e) => {
+        if (Date.now() - contextHoldStart > contextHoldTimeframe && contextHoldStart !== 0) openContext(e);
+        else {
+            if (aID == "-" || aID == "!") {
+                createToast("You can't view this profile.");
+            } else { // Invalid profiles do not have pfps
+                elements.profile.classList.remove("hidden");
+                elements.screen.classList.remove("hidden");
+                elements.profileName.innerText = user;
+                elements.profilePfp.src = pfp;
+                elements.profileBio.innerHTML = "";
+                if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
+                else {
+                    let lines = bio.split(/\r?\n|\\n/);
+                    lines.forEach((line) => {
+                        const p = document.createElement("p");
+                        const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
+                        p.innerText = `${line.replace(badRegex, (m) => "*".repeat(m.length)).split(":")}`;
+                        elements.profileBio.appendChild(p);
+                        // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                    });
+                };
+            };
+        };
+        contextHoldStart = 0;
+    };
+    userInfo.oncontextmenu = (e) => {
+        openContext(e);
     };
     userInfo.oncontextlost = (e) => {
         elements.userContext.classList.add("hidden");
@@ -577,7 +603,7 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
     return chatUser;
 };
 
-const messageCreateTextElement = (message, color) => {
+const messageCreateTextElement = (message, color, auth) => {
     // Text
     const chatMessage = document.createElement("div");
     chatMessage.className = `chat-message message-${color}`;
@@ -659,13 +685,14 @@ const messageCreateTextElement = (message, color) => {
             ...collectedUsers.overseers,
             ...collectedUsers.admins,
             ...collectedUsers.developers
-        ].map(user => user.name);
+        ].map(user => user.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        if (auth > 4) pingable.push("everyone");
         let regEx = new RegExp(`(@${pingable.join("|@")})`, "g");
         for (let i = 0; i < s.children.length; i++) {
             if (s.children[i].tagName === "P") {
                 if (s.children[i].innerHTML.includes(`@${info.name}`)) {
                     if (canPlayAudio && settings.allow_pings) { pingAudio.play(); };
-                };
+                } else if (auth > 4 && s.children[i].innerHTML.includes(`@everyone`) && canPlayAudio && settings.allow_pings) { importantAudio.play(); };
                 s.children[i].innerHTML = s.children[i].innerHTML.replace(regEx, `<span class="message-ping">\$1</span>`);
             };
         };
@@ -740,11 +767,11 @@ const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, 
         const replyText = document.createElement("p");
         replyText.className = "reply-text";
         const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
-        if (reply != "-") replyText.innerText = reply.replace(badRegex, (m) => "*".repeat(m.length).split(":"));
+        if (reply != "-") replyText.innerText = reply.replace(badRegex, (m) => "*".repeat(m.length));
 
         const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply);
         // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
-        const chatMessage = messageCreateTextElement(message, color);
+        const chatMessage = messageCreateTextElement(message, color, auth);
 
         if (reply != "-") messageElement.appendChild(replyText);
         messageElement.appendChild(chatUser);
@@ -804,7 +831,7 @@ const createMessageSimple = (message, timestamp, color) => {
     let dateTime = new Date(timestamp);
     const messageWithTime = `${dateTime.getHours() < 10 ? "0" : ""}${(dateTime.getHours() == 12 || dateTime.getHours() == 0) ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}${message}`;
 
-    const chatMessage = messageCreateTextElement(messageWithTime, color);
+    const chatMessage = messageCreateTextElement(messageWithTime, color, 0);
     messageElement.appendChild(chatMessage);
 
     elements.chatHistory.appendChild(messageElement);
@@ -838,35 +865,7 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
     const userName = document.createElement("p");
     userName.className = `user-name message-${neo}`;
     userName.innerText = name;
-    userName.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        switch (e.button) {
-            case 0: {
-                if (aID == "-" || aID == "!") {
-                    createToast("You can't view this profile.");
-                } else { // Invalid profiles do not have pfps
-                    elements.profile.classList.remove("hidden");
-                    elements.screen.classList.remove("hidden");
-                    elements.profileName.innerText = name;
-                    elements.profilePfp.src = pfp;
-                    elements.profileBio.innerHTML = "";
-                    if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
-                    else {
-                        let lines = bio.split(/\r?\n|\\n/);
-                        lines.forEach((line) => {
-                            const p = document.createElement("p");
-                            p.innerText = line;
-                            elements.profileBio.appendChild(p);
-                            // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
-                        });
-                    };
-                };
-                break;
-            };
-        };
-    };
-    userName.oncontextmenu = (e) => {
+    const openContext = (e) => {
         e.preventDefault();
         e.stopPropagation();
         elements.userContext.classList.remove("hidden");
@@ -878,6 +877,40 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
             iID: id,
             aID
         };
+    };
+    userName.onclick = (e) => {
+        if (Date.now() - contextHoldStart > contextHoldTimeframe && contextHoldStart !== 0) openContext(e);
+        else {
+            e.preventDefault();
+            e.stopPropagation();
+            switch (e.button) {
+                case 0: {
+                    if (aID == "-" || aID == "!") {
+                        createToast("You can't view this profile.");
+                    } else { // Invalid profiles do not have pfps
+                        elements.profile.classList.remove("hidden");
+                        elements.screen.classList.remove("hidden");
+                        elements.profileName.innerText = name;
+                        elements.profilePfp.src = pfp;
+                        elements.profileBio.innerHTML = "";
+                        if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
+                        else {
+                            let lines = bio.split(/\r?\n|\\n/);
+                            lines.forEach((line) => {
+                                const p = document.createElement("p");
+                                p.innerText = line;
+                                elements.profileBio.appendChild(p);
+                                // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+                            });
+                        };
+                    };
+                    break;
+                };
+            };
+        };
+    };
+    userName.oncontextmenu = (e) => {
+        openContext(e);
     };
     userName.oncontextlost = (e) => {
         elements.userContext.classList.add("hidden");
@@ -1256,7 +1289,7 @@ const eInitiateReply = (user, message, id, dm) => {
     let sample = message.slice(0, sampleSize);
     if (sample.length == sampleSize) sample += "-...";
     const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
-    elements.replyContent.innerText = `${sample.replace(badRegex, (m) => "*".repeat(m.length)).split(":")}`;
+    elements.replyContent.innerText = `${sample.replace(badRegex, (m) => "*".repeat(m.length))}`;
     messageReplyID = id;
     messageReplyDM = dm;
     if (autoScroll) setTimeout(scrollChatHistory, 30);
@@ -1303,7 +1336,7 @@ const eUpdate = () => {
             if (settings.show_ui) {
                 elements.users.style.width = "20%";
                 elements.viewport.style.width = "80%";
-                if (window.innerWidth >= 600) {
+                if (window.innerWidth >= window.innerHeight) {
                     if (elements.users.classList.contains("hidden")) elements.users.classList.remove("hidden");
                 };
             };
@@ -1320,7 +1353,7 @@ const eUpdate = () => {
     };
     // Whether we can maximize the user list
     if (settings.show_ui) {
-        if (window.innerWidth < 600 || !settings.show_users) {
+        if (window.innerWidth < window.innerHeight || !settings.show_users) {
             if (elements.toggleUsers.classList.contains("hidden")) elements.toggleUsers.classList.remove("hidden");
             if (!elements.users.classList.contains("hidden") && !maximizeUsers) elements.users.classList.add("hidden");
             // if (!elements.users.classList.contains("hidden")) elements.users.classList.add("hidden");
@@ -1334,7 +1367,9 @@ const eUpdate = () => {
                 elements.users.style.width = "20%";
             };
         };
-    };
+    } else {
+        if (!elements.toggleUsers.classList.contains("hidden")) elements.toggleUsers.classList.add("hidden");
+    }
     requestAnimationFrame(eUpdate);
 };
 
@@ -1918,5 +1953,3 @@ ws.onmessage = (e, isBinary) => wsMessage(e, isBinary);
 ws.onclose = (e) => wsClose(e);
 
 eUpdate();
-
-createToast(`30th October 2026 AWST: We have updated our license for more clarity.`);

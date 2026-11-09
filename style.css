@@ -645,6 +645,30 @@ a:visited:hover {
     color: var(--text-color);
 }
 
+#userContext {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: clamp(200px, calc(15vw + 15vh), 300px);
+    background-color: var(--primary-color);
+    border: 2px solid var(--accent-color);
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.context-option {
+    background-color: var(--accent-color);
+    color: var(--white-color);
+    padding: 10px;
+    border-bottom: 2px solid var(--primary-color);
+    margin: 0;
+    cursor: pointer;
+}
+
+.context-option:hover {
+    background-color: var(--text-color);
+}
+
 #scrollButton {
     position-anchor: --scroll-anchor;
     position: absolute;

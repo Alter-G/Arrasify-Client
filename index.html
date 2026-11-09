@@ -12,7 +12,7 @@
 
 <body class="theme-seasonal-dark">
     <header>
-        <h1>Arrasify [v1.3.3]</h1>
+        <h1>Arrasify [v1.3.4]</h1>
         <div class="header-tools">
             <i class="bi bi-person header-icons" id="toggleUsers"></i>
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
@@ -445,6 +445,45 @@
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
                     <p>Note: all changelogs are made in the AWST timezone.</p>
+                    <h2>9th November 2026 - Minor Update - v1.3.4</h2>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added <code>@everyone</code> pings, available to admins+.</li>
+                        <ul>
+                            <li>These will play a different sound than a normal mention.</li>
+                        </ul>
+                        <li>Added word filtering to bios.</li>
+                        <li>
+                            The user list in the new UI is now only hidden if the window width is less than the window
+                            height.
+                        </li>
+                        <li>Added 13 new emotes.</li>
+                        <li>Changed <code>/kick</code> to be available to overseers+.</li>
+                        <li>Removed the license update notice for 30th September, as it has now been a while.</li>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>Fixed some users not being pingable.</li>
+                        <li>Fixed replies with emotes showing <code>,</code> instead of <code>:</code>.</li>
+                        <li>Fixed the new UI chat bar interface oftenly overlapping the chat history on mobile devices.
+                        </li>
+                        <li>Fixed the context menu not being usable on the old UI.</li>
+                        <li>Fixed the context menu not being accessible on mobile devices.</li>
+                        <li>Fixed the options not saving your choice on disabling the old UI.</li>
+                        <li>
+                            Fixed the fullscreen users list button appearing in the header even if you are not using the
+                            new UI.
+                        </li>
+                        <li>
+                            Removed the typo involving <code>[param4]</code> for <code>/mute</code> from the book's
+                            commands section.
+                        </li>
+                    </ul>
+                    <p>
+                        It seems like the rate limiting issues I patched last update are resolved. If the servers are
+                        down for a long period of time after this point, you can contact me about it and I'll see what I
+                        can do.
+                    </p>
                     <h2>8th November 2026 - Minor Update - v1.3.3</h2>
                     <h3>New features</h3>
                     <ul>
@@ -915,7 +954,7 @@
                     <h4>/broadcast [param1]</h4>
                     <p>Broadcasts a message without a user attached to it.</p>
                     <h5>With [param1] - message</h5>
-                    <h4>/mute [param1] [param2] [param3] [param4]</h4>
+                    <h4>/mute [param1] [param2] [param3]</h4>
                     <p>Mute a specific user, for text or uploads, for a specified duration. Use 0s to unmute.</p>
                     <h5>With [param1] - "text" and [param2] - account ID and [param3] - duration + unit</h5>
                     <h5>With [param1] - "upload" and [param2] - account ID and [param3] - duration + unit</h5>
@@ -943,6 +982,9 @@
                     <h4>/slowmode [param1]</h4>
                     <p>Change the global slowmode.</p>
                     <h5>With [param1] - seconds</h5>
+                    <h4>/kick [param1]</h4>
+                    <p>Kick a specific account.</p>
+                    <h5>With [param1] - instance ID.</h5>
                     <hr>
                     <h3>Admin+ Commands</h3>
                     <h4>/findghosts</h4>
@@ -956,9 +998,6 @@
                     <h4>/server [param1] [param2]</h4>
                     <p>Allows the editing of certain server settings.</p>
                     <h5>With [param1] - "sudo" and [param2] - message</h5>
-                    <h4>/kick [param1]</h4>
-                    <p>Kick a specific account.</p>
-                    <h5>With [param1] - account name</h5>
                     <h4>/killall</h4>
                     <p>Kill every account connection at once.</p>
                     <h4>/restart</h4>
