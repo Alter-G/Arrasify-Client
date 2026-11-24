@@ -12,9 +12,10 @@
 
 <body class="theme-seasonal-dark">
     <header>
-        <h1>Arrasify [v1.3.4]</h1>
+        <h1>Arrasify [v1.4.0]</h1>
         <div class="header-tools">
             <i class="bi bi-person header-icons" id="toggleUsers"></i>
+            <i class="bi bi-database-fill-gear header-icons hidden" id="toggleData"></i>
             <i class="bi bi-gear header-icons" id="toggleOptions"></i>
             <i class="bi bi-moon-stars-fill header-icons" id="toggleDark"></i>
             <i class="bi bi-bell header-icons" id="togglePings"></i>
@@ -148,7 +149,7 @@
         <hr>
         <h2>Emotes</h2>
         <h3>Diep.io & Arras.io</h3>
-        <p>Credit to 3AM Experiences, Neph, Damocles & XX</p>
+        <p>Credit to M28, 3AM Experiences, Neph, Damocles & XX</p>
         <p>Some drawn by MLG</p>
         <div class="emotes" id="eDiep">
         </div>
@@ -173,6 +174,10 @@
         <h3>TTF</h3>
         <p>Credit to Dragon King Gaming (DKG)</p>
         <div class="emotes" id="eTTF">
+        </div>
+        <h3>Chess</h3>
+        <p>Credit to chess.com</p>
+        <div class="emotes" id="eChess">
         </div>
         <h3>General</h3>
         <p>Some drawn by MLG</p>
@@ -309,7 +314,8 @@
         <div class="book-main">
             <div class="book-side">
                 <h1>Getting Started</h1>
-                <p id="bookRules" class="book-side-option-h"><i class="bi bi-shield-fill-exclamation"></i> Rules</p>
+                <p id="bookAbout" class="book-side-option-h"><i class="bi bi-info-circle"></i> About</p>
+                <p id="bookRules" class="book-side-option"><i class="bi bi-shield-exclamation"></i> Rules</p>
                 <p id="bookChangelog" class="book-side-option"><i class="bi bi-archive"></i> Changelog</p>
                 <p id="bookAdmins" class="book-side-option"><i class="bi bi-key"></i> Admins</p>
                 <p id="bookSupport" class="book-side-option"><i class="bi bi-info-circle"></i> Support</p>
@@ -320,7 +326,133 @@
                 <p id="bookCredits" class="book-side-option"><i class="bi bi-award"></i> Credits</p>
             </div>
             <div class="book-content">
-                <div id="bookRulesContent">
+                <div id="bookAboutContent">
+                    <h1>Getting Started - About</h1>
+                    <h2>What is Arrasify?</h2>
+                    <p>
+                        Arrasify is a small chat application on the web, designed to have accounts without necessarily
+                        needing anything complicated to get one, like an email or phone number. Originally designed for
+                        the web game <a href="https://arras.io">arras.io</a>, and more specifically the <a
+                            href="https://arras.io/#wpd">#wpd sandbox server</a>, it has evolved into a vast
+                        communication platform for people of any kind, offering easy ways to connect with others, and to
+                        socialize.
+                    </p>
+                    <p>
+                        This project is 100% funded and supported by me and is not monetized or accepting donations. If
+                        you would like to help it, you could share it to other people (even people that don't know
+                        arras.io)!
+                    </p>
+                    <h2>Origins</h2>
+                    <h3>Birth of #wpd</h3>
+                    <p>
+                        The origins of Arrasify come from around the end of 2023 to the beginning of 2024. In the <a
+                            href="https://arras.io/#wpd">#wpd sandbox server</a>, at the time, there was two positions
+                        in the server-player, and operator (OP). Whilst players had normal permissions like in official
+                        gamemodes of <a href="https://arras.io">arras.io</a>, operators had the ability to build their
+                        own minigames, art, and concepts within the arena. This sparked an influx of people wanting to
+                        attain such status, but it didn't come without consequence. Because there was only one positon
+                        at this time, anyone with the operator permissions could easily promote and demote whoever they
+                        wanted. So, the most popular of users at the time decided to create a 'trust' system-a way of
+                        quantifying if someone is good enough to become an operator to moderate the server and build
+                        stuff at the same time.
+                    </p>
+                    <p>
+                        This decision made a wall between players who only wanted to unleash creativity and people who
+                        needed to keep the server in order, as there were users who oftenly obtained operator by
+                        accident and began destroying other people's creations ('griefing'). And eventually it got bad
+                        enough to the point where abusers started to impersonate trusted operators in order to tarnish
+                        their reputation and to obtain operator for themselves and themselves alone.
+                    </p>
+                    <h3>Featured YouTubers and Impersonation</h3>
+                    <p>
+                        At the time, there was also secretly a third role; 'featured youtuber'. Specific users chosen by
+                        the developers are gifted access to unreleased tanks, new commands, and more moderation
+                        capabilities in sandbox. These users cannot be demoted by people who possess operator, and as
+                        such were oftenly contacted to help when abusers invaded the server. One of the most popular
+                        <a href="https://arras.io">arras.io</a> youtubers at the time, also being featured, <a
+                            href="https://www.youtube.com/@MASSIVEBIRD">BIRD (Mushroom)</a>, was a prime example of
+                        these featured youtubers. They kickstarted the <a href="https://arras.io/#wpd">#wpd</a>
+                        community back in May of 2023. They are the reason that <a href="https://arras.io/#wpd">#wpd</a>
+                        exists now.
+                    </p>
+                    <p>
+                        Whilst they helped out where able, they could not always be available, which is understandable.
+                        And as such, people began searching for ways to stop impersonators. One of which was to have a
+                        name using a unique font or set of characters that is difficult to replicate. Many people
+                        resorted to online font generators, and for a while those worked. But the abusers ended up
+                        finding the most common ones and started impersonating again. So people went to more obscure
+                        sites, which the abusers did not find. However, there was a script released to the public by an
+                        anonymous user that let people copy the names of others without needing to find the exact font
+                        generator they used. People were close to having no way of stopping impersonators outside of <a
+                            href="https://discord.com">Discord</a>, which wasn't viable to use as most of the playerbase
+                        at the time could not obtain an account. So, that's where Arrasify came in-or, rather, <a
+                            href="https://arras-verify.glitch.me">Arras Verify</a> at the time.
+                    </p>
+                    <h3>Arras Verify is Born</h3>
+                    <p>
+                        Originally thought by <a href="https://mlg-inc.vercel.app">MLG</a>, and developed by <a
+                            href="https://mlg-inc.vercel.app">MLG</a>, Flowey, and Testing, the site kickstarted on <a
+                            href="https://glitch.com">Glitch</a>, a site that lets people host their own web pages for
+                        free (there was also a paid tier to boost uptime of the server you hosted). The site did not
+                        originally have a chat-just an input box for a token (called 'codes' back then), and a user list
+                        of online people. You'd put your own code into the box, and you'd log into your account and join
+                        the online users list. This was used as a way to verify if people are actually on the <a
+                            href="https://arras.io/#wpd">#wpd</a> server, and if they aren't, then whoever is using
+                        their name in the server is an impersonator.
+                    </p>
+                    <p>
+                        This, for a while, worked great. Impersonators got caught more easily, and the site eventually
+                        developed a chat so you could communicate outside of the game. And then, one of the biggest
+                        abusers and msot infamous at the time, 'TaskMaster', formerly known on youtube as 'wk18', got
+                        permanently banned from the game by the developers, meaning they could no longer terrorize or
+                        impersonate anyone any longer. And then shortly after, the developers released a sandbox update,
+                        adding two new positions to the player hierarchy-'arena conductor' (AC), and 'arena supervisor'
+                        (AS). These roles come before operator, which is now renamed to 'arena operator' (AO).
+                    </p>
+                    <p>
+                        With this new update, abusers were at a new low, and many started to quit because it was harder
+                        to grief builds and take control of the server. Leading into 2025, <a
+                            href="https://arras.io/#wpd">#wpd</a> was lead to a state of peace. <a
+                            href="https://www.youtube.com/@MASSIVEBIRD">Bird</a> eventually quit silently, but the
+                        server was still-and is still-popular. And then 2025 came, and <a
+                            href="https://glitch.com">Glitch</a> declared they would stop web hosting on July 8th.
+                    </p>
+                    <h3>Glitch Shutdown, the Replacement, and the Hijack</h3>
+                    <p>
+                        We were unfortunately not able to create a solution by then, and so Arras Verify became dead for
+                        about 6 months (I do not recall the exact time frame). A user called MatriCYS created a <a
+                            href="https://www.chatzy.com/">Chatzy</a> room alternative to keep communicating, but it did
+                        require an email to use. During these 6 months, Testing found a way to port <a
+                            href="https://arras-verify.glitch.me">Arras Verify</a> to <a
+                            href="https://vercel.com">Vercel</a>, a serverless website hosting service. Paired with <a
+                            href="https://www.partykit.io/">PartyKit</a>, a service used to host servers, and <a
+                            href="https://vercel-tinkering.vercel.app">Arras Verify</a> has returned.
+                    </p>
+                    <p>
+                        During February 2026 to 8th of September 2026, nothing unusual happened in the way of <a
+                            href="https://vercel-tinkering.vercel.app">Arras Verify</a>. However, <a
+                            href="https://arras.io">Arras.io</a> received a DMCA complaint from <a
+                            href="https://diep.io">diep.io</a>'s developer, Mistik, causing one of <a
+                            href="https://arras.io">Arras.io</a>'s developers to quit, and the other being radio silent
+                        for a year. But somehow <a href="https://arras.io/#wpd">#wpd</a> still lived on and kept
+                        growing, even with the abscense of featured youtubers not being as active anymore and the
+                        countless botters using scripts to crash the servers. But, on September 9th 2026, a
+                        vulnerability was found in <a href="https://vercel-tinkering.vercel.app">Arras Verify</a>.
+                    </p>
+                    <p>
+                        The vulnerability leaked everyone's codes, making the authentication process completely
+                        pointless. Impersonators started to steal accounts and even managed to get manager permissions,
+                        which allowed them to delete those accounts too. The database got ravaged by griefers and
+                        abusers. After an hour, Testing arrived to fix it, and most accounts were recovered over a ~3
+                        day period. But in the background MLG had been working on a new <a
+                            href="https://vercel-tinkering.vercel.app">Arras Verify</a> clone for two weeks prior.
+                        Deciding on the spot, he released it-<a href="https://arrasify.vercel.app">Arrasify</a>.
+                    </p>
+                    <p>And that is where we are today.</p>
+                    <p><a href="https://mlg-inc.vercel.app/verify">(If you would like more information regarding the
+                            hijack, click here.)</a></p>
+                </div>
+                <div id="bookRulesContent" class="hidden">
                     <h1>Getting Started - Rules</h1>
                     <h2>What Isn't Allowed</h2>
                     <h3>Spamming</h3>
@@ -445,6 +577,83 @@
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
                     <p>Note: all changelogs are made in the AWST timezone.</p>
+                    <h2>23rd November 2026 - Major Update - v1.4.0</h2>
+                    <p>
+                        This wasn't ready for release but Vercel stopped working, so I was kind of forced to
+                        resolve it.
+                    </p>
+                    <ul>
+                        <li>I think I've fixed the most critical bugs but let me know if you encounter more.</li>
+                    </ul>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added a new database UI to make editing accounts easier.</li>
+                        <li>Added roles.</li>
+                        <ul>
+                            <li>Specific roles can give you specific permissions.</li>
+                            <li>Some roles can save different, custom "variables".</li>
+                        </ul>
+                        <li>Added basic markdown formatting.</li>
+                        <li>Added user badges to the user list.</li>
+                        <li>Added <code>@developers</code> ping, available to admins+.</li>
+                        <li>Added <code>@admins</code> ping, available to overseers+.</li>
+                        <li>Added <code>@overseers</code> ping, available to underseers+.</li>
+                        <li>Added <code>@underseers</code> ping, available to helpers+.</li>
+                        <li>Added <code>@helpers</code> ping, available to users+.</li>
+                        <li>Added 26 new emotes.</li>
+                        <li>Added a new <code>/refresh</code> command, available to admins+.</li>
+                        <li>Added a new <code>/abc</code> command, available to overseers+.</li>
+                        <li>Added a new <code>/data status</code> sub-command, available to underseers+.</li>
+                        <li>Added a new <code>/roll</code> command, available to users+.</li>
+                        <li>Added two new toggles to filter out specific words.</li>
+                        <ul>
+                            <li>The categorization of these words is subject to change.</li>
+                        </ul>
+                        <li>Added a new <code>about</code> section to the book.</li>
+                        <li>Added new selectors to the <code>commands</code> section of the book.</li>
+                        <li>Added a new <code>aliases</code> section to individual commands in the book.</li>
+                        <li>Changed the <code>/restart</code> command to give a proper reason and exit code.</li>
+                        <li>Changed the <code>/bc</code> command to show the name of who is using it.</li>
+                        <li>There's an anomaly in the settings.</li>
+                        <ul>
+                            <li>Just leave it alone and we'll be fine.</li>
+                        </ul>
+                        <li>Changed the new UI to have slightly more margin across main windows.</li>
+                        <li>Changed the new UI's image enlarger to be larger.</li>
+                        <li>Changed the way that emojis and emotes are created on the client-side.</li>
+                        <li>Changed the rate limit timeout from 1 hour to 30 minutes.</li>
+                        <li>Changed the maximum file size limit from 25MB to 10MB.</li>
+                        <ul>
+                            <li>Once I fix the uploads crashing the server I'll increase it.</li>
+                        </ul>
+                        <li>Changed the <code>rules</code> tab icon.</li>
+                        <li>
+                            Changed the <code>/pfp</code> command to now document a more thorough reason on why it won't
+                            work.
+                        </li>
+                        <li>Changed <code>/data edit creator</code> to be developer-exclusive.</li>
+                        <li>Using <code>/neo</code> now updates the user list.</li>
+                        <li>
+                            Emotes are now served from the server rather than the client. Aside potentially longer load
+                            times, this shouldn't affect much.
+                        </li>
+                        <ul>
+                            <li>If you find sprites that don't render let me know.</li>
+                        </ul>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>Fixed the <code>:absolutelytrust:</code> emote not loading the correct file.</li>
+                        <li>Fixed the <code>:tracker3</code> emote not being displayed.</li>
+                        <li>Fixed bios showing <code>:</code> instead of <code>,</code>.</li>
+                        <li>Fixed the pings icon being crossed out when you load the site, even if it's on.</li>
+                        <li>
+                            Fixed the new UI loading if its disabled and pings are muted when you load into the site.
+                        </li>
+                        <li>Fixed the <code>/pfp</code> command denying some images or URLs.</li>
+                        <li>Fixed the creation of 'Registered Guest' accounts.</li>
+                        <li>Fixed an oversight where the recalled messages do not store the aID.</li>
+                    </ul>
                     <h2>9th November 2026 - Minor Update - v1.3.4</h2>
                     <h3>New features</h3>
                     <ul>
@@ -464,7 +673,7 @@
                     <h3>Bug fixes</h3>
                     <ul>
                         <li>Fixed some users not being pingable.</li>
-                        <li>Fixed replies with emotes showing <code>,</code> instead of <code>:</code>.</li>
+                        <li>Fixed replies showing <code>,</code> instead of <code>:</code>.</li>
                         <li>Fixed the new UI chat bar interface oftenly overlapping the chat history on mobile devices.
                         </li>
                         <li>Fixed the context menu not being usable on the old UI.</li>
@@ -892,8 +1101,8 @@
                     <h2>Types</h2>
                     <p>
                         First and foremost; selectors. Selectors are the basis of almost every command. Specific
-                        commands
-                        require different selectors. There are multiple types, but I'll briefly go over the main three;
+                        commands require different selectors. There are multiple types, but I'll briefly go over the
+                        important ones;
                     </p>
                     <h3>Account ID (aID)</h3>
                     <p>
@@ -910,9 +1119,19 @@
                     <h3>Database ID (dID)</h3>
                     <p>
                         Refers to 'database ID'. This is the index in the database of the account you possess, and is
-                        used to edit permanent
-                        information usually found inside the account database. This is most commonly used in the /data
-                        command.
+                        used to edit permanent information usually found inside the account database. This is most
+                        commonly used in the <code>/data</code> command.
+                    </p>
+                    <h3>Role ID (roleID / rID)</h3>
+                    <p>
+                        Refers to 'role ID'. This is a string commonly used to find which role does what action. It is
+                        used when reading roles on the client and for adding roles to users, as well as adjusting
+                        variables custom to that specific role.
+                    </p>
+                    <h3>Variable ID (varID / vID)</h3>
+                    <p>
+                        Refers to 'variable ID'. This is used in conjunction with the role ID and is typically used to
+                        modify dynamic values of an account that are stored using the roles system.
                     </p>
                     <hr>
                     <h2>Commands</h2>
@@ -927,6 +1146,10 @@
                     <h3>User+ Commands</h3>
                     <h4>/packet</h4>
                     <p>Returns the average rate your client is sending packets.</p>
+                    <h5>Aliases: /packets, /frequency</h5>
+                    <h4>/roll [param1]</h4>
+                    <p>Returns a random number between 1 and the specified amount.</p>
+                    <h5>With [param1] - positive integer</h5>
                     <h4>/ignoreguests</h4>
                     <p>Toggle ignoring guest messages on the client-side.</p>
                     <h4>/title</h4>
@@ -945,12 +1168,19 @@
                     <h4>/dm [param1] [param2]</h4>
                     <p>Sends a direct message to the specific user. Can't be seen by other users.</p>
                     <h5>With [param1] - instance ID and [param2] - message</h5>
+                    <h4>/equip [param1] [param2]</h4>
+                    <p>Equip a role's NEO, if it has one to equip.</p>
+                    <h5>With [param1] - "clear"</h5>
+                    <h5>With [param1] - "name" and [param2] - roleID</h5>
+                    <h5>With [param1] - "message" and [param2] - roleID</h5>
                     <hr>
                     <h3>Helper+ Commands</h3>
                     <h4>/clearall</h4>
                     <p>Clears all chat messages, uploads, DMs, and broadcasts for everyone.</p>
+                    <h5>Aliases: /ca, /cc, /clear, /clearchat</h5>
                     <h4>/muteguests</h4>
                     <p>Toggles the muting of all guests in the current channel.</p>
+                    <h5>Aliases: /mg, /muteg</h5>
                     <h4>/broadcast [param1]</h4>
                     <p>Broadcasts a message without a user attached to it.</p>
                     <h5>With [param1] - message</h5>
@@ -959,24 +1189,29 @@
                     <h5>With [param1] - "text" and [param2] - account ID and [param3] - duration + unit</h5>
                     <h5>With [param1] - "upload" and [param2] - account ID and [param3] - duration + unit</h5>
                     <h5>With [param1] - "both" and [param2] - account ID and [param3] - duration + unit</h5>
+                    <h5>Aliases: /b, /s, /bc, /simple</h5>
                     <hr>
                     <h3>Underseer+ Commands</h3>
                     <h4>/data [param1] [param2] [param3] [param4] </h4>
                     <p>Allows the editing, creation, and deletion of accounts. Also displays accounts you can edit.</p>
                     <h5>With [param1] - "list"</h5>
+                    <h5>With [param1] - "status" and [param2] - database ID</h5>
                     <h5>With [param1] - "id" and [param2] - account name</h5>
-                    <h5>With [param1] - "create" and [param2] - new token and [param3] - new auth and [param4] new name
+                    <h5>With [param1] - "create" and [param2] - new token and [param3] - new auth and [param4] - new
+                        name
                     </h5>
-                    <h5>With [param1] - "edit" and [param2] - "name" and [param3] - database ID and [param4] new name
+                    <h5>With [param1] - "edit" and [param2] - "name" and [param3] - database ID and [param4] - new name
                     </h5>
-                    <h5>With [param1] - "edit" and [param2] - "creator" and [param3] - database ID and [param4] new
-                        creator account ID
+                    <h5>(Exclusive to developer) With [param1] - "edit" and [param2] - "creator" and [param3] - database
+                        ID and [param4] - new creator account ID
                     </h5>
-                    <h5>With [param1] - "edit" and [param2] - "auth" and [param3] - database ID and [param4] new auth
+                    <h5>With [param1] - "edit" and [param2] - "auth" and [param3] - database ID and [param4] - new auth
                     </h5>
-                    <h5>With [param1] - "edit" and [param2] - "token" and [param3] - database ID and [param4] new token
+                    <h5>With [param1] - "edit" and [param2] - "token" and [param3] - database ID and [param4] - new
+                        token
                     </h5>
                     <h5>With [param1] - "delete" and [param2] - database ID</h5>
+                    <h5>Aliases: /d, /db</h5>
                     <hr>
                     <h3>Overseer+ Commands</h3>
                     <h4>/slowmode [param1]</h4>
@@ -985,25 +1220,53 @@
                     <h4>/kick [param1]</h4>
                     <p>Kick a specific account.</p>
                     <h5>With [param1] - instance ID.</h5>
+                    <h5>Aliases: /kill</h5>
+                    <h4>/abc [param1]</h4>
+                    <p>The same as <code>/broadcast</code>, except the name is anonymous.</p>
+                    <h5>With [param1] - message.</h5>
+                    <h5>Aliases: /anonymousbc, /anonymousbroadcast</h5>
                     <hr>
                     <h3>Admin+ Commands</h3>
                     <h4>/findghosts</h4>
                     <p>Tries to estimate how many ghost accounts currently exist, and lists their names.</p>
+                    <h5>Aliases: /ghostbusters</h5>
+                    <h4>/refresh</h4>
+                    <p>
+                        Forcefully refreshes the user list on every concurrent connection. Useful to showcase NEO
+                        changes.</p>
                     <h4>/g [param1]</h4>
                     <p>
                         Plays a sound to everyone that is online. Sounds have to be from a predetermined list of
                         options. That may change in the future.
                     </p>
                     <h5>With [param1] - file name</h5>
+                    <h5>Aliases: /g, /goober, /goofy, /mix, /mixer</h5>
                     <h4>/server [param1] [param2]</h4>
                     <p>Allows the editing of certain server settings.</p>
                     <h5>With [param1] - "sudo" and [param2] - message</h5>
                     <h4>/killall</h4>
                     <p>Kill every account connection at once.</p>
+                    <h5>Aliases: /kickall</h5>
                     <h4>/restart</h4>
                     <p>Restart the entire server.</p>
+                    <h4>/refresh</h4>
+                    <p>Refresh every user with the latest user list.</p>
                     <hr>
                     <h3>Developer+ Commands</h3>
+                    <h4>/role [param1] [param2] [param3] [param4]</h4>
+                    <p>Change the NEO of accounts, in either messages or names.</p>
+                    <h5>With [param1] - "loaded"</h5>
+                    <h5>With [param1] - "-s" or dID and [param2] - "raw"</h5>
+                    <h5>With [param1] - "-s" or dID and [param2] - "list"</h5>
+                    <h5>With [param1] - "-s" or dID and [param2] - "clear"</h5>
+                    <h5>With [param1] - "-s" or dID and [param2] - "get" and [param3] - roleID</h5>
+                    <h5>With [param1] - "-s" or dID and [param2] - "delete" and [param3] - roleID</h5>
+                    <h5>With [param1] - "-s" or dID and [param2] - "add" and [param3] - roleID</h5>
+                    <h5>
+                        With [param1] - "-s" or dID and [param2] - "modify" and [param3] - roleID and [param4] - varID
+                        and [param5] - value
+                    </h5>
+                    <h5>Aliases: /roles</h5>
                     <h4>/neo [param1] [param2] [param3]</h4>
                     <p>Change the NEO of accounts, in either messages or names.</p>
                     <h5>With [param1] - "name" and [param2] - neo</h5>
@@ -1040,6 +1303,7 @@
                     <ul>
                         <li><a href="https://mlg-inc.vercel.app/">MLG</a></li>
                         <li>Testing</li>
+                        <li>M28</li>
                         <li>3AM Experiences</li>
                         <li><a href="https://www.youtube.com/arrasio">Neph, Damocles & XX</a></li>
                         <li><a href="https://www.youtube.com/channel/UClSjjHu1p16hGxcbfz51haA">Double Squared (d2)</a>
@@ -1047,6 +1311,7 @@
                         <li><a href="https://www.youtube.com/@toby-fox-music">Toby Fox</a></li>
                         <li>Dragon King Gaming (DKG)</li>
                         <li><a href="https://www.pixilart.com/bongis">Bongis</a></li>
+                        <li>Edd the Expie</li>
                     </ul>
                     <h3>Special Thanks</h3>
                     <ul>
@@ -1083,11 +1348,78 @@
             <i class="bi bi-x-octagon" id="closeProfile"></i>
         </div>
         <div class="profile-data">
+            <div class="profile-actions">
+                <i class="bi bi-hammer header-icons" id="profileActionMod"></i>
+                <i class="bi bi-envelope-plus-fill header-icons" id="profileActionMessage"></i>
+                <i class="bi bi-person-fill-slash header-icons" id="profileActionBlock"></i>
+            </div>
             <img src="" id="profilePfp">
             <h2 id="profileName">Name</h2>
+            <h2>Roles</h2>
+            <ul id="profileRoles">
+                <li class="profile-role">No roles.</li>
+            </ul>
+            <h2>Bio</h2>
             <div id="profileBio">
                 <p>No bio provided.</p>
             </div>
+        </div>
+    </div>
+    <div id="data" class="hidden">
+        <div class="data-top">
+            <h1>Data</h1>
+            <i class="bi bi-x-square" id="closeData"></i>
+        </div>
+        <div class="data-content">
+            <div class="data-bar">
+                <input type="text" id="dataSearch" placeholder="Search by display name...">
+                <button id="dataRefresh"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Database ID (dID)</th>
+                        <th>Display Name</th>
+                        <th>Account ID (aID)</th>
+                        <th>Token</th>
+                        <th>Access Level</th>
+                        <th>Creator</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                    <tr>
+                        <td>
+                            <p>If no users appear here, click the refresh button.</p>
+                        </td>
+                    </tr>
+                    <!-- <tr class="data-account">
+                        <td>11</td>
+                        <td><input type="text" value="MLG" placeholder="Enter a display name..."></td>
+                        <td>O4CwNZoq</td>
+                        <td>[REDACTED]</td>
+                        <td>6</td>
+                        <td class="data-operations"><button>Update</button><button>Delete</button></td>
+                    </tr>
+                    <tr class="data-account">
+                        <td>261</td>
+                        <td><input type="text" value="commaL" placeholder="Enter a display name..."></td>
+                        <td>F5S9NyPB</td>
+                        <td>[REDACTED]</td>
+                        <td>
+                            <select>
+                                <option value="1">User</option>
+                                <option value="2">Helper</option>
+                                <option value="3" selected>Underseer</option>
+                                <option value="4">Overseer</option>
+                                <option value="5">Admin</option>
+                                <option value="6">Developer</option>
+                            </select>
+                        </td>
+                        <td class="data-operations"><button>Update</button><button>Delete</button></td>
+                    </tr> -->
+                </tbody>
+            </table>
         </div>
     </div>
     <div id="options" class="hidden">
@@ -1106,10 +1438,34 @@
             </div>
             <div class="toggle">
                 <div class="toggle-header">
+                    <i class="bi bi-toggle-on" id="viewSwears"></i>
+                    <p>Filter Swears</p>
+                </div>
+                <p>
+                    Filter out offensive or potentially inappropriate words. Only works on future messages unless you
+                    reload.
+                </p>
+            </div>
+            <div class="toggle">
+                <div class="toggle-header">
                     <i class="bi bi-toggle-on" id="viewUI"></i>
                     <p>New UI</p>
                 </div>
                 <p>Try out the new UI currently in development.</p>
+            </div>
+            <div class="toggle">
+                <div class="toggle-header">
+                    <i class="bi bi-toggle-on" id="viewSlurs"></i>
+                    <p>Filter Slurs</p>
+                </div>
+                <p>Filter out slurs and explicit phrases. Only works on future messages unless you reload.</p>
+            </div>
+            <div class="toggle">
+                <div class="toggle-header">
+                    <i class="bi bi-toggle-off" id="showAll"></i>
+                    <p>View All Accounts</p>
+                </div>
+                <p>Show every account in the database instead of only the ones you've created.</p>
             </div>
             <!-- <div class="viewToggle">
                 <div class="toggle-header">
@@ -1163,6 +1519,18 @@
                 <p>Enable the current seasonal theme if there is one.
                 </p>
             </div>
+        </div>
+        <div class="options-secret">
+            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="#000000" id="door">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                    <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+                    <path fill="var(--white-color)"
+                        d="M105 41v398h302V41H105zm55 174c18.1 0 33 14.9 33 33s-14.9 33-33 33-33-14.9-33-33 14.9-33 33-33zm0 18c-8.4 0-15 6.6-15 15s6.6 15 15 15 15-6.6 15-15-6.6-15-15-15zM73 457v30h366v-30H73z">
+                    </path>
+                </g>
+            </svg>
         </div>
     </div>
     <div id="mod" class="hidden">

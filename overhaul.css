@@ -1,3 +1,8 @@
+@font-face {
+    font-family: wingding;
+    src: url("./src/wingding.ttf");
+}
+
 @keyframes animRainbow {
 
     0%,
@@ -29,6 +34,200 @@
         color: magenta;
         fill: magenta;
         stroke: magenta;
+    }
+}
+
+@keyframes animDev2 {
+
+    0%,
+    100% {
+        color: rgb(145, 62, 190);
+    }
+
+    25% {
+        color: rgb(205, 102, 212);
+    }
+
+    50% {
+        color: rgb(173, 103, 172);
+    }
+
+    75% {
+        color: rgb(105, 51, 134);
+    }
+}
+
+@keyframes animYoutuber {
+
+    0%,
+    20%,
+    100% {
+        color: red;
+        fill: red;
+        stroke: red;
+    }
+
+    40%,
+    80% {
+        color: white;
+        fill: white;
+        stroke: white;
+    }
+}
+
+@keyframes animFemboy {
+
+    /* I lost a coin flip */
+    0%,
+    100% {
+        color: #cf62a9;
+        fill: #cf62a9;
+        stroke: #cf62a9;
+    }
+
+    20%,
+    80% {
+        color: #e4adcd;
+        fill: #e4adcd;
+        stroke: #e4adcd;
+    }
+
+    40%,
+    60% {
+        color: #fff;
+        fill: #fff;
+        stroke: #fff;
+    }
+
+    50% {
+        color: #58cef8;
+        fill: #58cef8;
+        stroke: #58cef8;
+    }
+}
+
+@keyframes animMysterious {
+
+    /* I lost a coin flip */
+    0%,
+    100%,
+    40% {
+        color: yellow;
+        fill: yellow;
+        stroke: yellow;
+    }
+
+    50%,
+    90% {
+        color: blueviolet;
+        fill: blueviolet;
+        stroke: blueviolet;
+    }
+}
+
+@keyframes animExpie {
+
+    /* I lost a coin flip x2 */
+    0%,
+    100% {
+        color: orangered;
+        fill: orangered;
+        stroke: orangered;
+    }
+
+    50% {
+        color: yellow;
+        fill: yellow;
+        stroke: yellow;
+    }
+}
+
+@keyframes animHyperneo {
+
+    0%,
+    100% {
+        font-size: 15px;
+        top: -5px;
+    }
+
+    25%,
+    75% {
+        top: 5px;
+    }
+
+    50% {
+        font-size: 30px;
+        top: -5px;
+    }
+
+    0%,
+    100% {
+        color: red;
+        fill: red;
+        stroke: red;
+    }
+
+    20% {
+        color: yellow;
+        fill: yellow;
+        stroke: yellow;
+    }
+
+    40% {
+        color: lime;
+        fill: lime;
+        stroke: lime;
+    }
+
+    60% {
+        color: aqua;
+        fill: aqua;
+        stroke: aqua;
+    }
+
+    80% {
+        color: magenta;
+        fill: magenta;
+        stroke: magenta;
+    }
+}
+
+@keyframes animShake {
+
+    0%,
+    100%,
+    15% {
+        left: -1px;
+        top: 2px;
+    }
+
+    20%,
+    35% {
+        left: 2px;
+        top: 1px;
+    }
+
+    40%,
+    55% {
+        left: -2px;
+        top: 3px;
+    }
+
+    60%,
+    75% {
+        left: 2px;
+        top: -3px;
+    }
+
+    80%,
+    95% {
+        left: -3px;
+        top: -1px;
+    }
+
+    0%,
+    100% {
+        color: white;
     }
 }
 
@@ -120,6 +319,31 @@
     animation: animRainbow 5s infinite linear !important;
 }
 
+.message-dev2 {
+    animation: animDev2 8s infinite linear !important;
+}
+
+.message-youtuber {
+    animation: animYoutuber 1s infinite linear !important;
+}
+
+.message-femboy {
+    animation: animFemboy 2s infinite linear !important;
+}
+
+.message-mysterious {
+    animation: animMysterious 2s infinite linear !important;
+}
+
+.message-expie {
+    animation: animExpie 1s infinite ease-in-out !important;
+}
+
+.message-wingdings {
+    font-family: wingding;
+    color: white !important;
+}
+
 .message-bland {
     color: var(--text-color) !important;
 }
@@ -133,6 +357,17 @@
     margin-right: 4px;
 }
 
+.message-dark {
+    color: black !important;
+    fill: black !important;
+    stroke: black !important;
+    text-shadow:
+        1px 1px 0 white,
+        -1px 1px 0 white,
+        -1px -1px 0 white,
+        1px -1px 0 white;
+}
+
 .message-aqua {
     color: aqua !important;
 }
@@ -143,6 +378,14 @@
 
 .message-yellow {
     color: yellow !important;
+}
+
+.message-orange {
+    color: orange !important;
+}
+
+.message-blue {
+    color: blue !important;
 }
 
 .message-purple {
@@ -216,7 +459,7 @@ header {
     position: sticky;
     display: flex;
     flex-direction: row;
-    height: 5%;
+    height: 7.5%;
     width: calc(100%);
     background-color: var(--secondary-color);
     border-bottom: 2px solid var(--accent-color);
@@ -238,10 +481,10 @@ header h1 {
 }
 
 .header-icons {
-    font-size: clamp(10px, calc(1vw + 1vh), 30px);
-    margin-right: clamp(5px, calc(0.5vw + 0.5vh), 60px);
+    font-size: clamp(10px, calc(1.5vw + 1.5vh), 30px);
     color: var(--white-color);
     cursor: pointer;
+    margin-right: 10px;
 }
 
 .header-icons:hover {
@@ -250,13 +493,24 @@ header h1 {
 
 main {
     position: absolute;
-    width: calc(100%);
-    height: 92.5%;
-    top: calc(5%);
+    width: 95%;
+    height: 85%;
+    top: 11.25%;
+    left: 2.5%;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
+}
+
+details {
+    background-color: var(--primary-color);
+    padding: 10px;
+}
+
+summary {
+    color: var(--white-color);
+    cursor: pointer;
 }
 
 a {
@@ -279,7 +533,6 @@ a:visited:hover {
     /* istg this took so many tries to scale correctly on smaller devices, you have no idea lmao */
     display: flex;
     flex-direction: column;
-    padding: 20px;
     width: 100%;
     height: 100%;
     background-color: var(--midtone-color);
@@ -288,6 +541,7 @@ a:visited:hover {
     justify-content: center;
     text-align: center;
     font-size: clamp(10px, calc(0.75vw + 0.75vh), 50px);
+    border: 2px solid var(--accent-color);
 }
 
 #auth h1 {
@@ -395,9 +649,7 @@ a:visited:hover {
     background-color: var(--midtone-color);
     overflow-y: scroll;
     font-size: clamp(10px, calc(0.625vw + 0.625vh), 50px);
-    border-top: 2px solid var(--accent-color);
-    border-bottom: 2px solid var(--accent-color);
-    border-right: 2px solid var(--accent-color);
+    border: 2px solid var(--accent-color);
 }
 
 .users-user {
@@ -445,6 +697,12 @@ a:visited:hover {
     width: 50px;
     height: 50px;
     margin-left: 10px;
+    object-fit: contain;
+}
+
+.users-user-badge {
+    width: 50px;
+    height: 50px;
     object-fit: contain;
 }
 
@@ -577,6 +835,16 @@ a:visited:hover {
     padding-top: clamp(0px, calc(1.5vw + 1.5vh), 5px);
     padding-bottom: clamp(0px, calc(1.5vw + 1.5vh), 5px);
     font-size: clamp(10px, calc(1.5vw + 1.5vh), 15px);
+}
+
+.chat-message-line * {
+    display: inline-block;
+    margin-inline-end: 8px;
+}
+
+.chat-message-line code {
+    background-color: var(--primary-color);
+    padding: 5px;
 }
 
 .chat-emoji {
@@ -842,11 +1110,12 @@ a:visited:hover {
     position: absolute;
     display: flex;
     flex-direction: column;
-    width: 40vw;
-    height: 40vw;
-    top: calc(50% - 20vw - 10px);
-    left: calc(50% - 20vw - 10px);
-    background-color: var(--accent-color);
+    width: 90%;
+    height: 90%;
+    top: calc(50% - 45% - 10px);
+    left: calc(50% - 45% - 10px);
+    border: 2px solid var(--accent-color);
+    background-color: var(--primary-color);
     color: var(--white-color);
     z-index: 2001;
     justify-content: center;
@@ -855,9 +1124,8 @@ a:visited:hover {
 }
 
 #imageEnlarger img {
-    background-color: var(--accent-color);
-    width: 30vw;
-    height: 30vw;
+    width: 80%;
+    height: 60%;
     padding: 20px;
     object-fit: contain;
 }
@@ -1055,6 +1323,19 @@ a:visited:hover {
     cursor: pointer;
 }
 
+.options-secret {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    padding-top: clamp(10px, calc(2vw + 2vh), 50px);
+}
+
+.options-secret svg {
+    width: 5%;
+    cursor: pointer;
+}
+
 #mod {
     position: absolute;
     background-color: var(--highlight-color);
@@ -1188,10 +1469,12 @@ a:visited:hover {
     justify-content: space-between;
     text-align: center;
     width: 100%;
+    height: clamp(50px, calc(3vw + 3vh), 200px);
     border-bottom: 2px solid var(--text-color);
     font-size: clamp(10px, calc(1vw + 1vh), 20px);
     background-color: var(--primary-color);
     top: -2px;
+    flex-shrink: 0;
     z-index: 2002;
 }
 
@@ -1211,15 +1494,29 @@ a:visited:hover {
     cursor: pointer;
 }
 
+.profile-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    padding: clamp(5px, calc(1vw + 1vh), 10px);
+    gap: clamp(5px, calc(1vw + 1vh), 20px);
+    width: calc(100% - clamp(20px, calc(2vw + 2vh), 40px));
+    /* border: 2px solid var(--accent-color);
+    background-color: var(--primary-color); */
+    font-size: clamp(20px, calc(2vw + 2vh), 40px);
+}
+
 .profile-data {
     display: flex;
     flex-direction: column;
+    min-height: 0;
     width: 100%;
     height: 100%;
-    justify-content: center;
     align-items: center;
     position: relative;
     overflow-y: scroll;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 #profilePfp {
@@ -1232,14 +1529,269 @@ a:visited:hover {
     font-size: clamp(20px, calc(2vw + 2vh), 30px);
 }
 
+#profileRoles {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: calc(80% - 40px);
+    gap: 10px;
+    text-align: center;
+    font-size: clamp(10px, calc(1vw + 1vh), 20px);
+    /* background-color: var(--primary-color); */
+    /* border: 2px solid var(--accent-color); */
+}
+
+.profile-role {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    grid-column: span 2;
+    height: clamp(50px, calc(5vw + 5vh), 50px);
+    border-radius: 10px;
+    justify-content: center;
+    background-color: var(--primary-color);
+    border: 2px solid var(--accent-color);
+}
+
+.profile-role:nth-last-child(3):nth-child(4n + 1) {
+    grid-column: 2 / span 2;
+}
+
+.profile-role:nth-last-child(2):nth-child(4n + 1) {
+    grid-column: 3 / span 2;
+}
+
+.profile-role:last-child:nth-child(4n + 1) {
+    grid-column: 4 / span 2;
+}
+
+.profile-role a {
+    vertical-align: middle;
+}
+
+.profile-role-icon {
+    width: clamp(20px, calc(2vw + 2vh), 40px);
+    height: clamp(20px, calc(2vw + 2vh), 40px);
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.profile-role-blank {
+    position: relative;
+    display: inline-block;
+    border-radius: 100%;
+    width: clamp(5px, calc(2vw + 2vh), 15px);
+    height: clamp(5px, calc(2vw + 2vh), 15px);
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    right: 15px;
+    background-color: white;
+}
+
 #profileBio {
     display: flex;
     flex-direction: column;
-    width: 50%;
-    height: 50%;
+    width: 80%;
     justify-self: center;
     align-self: center;
     font-size: clamp(10px, calc(1vw + 1vh), 20px);
+    /* overflow-y: scroll;
+    border: 2px solid var(--accent-color); */
+}
+
+#profileBio * {
+    margin-left: 20px;
+}
+
+#data {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: 90%;
+    top: calc(50% - 90% / 2);
+    left: calc(50% - 90% / 2);
+    background-color: var(--primary-color);
+    z-index: 2001;
+    color: var(--white-color);
+    border: 2px solid var(--accent-color);
+}
+
+#data input[type="text"],
+#data input[type="number"],
+#data button,
+#data select {
+    box-sizing: border-box;
+    outline: none !important;
+    border-radius: 0px;
+    background-color: var(--highlight-color);
+    border: 2px solid var(--accent-color);
+    font-size: clamp(10px, calc(1vw + 1vh), 20px);
+    color: var(--text-color);
+    font-size: clamp(10px, calc(0.5vw + 0.5vh), 50px);
+    padding: 5px;
+    caret-color: var(--white-color);
+}
+
+#data input[type="text"]::placeholder,
+#data input[type="number"]::placeholder {
+    color: var(--text-color);
+}
+
+#data select {
+    cursor: pointer;
+}
+
+.data-top {
+    position: sticky;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: center;
+    align-items: center;
+    width: 100%;
+    height: clamp(50px, calc(3vw + 3vh), 200px);
+    border-bottom: 2px solid var(--accent-color);
+    font-size: clamp(10px, calc(1vw + 1vh), 20px);
+    background-color: var(--primary-color);
+    top: -2px;
+    flex-shrink: 0;
+    z-index: 2002;
+}
+
+.data-top h1 {
+    text-indent: 20px;
+}
+
+.data-top i {
+    color: var(--white-color);
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-left: 20px;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.data-content {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    height: 90%;
+    justify-self: center;
+    align-self: center;
+    font-size: clamp(10px, calc(1vw + 1vh), 20px);
+    /* overflow-y: scroll;
+    border: 2px solid var(--accent-color); */
+}
+
+.data-bar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 5%;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.data-bar input[type="text"],
+.data-bar input[type="number"],
+.data-bar select {
+    width: 100%;
+    height: 100%;
+    text-indent: 10px;
+}
+
+.data-bar button {
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    text-align: center;
+    align-items: center;
+    text-indent: 0;
+    cursor: pointer;
+}
+
+.data-content table {
+    height: 90%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: var(--secondary-color);
+    border: 2px solid var(--accent-color);
+    overflow-y: scroll;
+}
+
+.data-content thead {
+    position: sticky;
+    background-color: var(--accent-color);
+}
+
+.data-content thead,
+.data-content tbody,
+.data-content tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.data-content tbody {
+    display: block;
+    height: 100%;
+    max-height: 95%;
+    overflow-y: auto;
+}
+
+.data-account {
+    background-color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.data-account:nth-child(even of :not(.hidden)) {
+    background-color: var(--secondary-color);
+}
+
+.data-account td {
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.data-account td input[type="text"],
+.data-account td input[type="number"] {
+    max-width: 100% !important;
+    font-size: clamp(10px, calc(1vw + 1vh), 20px) !important;
+    text-align: center;
+    border: 2px solid var(--accent-color) !important;
+    outline: none !important;
+    border-radius: 10px !important;
+    color: var(--white-color) !important;
+}
+
+.data-operations {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 100% !important;
+}
+
+.data-operations * {
+    width: 40%;
+    height: 100% !important;
+    cursor: pointer;
 }
 
 #disconnect,

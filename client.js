@@ -1,16 +1,27 @@
 let endpointAddress = "https://arrasify.alter-g.workers.dev";
 let socketAddress = "wss://arrasify.alter-g.workers.dev";
+let homeServer = "https://arrasify.alter-g.workers.dev";
 
 // Localhost Setup
 // endpointAddress = "http://127.0.0.1:8787";
 // socketAddress = "ws://127.0.0.1:8787";
+// homeServer = "http://127.0.0.1:8787";
 
 let bad = [];
 let r = await fetch("./bad.jsonc");
 if (r.ok) {
     bad = JSON.parse((await r.text()).replace(/\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/g, (m, g) => g ? "" : m));
-}
-console.log("Profanity filter loaded.");
+    console.log("Profanity filter loaded.");
+};
+const swearsRegex = new RegExp(`\\b(${bad.swears.join('|')})\\b`, "gi");
+const slursRegex = new RegExp(`\\b(${bad.slurs.join('|')})\\b`, "gi");
+
+let roleDefinitions = [];
+r = await fetch(`${endpointAddress}/roles`);
+if (r.ok) {
+    roleDefinitions = await r.json();
+    console.log("Role definitions loaded.");
+};
 
 const ws = new WebSocket(`${socketAddress}`);
 
@@ -21,6 +32,9 @@ let settings = {
     // Option toggles
     show_users: true,
     show_ui: true,
+    filter_swears: true,
+    filter_slurs: true,
+    show_all: false,
     abyss_theme: false,
     night_theme: false,
     aqua_theme: false,
@@ -32,6 +46,30 @@ let settings = {
 if (localStorage.getItem("settings")) settings = { ...JSON.parse(localStorage.getItem("settings")) };
 else localStorage.setItem("settings", JSON.stringify(settings));
 
+const priority = [ // Priority for roles
+    "mlg",
+    "testing",
+    "flowey",
+    "boyfriend",
+    "beta_tester",
+    "contributor",
+    "youtuber",
+    "supporter",
+    "expie",
+    "femboy",
+    "mysterious",
+    "polychrome",
+    "est_2027",
+    "est_2026",
+    "est_2025",
+    "est_2024",
+    "est_2023",
+    "og",
+    "enthusiast"
+];
+
+const priorityMap = new Map(priority.map((name, index) => [name, index]));
+
 let userContextInfo = {
     iID: "-",
     aID: "-"
@@ -41,7 +79,8 @@ let info = {
     name: "-",
     timeout: 0,
     channel: "???",
-    auth: 0
+    auth: 0,
+    aID: "-"
 };
 
 let collectedUsers = {
@@ -54,6 +93,8 @@ let collectedUsers = {
     developers: [],
     friends: []
 };
+
+let dataUsers = [];
 
 let dragMod = false;
 let modLocation = {
@@ -79,11 +120,11 @@ let nextUpload = undefined;
 let readyFile = undefined;
 
 // Audio-related things
-const pingAudio = new Audio("./sfx/ping.mp3");
+const pingAudio = new Audio(`${homeServer}/sfx/ping.mp3`);
 let canPlayAudio = false;
 pingAudio.oncanplay = () => { canPlayAudio = true; };
-const importantAudio = new Audio("./sfx/important.mp3");
-const dmAudio = new Audio("./sfx/dm.mp3");
+const importantAudio = new Audio(`${homeServer}/sfx/important.mp3`);
+const dmAudio = new Audio(`${homeServer}/sfx/dm.mp3`);
 const mixAudio = new Audio();
 
 // Misc
@@ -110,121 +151,151 @@ const emojis = { // Emoji - ClassList
 const emotes = { // Emote - SRC
     eDiep: {
         // Diep.io / Arras
-        "spectator": "./emotes/spectator.png",
-        "basic": "./emotes/basic.png",
-        "booster": "./emotes/booster.png",
-        "ranger": "./emotes/ranger.png",
-        "youtuber": "./emotes/youtuber.png",
-        "valrayvn": "./emotes/valrayvn.jpg"
+        "spectator": "emotes/spectator.png",
+        "basic": "emotes/basic.png",
+        "youtuber": "emotes/youtuber.png",
+        "booster": "emotes/booster.png",
+        "ranger": "emotes/ranger.png",
+        "tracker3": "emotes/tracker3.png",
+        "valrayvn": "emotes/valrayvn.jpg"
     },
     eVerify: {
         // Verify
-        "verifyguest": "./emotes/verifyguest.png",
-        "verifyalt": "./emotes/verifyalt.png",
-        "verifydirector": "./emotes/verifydirector.png",
-        "verifytrial": "./emotes/verifytrial.png",
-        "verifymanager": "./emotes/verifymanager.png",
-        "verifydev": "./emotes/verifydev.png",
-        "verifytrash": "./emotes/verifytrash.png",
-        "verifyyoutuber": "./emotes/verifyyoutuber.png",
-        "verifymusician": "./emotes/verifymusician.png",
-        "verifyartist": "./emotes/verifyartist.png",
-        "verifybongis": "./emotes/verifybongis.png",
-        "verifyolddev": "./emotes/verifyolddev.png"
+        "verifyguest": "emotes/verifyguest.png",
+        "verifyalt": "emotes/verifyalt.png",
+        "verifydirector": "emotes/verifydirector.png",
+        "verifytrial": "emotes/verifytrial.png",
+        "verifymanager": "emotes/verifymanager.png",
+        "verifydev": "emotes/verifydev.png",
+        "verifytrash": "emotes/verifytrash.png",
+        "verifyyoutuber": "emotes/verifyyoutuber.png",
+        "verifymusician": "emotes/verifymusician.png",
+        "verifyartist": "emotes/verifyartist.png",
+        "verifybongis": "emotes/verifybongis.png",
+        "verifyolddev": "emotes/verifyolddev.png"
     },
     eTrust: {
         // Trust
-        "extremelynottrust": "./emotes/extremelynottrust.png",
-        "nottrust": "./emotes/nottrust.png",
-        "maybetrust": "./emotes/maybetrust.png",
-        "yestrust": "./emotes/yestrust.png",
-        "probablytrust": "./emotes/probablytrust.png",
-        "supertrust": "./emotes/supertrust.png",
-        "absolutelytrust": "./emotes/absolutelytrust",
-        "eviljinn": "./emotes/eviljinn.png",
-        "deadchat": "./emotes/deadchat.png"
+        "extremelynottrust": "emotes/extremelynottrust.png",
+        "nottrust": "emotes/nottrust.png",
+        "maybetrust": "emotes/maybetrust.png",
+        "possiblytrust": "emotes/possiblytrust.png",
+        "probablytrust": "emotes/probablytrust.png",
+        "yestrust": "emotes/yestrust.png",
+        "supertrust": "emotes/supertrust.png",
+        "absolutelytrust": "emotes/absolutelytrust.png",
+        "eviljinn": "emotes/eviljinn.png",
+        "deadchat": "emotes/deadchat.png"
     },
     eDeltarune: {
         // Deltarune
-        "mlg": "./emotes/mlg.png",
-        "ralsei": "./emotes/ralsei.png",
-        "pansei": "./emotes/pansei.jpg",
-        "spamton": "./emotes/spamton.gif",
-        "determination": "./emotes/determination.png",
-        "jaorange": "./emotes/jaorange.png",
-        "justice": "./emotes/justice.png",
-        "kindness": "./emotes/kindness.png",
-        "patience": "./emotes/patience.png",
-        "integrity": "./emotes/integrity.png",
-        "perseverence": "./emotes/perseverence.png",
-        "wave": "./emotes/wave.gif",
-        "gaster": "./emotes/gaster.gif",
+        "mlg": "emotes/mlg.png",
+        "ralsei": "emotes/ralsei.png",
+        "pansei": "emotes/pansei.jpg",
+        "spamton": "emotes/spamton.gif",
+        "determination": "emotes/determination.png",
+        "jaorange": "emotes/jaorange.png",
+        "justice": "emotes/justice.png",
+        "kindness": "emotes/kindness.png",
+        "patience": "emotes/patience.png",
+        "integrity": "emotes/integrity.png",
+        "perseverence": "emotes/perseverence.png",
+        "wave": "emotes/wave.gif",
+        "gaster": "emotes/gaster.gif",
     },
     eRetro: {
-        "bongisalt": "./emotes/bongisalt.png",
-        "bongisguest": "./emotes/bongisguest.png",
-        "bongisdirector": "./emotes/bongisdirector.png",
-        "bongistrial": "./emotes/bongistrial.png",
-        "bongismanager": "./emotes/bongismanager.png",
-        "bongisdeveloper": "./emotes/bongisdeveloper.png",
-        "bongisyoutuber": "./emotes/bongisyoutuber.png",
-        "bongistrash": "./emotes/bongistrash.png",
-        "bongisfish": "./emotes/bongisfish.png",
+        "bongisalt": "emotes/bongisalt.png",
+        "bongisguest": "emotes/bongisguest.png",
+        "bongisdirector": "emotes/bongisdirector.png",
+        "bongistrial": "emotes/bongistrial.png",
+        "bongismanager": "emotes/bongismanager.png",
+        "bongisdeveloper": "emotes/bongisdeveloper.png",
+        "bongisyoutuber": "emotes/bongisyoutuber.png",
+        "bongistrash": "emotes/bongistrash.png",
+        "bongisfish": "emotes/bongisfish.png",
     },
     eTTF: {
         // TTF
-        "ttfidle": "./emotes/ttfidle.gif",
-        "ttfseizure": "./emotes/ttfseizure.gif",
-        "ttfspin": "./emotes/ttfspin.gif"
+        "ttfidle": "emotes/ttfidle.gif",
+        "ttfseizure": "emotes/ttfseizure.gif",
+        "ttfspin": "emotes/ttfspin.gif"
+    },
+    eChess: {
+        "chesscapture": "emotes/chesscapture.png",
+        "chessblunder": "emotes/chessblunder.png",
+        "chessmistake": "emotes/chessmistake.png",
+        "chessdubious": "emotes/chessdubious.png",
+        "chessbook": "emotes/chessbook.png",
+        "chessgood": "emotes/chessgood.png",
+        "chessbrilliant": "emotes/chessbrilliant.png",
+        "chessarrow": "emotes/chessarrow.png",
+        "chessstar": "emotes/chessstar.png",
+        "chessthumb": "emotes/chessthumb.png"
     },
     eGeneral: {
         // General
-        "skull": "./emotes/skull.png",
-        "pepe": "./emotes/pepe.png",
-        "troll": "./emotes/troll.png"
+        "skull": "emotes/skull.png",
+        "pepe": "emotes/pepe.png",
+        "troll": "emotes/troll.png"
     },
     eMemes: {
         // Memes
-        "smart": "./emotes/smart.gif",
-        "clips": "./emotes/clips.gif",
-        "bird": "./emotes/bird.gif",
-        "yippe": "./emotes/yippe.gif",
-        "nerd": "./emotes/nerd.gif",
-        "duck": "./emotes/duck.gif",
-        "bird": "./emotes/bird.gif",
-        "badapple": "./emotes/badapple.gif",
-        "idk": "./emotes/idk.gif",
-        "deadchatskeleton": "./emotes/deadchatskeleton.gif",
-        "wirewalls": "./emotes/wirewalls.gif",
-        "clark": "./emotes/clark.gif",
-        "waaaaat": "./emotes/waaaaat.png",
-        "concrete_proof": "./emotes/concrete_proof.png",
-        "thinking": "./emotes/thinking.gif"
+        "smart": "emotes/smart.gif",
+        "clips": "emotes/clips.gif",
+        "bird": "emotes/bird.gif",
+        "yippe": "emotes/yippe.gif",
+        "nerd": "emotes/nerd.gif",
+        "duck": "emotes/duck.gif",
+        "bird": "emotes/bird.gif",
+        "badapple": "emotes/badapple.gif",
+        "idk": "emotes/idk.gif",
+        "deadchatskeleton": "emotes/deadchatskeleton.gif",
+        "wirewalls": "emotes/wirewalls.gif",
+        "clark": "emotes/clark.gif",
+        "waaaaat": "emotes/waaaaat.png",
+        "concrete_proof": "emotes/concrete_proof.png",
+        "thinking": "emotes/thinking.gif",
+        "oiia": "emotes/oiia.gif",
+        "cat": "emotes/cat.gif"
     },
     eCommunity: {
-        "aperson": "./emotes/aperson.jpeg",
-        "dkg": "./emotes/dkg.png",
-        "peiple": "./emotes/peiple.jfif",
-        "boykisser": "./emotes/boykisser.png",
-        "arraspolice": "./emotes/arraspolice.gif",
-        "chained": "./emotes/chained.jpeg",
-        "testing": "./emotes/testing.jpeg",
-        "stipid": "./emotes/stipid.jpeg",
-        "weather": "./emotes/weather.png",
-        "crazy": "./emotes/crazy.gif",
-        "shegendarysquare": "./emotes/shegendarysquare.gif",
-        "spin": "./emotes/spin.gif",
-        "optical": "./emotes/optical.gif"
+        "aperson": "emotes/aperson.jpeg",
+        "dkg": "emotes/dkg.png",
+        "filament": "emotes/filament.jfif",
+        "boykisser": "emotes/boykisser.png",
+        "arraspolice": "emotes/arraspolice.gif",
+        "chained": "emotes/chained.jpeg",
+        "testing": "emotes/testing.jpeg",
+        "stipid": "emotes/stipid.jpeg",
+        "weather": "emotes/weather.png",
+        "crazy": "emotes/crazy.gif",
+        "shegendarysquare": "emotes/shegendarysquare.gif",
+        "alephnullshegendarysquare": "emotes/alephnullshegendarysquare.gif",
+        "spin": "emotes/spin.gif",
+        "optical": "emotes/optical.gif",
+        "screech": "emotes/screech.jpeg",
+        "trauma": "emotes/trauma.png",
+        "chess": "emotes/chess.png",
+        "no": "emotes/no.png",
+        "funkyeye": "emotes/funkyeye.png",
+        "heptagons": "emotes/heptagons.png",
+        "flarrasio": "emotes/flarrasio.png",
+        "skull2": "emotes/skull2.png",
+        "iq": "emotes/iq.png",
+        "recursion": "emotes/recursion.png",
+        "heyapple": "emotes/heyapple.gif",
+        "expiebomb": "emotes/expiebomb.png"
     }
 };
 
-const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eRetro, ...emotes.eTTF, ...emotes.eGeneral, ...emotes.eMemes, ...emotes.eCommunity };
+const allEmotes = { ...emotes.eDiep, ...emotes.eVerify, ...emotes.eTrust, ...emotes.eDeltarune, ...emotes.eRetro, ...emotes.eTTF, ...emotes.eChess, ...emotes.eGeneral, ...emotes.eMemes, ...emotes.eCommunity };
 
 const elements = {
     screen: document.querySelector("#screen"), // The darkening effect
     sheet: document.querySelector("#sheet"), // The style sheet for everything
     // Header Bars
     toggleUsers: document.querySelector("#toggleUsers"), // Toggle the visibility of the user list, whilst making it fullscreen and hiding the chat.
+    toggleData: document.querySelector("#toggleData"), // Show the new database UI.
     toggleOptions: document.querySelector("#toggleOptions"), // The element that, when clicked, opens the options.
     toggleDark: document.querySelector("#toggleDark"), // The element that, when clicked, toggles the dark/light theme. Dark by default
     togglePings: document.querySelector("#togglePings"), // Whether pings make a noise or not
@@ -281,6 +352,7 @@ const elements = {
     eDeltarune: document.querySelector("#eDeltarune"),
     eRetro: document.querySelector("#eRetro"),
     eTTF: document.querySelector("#eTTF"),
+    eChess: document.querySelector("#eChess"),
     eGeneral: document.querySelector("#eGeneral"),
     eMemes: document.querySelector("#eMemes"),
     eCommunity: document.querySelector("#eCommunity"),
@@ -305,6 +377,7 @@ const elements = {
     // Tabs
     book: document.querySelector("#book"),
     closeBook: document.querySelector("#closeBook"),
+    bookAbout: document.querySelector("#bookAbout"),
     bookRules: document.querySelector("#bookRules"),
     bookChangelog: document.querySelector("#bookChangelog"),
     bookAdmins: document.querySelector("#bookAdmins"),
@@ -312,6 +385,7 @@ const elements = {
     bookCommands: document.querySelector("#bookCommands"),
     bookCredits: document.querySelector("#bookCredits"),
     // Content
+    bookAboutContent: document.querySelector("#bookAboutContent"),
     bookRulesContent: document.querySelector("#bookRulesContent"),
     bookChangelogContent: document.querySelector("#bookChangelogContent"),
     bookAdminsContent: document.querySelector("#bookAdminsContent"),
@@ -323,16 +397,32 @@ const elements = {
     optionsClose: document.querySelector("#optionsClose"), // The close options menu button.
     optionsViewUser: document.querySelector("#viewUser"), // Toggle the viewing of the user list.
     optionsViewUI: document.querySelector("#viewUI"), // Toggle the viewing of the new UI.
+    optionsViewSwears: document.querySelector("#viewSwears"), // Toggle the filtering of swears.
+    optionsViewSlurs: document.querySelector("#viewSlurs"), // Toggle the filtering of slurs.
+    optionsShowAll: document.querySelector("#showAll"), // Toggle the filtering of accounts you have created.
     optionsTAbyss: document.querySelector("#tAbyss"), // Toggle the Abyss theme. Overrides the current theme.
     optionsTNight: document.querySelector("#tNight"), // Toggle the Night theme. Overrides the current theme and any before.
     optionsTAqua: document.querySelector("#tAqua"), // Toggle the Aqua theme. Overrides the current theme and any before.
     optionsExpMixer: document.querySelector("#expMixer"), // Toggle the hearing of the mixer.
     optionsExpSeasonalTheme: document.querySelector("#expSeasonalTheme"), // Toggle the Seasonal Theme if there is one.
+    door: document.querySelector("#door"), // Door
+    // Data
+    data: document.querySelector("#data"), // Database Management
+    closeData: document.querySelector("#closeData"), // Close button for database management
+    dataSearch: document.querySelector("#dataSearch"), // Search for specific users
+    dataRefresh: document.querySelector("#dataRefresh"), // Refresh the users list data
+    dataTableBody: document.querySelector("#dataTableBody"), // Where users get added
     // Profile
     closeProfile: document.querySelector("#closeProfile"),
     profile: document.querySelector("#profile"),
+    // Profile Actions
+    profileActionMod: document.querySelector("#profileActionMod"),
+    profileActionMessage: document.querySelector("#profileActionMessage"),
+    profileActionBlock: document.querySelector("#profileActionBlock"),
+    // Profile Data
     profilePfp: document.querySelector("#profilePfp"),
     profileName: document.querySelector("#profileName"),
+    profileRoles: document.querySelector("#profileRoles"),
     profileBio: document.querySelector("#profileBio"),
     // Context
     userContext: document.querySelector("#userContext"),
@@ -355,7 +445,7 @@ const elements = {
 if (settings.allow_pings) elements.togglePings.className = "bi bi-bell header-icons";
 else elements.togglePings.className = "bi bi-bell-slash header-icons";
 if (settings.show_ui) elements.sheet.href = "overhaul.css";
-else elements.togglePings.className = "bi bi-bell-slash header-icons";
+else elements.sheet.href = "style.css";
 if (settings.dark_theme) {
     elements.toggleDark.className = "bi bi-moon-stars-fill header-icons";
     if (!settings.seasonal_theme) {
@@ -388,6 +478,21 @@ if (settings.show_ui) {
     elements.optionsViewUI.className = "bi bi-toggle-off";
     if (settings.show_users) elements.viewport.style.width = "60%";
     else elements.viewport.style.width = "80%";
+};
+if (settings.filter_swears) {
+    elements.optionsViewSwears.className = "bi bi-toggle-on";
+} else {
+    elements.optionsViewSwears.className = "bi bi-toggle-off";
+};
+if (settings.filter_slurs) {
+    elements.optionsViewSlurs.className = "bi bi-toggle-on";
+} else {
+    elements.optionsViewSlurs.className = "bi bi-toggle-off";
+};
+if (settings.show_all) {
+    elements.optionsShowAll.className = "bi bi-toggle-on";
+} else {
+    elements.optionsShowAll.className = "bi bi-toggle-off";
 };
 if (settings.abyss_theme) {
     elements.optionsTAbyss.className = "bi bi-toggle-on";
@@ -438,7 +543,132 @@ const scrollChatHistory = () => {
     elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
 };
 
-const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply) => {
+const refreshData = () => {
+    elements.dataSearch.value = "";
+    elements.dataTableBody.innerHTML = `<tr>
+            <td><p>Fetching. Please wait...</p></td>
+        </tr>`;
+    const response = fetch(`${endpointAddress}/data`, {
+        headers: {
+            "Authorization": sessionID,
+        }
+    }).then(async (r) => {
+        if (!r.ok) {
+            elements.dataTableBody.innerHTML = `<tr>
+                <td><p>Couldn't fetch users.<br>Reason: "${r.statusText}"<br>Code: ${r.status}</p></td>
+            </tr>`;
+        } else {
+            let data = await r.json();
+            data = data.map((str) => JSON.parse(str));
+            dataUsers = data;
+            showDataUsers("auth");
+        };
+    }).catch((e) => {
+        elements.dataTableBody.innerHTML = `<tr>
+            <td><p>An unexpected error occured. Please try again later.</p></td>
+        </tr>`;
+        console.error(e);
+    });
+};
+
+const messageCreateUserBio = (user, pfp, roles, bio) => {
+    elements.profile.classList.remove("hidden");
+    elements.screen.classList.remove("hidden");
+    elements.profileName.innerText = user;
+    elements.profilePfp.src = pfp;
+    elements.profileRoles.innerHTML = ``;
+    if (!roles || roles === "" || roles.split("|").length < 1) elements.profileRoles.innerHTML += `<li class="profile-role" style="list-style-type: none;"><p><span class="profile-role-blank" style="background-color: var(--white-color);"></span>No roles.</p></li>`;
+    else {
+        var separateRoles = roles.split("|");
+        separateRoles.sort((a, b) => {
+            const nameA = a.split("?").length > 1 ? a.split("?")[0] : a;
+            const nameB = b.split("?").length > 1 ? b.split("?")[0] : b;
+
+            const indexA = priorityMap.has(nameA) ? priorityMap.get(nameA) : Infinity;
+            const indexB = priorityMap.has(nameB) ? priorityMap.get(nameB) : Infinity;
+            return indexA - indexB;
+        });
+        separateRoles.forEach(role => {
+            const processed = role.split("?");
+            const roleID = processed.shift();
+            const basis = roleDefinitions.find(r => r.id === roleID);
+            const displayRole = document.createElement("li");
+            displayRole.innerText = basis.name;
+            displayRole.style.listStyleType = "none";
+            displayRole.classList.add("profile-role");
+            let vars = {};
+            if (processed.length > 0) {
+                processed.shift().split("&").forEach(v => {
+                    vars[v.split("=")[0]] = v.split("=")[1];
+                });
+            };
+            switch (roleID) {
+                case "youtuber": {
+                    if (basis.icon.type === "image") {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><a href="https://www.youtube.com/${vars.channel}" class="message-youtuber">${basis.name}</a>`;
+                    };
+                    break;
+                } case "polychrome": {
+                    if (basis.icon.type === "image") {
+                        displayRole.innerHTML = displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p></p>`;
+                        for (let i = 0; i < basis.name.length; i++) {
+                            const letter = basis.name[i];
+                            const l = document.createElement("b");
+                            l.innerText = letter;
+                            l.style.animation = `ease-in-out 1s animRainbow infinite`;
+                            l.style.animationDelay = `-${(i % 16) * 1000 / 16}ms`;
+                            displayRole.children.item(1).appendChild(l);
+                        };
+                    };
+                    break;
+                } case "femboy": {
+                    displayRole.innerHTML = `<p class="message-${basis.id}"><span class="profile-role-blank" style="background-color: ${basis.icon.color};"></span>${basis.name}</p>`;
+                    break;
+                };
+                case "mysterious":
+                case "expie": {
+                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-${basis.id}">${basis.name}</p>`;
+                    break;
+                } case "boyfriend": {
+                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-purple">${basis.name}</p>`;
+                    break;
+                } case "mlg": {
+                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-dark">${basis.name}</p>`;
+                    break;
+                } case "beta_tester": {
+                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-aqua">${basis.name}</p>`;
+                    break;
+                } case "testing": {
+                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-dark">${basis.name}</p>`;
+                    break;
+                } default: {
+                    if (basis.icon.type === "image") {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p>${basis.name}</p>`;
+                    };
+                    if (basis.icon.type === "solid") {
+                        displayRole.innerHTML = `<p><span class="profile-role-blank" style="background-color: ${basis.icon.color};"></span>${basis.name}</p>`;
+                    };
+                };
+            };
+            elements.profileRoles.appendChild(displayRole);
+        });
+    };
+    elements.profileBio.innerHTML = "";
+    if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
+    else {
+        let lines = bio.split(/\r?\n|\\n/);
+        lines.forEach((line) => {
+            const p = document.createElement("p");
+            if (settings.filter_swears) line = line.replace(swearsRegex, (m) => "*".repeat(m.length));;
+            if (settings.filter_slurs) line = line.replace(slursRegex, (m) => "*".repeat(m.length));
+            p.innerText = `${line}`;
+            elements.profileBio.appendChild(p);
+            // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+        });
+    };
+}
+
+const messageCreateUserElement = (user, auth, pfp, roles, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply) => {
     // User Info
     const chatUser = document.createElement("div"); // Includes the sender information, as well as buttons and the date/time of postage
     chatUser.className = "chat-user";
@@ -484,44 +714,91 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
     };
 
     const userName = document.createElement("p");
-    userName.innerText = `${dm ? "[Direct] " : ""}${user}`;
-    userName.className = `user-name message-${neo}`;
-
+    if (!["shake", "hyperneo", "polychrome"].includes(neo)) {
+        userName.innerText = `${dm ? "[Direct] " : ""}${user}`;
+        userName.className = `user-name message-${neo}`;
+    } else {
+        switch (neo) {
+            case "polychrome": {
+                userName.className = `user-name`;
+                const content = `${dm ? "[Direct] " : ""}${user}`;
+                for (let i = 0; i < content.length; i++) {
+                    const letter = content[i];
+                    const s = document.createElement("b");
+                    s.style.animation = `ease-in-out 1s animRainbow infinite`;
+                    s.style.animationDelay = `-${(i % 16) * 1000 / 16}ms`;
+                    s.innerText = letter;
+                    userName.appendChild(s);
+                };
+                break;
+            };
+            case "hyperneo": {
+                userName.className = `user-name`;
+                const content = `${dm ? "[Direct] " : ""}${user}`;
+                for (let i = 0; i < content.length; i++) {
+                    const letter = content[i];
+                    const s = document.createElement("b");
+                    s.style.animation = `ease-in-out 2s animHyperneo infinite`;
+                    s.style.animationDelay = `-${(i % 8) * 1000 / 8}ms`;
+                    s.style.position = "relative";
+                    s.style.marginInlineEnd = "8px";
+                    s.innerText = letter;
+                    userName.appendChild(s);
+                };
+                break;
+            };
+            case "shake": {
+                userName.className = `user-name`;
+                const content = `${dm ? "[Direct] " : ""}${user}`;
+                for (let i = 0; i < content.length; i++) {
+                    const letter = content[i];
+                    const s = document.createElement("b");
+                    s.style.animation = `linear 0.5s animShake infinite`;
+                    s.style.animationDelay = `-${Math.floor(Math.random() * (1000) + 1)}ms`;
+                    s.style.position = "relative";
+                    s.style.marginInlineEnd = "8px";
+                    s.innerText = letter;
+                    userName.appendChild(s);
+                };
+                break;
+            };
+        };
+    };
     userInfo.appendChild(userPfp);
     userInfo.appendChild(userName);
     switch (auth) {
         case 2: {
             let userBadge = document.createElement("img");
             userBadge.className = "user-badge";
-            userBadge.src = "./badges/helper.png";
+            userBadge.src = `${homeServer}/badges/helper.png`;
             userInfo.appendChild(userBadge);
             break;
         };
         case 3: {
             let userBadge = document.createElement("img");
             userBadge.className = "user-badge";
-            userBadge.src = "./badges/underseer.png";
+            userBadge.src = `${homeServer}/badges/underseer.png`;
             userInfo.appendChild(userBadge);
             break;
         };
         case 4: {
             let userBadge = document.createElement("img");
             userBadge.className = "user-badge";
-            userBadge.src = "./badges/overseer.png";
+            userBadge.src = `${homeServer}/badges/overseer.png`;
             userInfo.appendChild(userBadge);
             break;
         };
         case 5: {
             let userBadge = document.createElement("img");
             userBadge.className = "user-badge";
-            userBadge.src = "./badges/admin.png";
+            userBadge.src = `${homeServer}/badges/admin.png`;
             userInfo.appendChild(userBadge);
             break;
         };
         case 6: {
             let userBadge = document.createElement("img");
             userBadge.className = "user-badge";
-            userBadge.src = "./badges/developer.png";
+            userBadge.src = `${homeServer}/badges/developer.png`;
             userInfo.appendChild(userBadge);
             break;
         };
@@ -553,21 +830,19 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
             if (aID == "-" || aID == "!") {
                 createToast("You can't view this profile.");
             } else { // Invalid profiles do not have pfps
-                elements.profile.classList.remove("hidden");
-                elements.screen.classList.remove("hidden");
-                elements.profileName.innerText = user;
-                elements.profilePfp.src = pfp;
-                elements.profileBio.innerHTML = "";
-                if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
-                else {
-                    let lines = bio.split(/\r?\n|\\n/);
-                    lines.forEach((line) => {
-                        const p = document.createElement("p");
-                        const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
-                        p.innerText = `${line.replace(badRegex, (m) => "*".repeat(m.length)).split(":")}`;
-                        elements.profileBio.appendChild(p);
-                        // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
-                    });
+                messageCreateUserBio(user, pfp, roles, bio);
+                elements.profileActionMod.onclick = (e) => {
+                    createToast(`This feature is unavailable.`);
+                };
+                elements.profileActionMessage.onclick = (e) => {
+                    createToast(`This feature is unavailable.`);
+                };
+                elements.profileActionBlock.onclick = (e) => {
+                    // ws.send(JSON.stringify({
+                    //     type: "text",
+                    //     content: `/block add ${aID}`
+                    // }));
+                    createToast(`This feature is unavailable.`);
                 };
             };
         };
@@ -606,77 +881,63 @@ const messageCreateUserElement = (user, auth, pfp, bio, verified, neo, timestamp
 const messageCreateTextElement = (message, color, auth) => {
     // Text
     const chatMessage = document.createElement("div");
-    chatMessage.className = `chat-message message-${color}`;
+    if (!["shake", "hyperneo", "polychrome"].includes(color)) {
+        chatMessage.className = `chat-message message-${color}`;
+    } else {
+        chatMessage.clasName = `chat-message`;
+    };
     const p = document.createElement("p");
     p.className = "chat-message-lines";
     // Message Paragraphs
     let lines = message.toString();
     lines = lines.split(/\r?\n|\\n/);
     const paragraphs = [];
-    const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
     lines.forEach(line => { // Per paragraph
         let s = document.createElement("span"); // This used to be p
         s.className = "chat-message-line";
         // Split emotes
         // let reconstructed = [];
-        let previousWasEmote = false;
-        const emoteSplit = line.replace(badRegex, (m) => "*".repeat(m.length)).split(":");
-        // Initial text
-        // reconstructed.push(emoteSplit[0]);
-        const pElement = document.createElement(`p`);
-        pElement.textContent = emoteSplit[0];
-        s.appendChild(pElement);
-        for (let i = 1; i < emoteSplit.length; i++) { // Per emote
-            // Check if it's an emoji
-            if (Object.keys(emojis).includes(emoteSplit[i])) {
-                previousWasEmote = true;
-                // reconstructed.push(`<i class="${emojis[emoteSplit[i]]}"></i>`);
-                const emojiElement = document.createElement(`i`);
-                emojiElement.className = `${emojis[emoteSplit[i]]}`;
-                s.appendChild(emojiElement);
-            } else if (Object.keys(allEmotes).includes(emoteSplit[i])) { // Check if it's an emote
-                previousWasEmote = true;
-                // reconstructed.push(`<img class="chat-emote" src="${emotes[emoteSplit[i]]}">`);
-                const emoteElement = document.createElement(`img`);
-                emoteElement.className = `chat-emote`;
-                emoteElement.src = `${allEmotes[emoteSplit[i]]}`;
-                s.appendChild(emoteElement);
-            } else if (i > 0 && !previousWasEmote) {
-                previousWasEmote = false;
-                // reconstructed.push(":" + emoteSplit[i]);
-                const pElement = document.createElement(`p`);
-                pElement.textContent = ":" + emoteSplit[i];
-                if (emoteSplit[i - 1][emoteSplit[i - 1].length - 1] === " ") pElement.style.marginLeft = `4px`;
-                s.appendChild(pElement);
-            } else {
-                previousWasEmote = false;
-                // reconstructed.push(emoteSplit[i]);
-                const pElement = document.createElement(`p`);
-                pElement.textContent = emoteSplit[i];
-                s.appendChild(pElement);
-            };
-            // p.appendChild(s);
-        };
-        // Loop every element to find a ping
-        // Pings are broken
-        // for (let i = 0; i < s.children.length; i++) {
-        //     if (s.children[i].tagName === "P") {
-        //         let possiblePings = s.children[i].textContent.split(" ");
-        //         possiblePings.forEach((possiblePing) => {
-        //             if (possiblePing[0] === "@") {
-        //                 if (possiblePings.length < 1) {
-        //                     s.removeChild(s.children[i]);
-        //                 };
-        //                 const pElement = document.createElement(`p`);
-        //                 pElement.textContent = possiblePing;
-        //                 pElement.className = "message-ping";
-        //                 s.insertBefore(pElement, s.children[i]);
-        //                 if (i < s.children.length - 1) s.children[i].style.marginRight = `4px`;
-        //                 if (possiblePings.length > 1) s.children[i].textContent = possiblePings.join(" ");
-        //             };
-        //         });
+        // let previousWasEmote = false;
+        // const emoteSplit = line.split(":");
+        // // Initial text
+        // // reconstructed.push(emoteSplit[0]);
+        // const pElement = document.createElement(`p`);
+        // pElement.textContent = emoteSplit[0];
+        // s.appendChild(pElement);
+        // for (let i = 1; i < emoteSplit.length; i++) { // Per emote
+        //     // Check if it's an emoji
+        //     if (Object.keys(emojis).includes(emoteSplit[i])) {
+        //         previousWasEmote = true;
+        //         // reconstructed.push(`<i class="${emojis[emoteSplit[i]]}"></i>`);
+        //         const emojiElement = document.createElement(`i`);
+        //         emojiElement.className = `${emojis[emoteSplit[i]]}`;
+        //         s.appendChild(emojiElement);
+        //     } else if (Object.keys(allEmotes).includes(emoteSplit[i])) { // Check if it's an emote
+        //         previousWasEmote = true;
+        //         // reconstructed.push(`<img class="chat-emote" src="${emotes[emoteSplit[i]]}">`);
+        //         const emoteElement = document.createElement(`img`);
+        //         emoteElement.className = `chat-emote`;
+        //         emoteElement.src = `${allEmotes[emoteSplit[i]]}`;
+        //         s.appendChild(emoteElement);
+        //     } else if (i > 0 && !previousWasEmote) {
+        //         previousWasEmote = false;
+        //         // reconstructed.push(":" + emoteSplit[i]);
+        //         const pElement = document.createElement(`p`);
+        //         pElement.textContent = ":" + emoteSplit[i];
+        //         if (emoteSplit[i - 1][emoteSplit[i - 1].length - 1] === " ") pElement.style.marginLeft = `4px`;
+        //         s.appendChild(pElement);
+        //     } else {
+        //         previousWasEmote = false;
+        //         // reconstructed.push(emoteSplit[i]);
+        //         const pElement = document.createElement(`p`);
+        //         pElement.textContent = emoteSplit[i];
+        //         s.appendChild(pElement);
         //     };
+        //     // p.appendChild(s);
         // };
+        s.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+        // s.innerText = line;
+        // Pings
         const pingable = [
             ...collectedUsers.guests,
             ...collectedUsers.users,
@@ -686,27 +947,144 @@ const messageCreateTextElement = (message, color, auth) => {
             ...collectedUsers.admins,
             ...collectedUsers.developers
         ].map(user => user.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-        if (auth > 4) pingable.push("everyone");
-        let regEx = new RegExp(`(@${pingable.join("|@")})`, "g");
-        for (let i = 0; i < s.children.length; i++) {
-            if (s.children[i].tagName === "P") {
-                if (s.children[i].innerHTML.includes(`@${info.name}`)) {
-                    if (canPlayAudio && settings.allow_pings) { pingAudio.play(); };
-                } else if (auth > 4 && s.children[i].innerHTML.includes(`@everyone`) && canPlayAudio && settings.allow_pings) { importantAudio.play(); };
-                s.children[i].innerHTML = s.children[i].innerHTML.replace(regEx, `<span class="message-ping">\$1</span>`);
-            };
-        };
+        if (auth > 4) {
+            pingable.push("everyone");
+            pingable.push("developers");
+        }
+        if (auth > 3) pingable.push("admins");
+        if (auth > 2) pingable.push("overseers");
+        if (auth > 1) pingable.push("underseers");
+        if (auth > 0) pingable.push("helpers");
+        let regExPing = new RegExp(`(@${pingable.join("|@")})`, "g");
+        // for (let i = 0; i < s.children.length; i++) {
+        //     if (s.children[i].tagName === "P") {
+        // Emotes
+        let html = s.children.item(0).innerText.replace(/:([^:\s]+):/g, (match, key) => {
+            return allEmotes[key] ?
+                `</p><img class="chat-emote" src="${homeServer}/${allEmotes[key]}"><p>` :
+                emojis[key] ?
+                    `</p><i class="${emojis[key]}"></i><p>` : match;
+        });
+        // Formatting / Markdown
+        // Bold Italic
+        html = html.replace(/\*{3}(.+?)\*{3}/g, "<b><i>$1</i></b>");
+        // Bold
+        html = html.replace(/\*{2}(.+?)\*{2}/g, "<b>$1</b>");
+        // Italic
+        html = html.replace(/\*(.+?)\*/g, "<i>$1</i>");
+        // Strikethrough
+        html = html.replace(/\~{2}(.+?)\~{2}/g, "<s>$1</s>");
+        // Underline
+        html = html.replace(/\_{2}(.+?)\_{2}/g, "<u>$1</u>");
+        // Code
+        html = html.replace(/\`(.+?)\`/g, "<code>$1</code>");
+        // Header
+        html = html.replace(/\#(.+?)\#/g, "<h1>$1</h1>");
+        // Spoiler
+        html = html.replace(/\|{2}(.+?)\|{2}/g, "<details><summary>Click to expand or collapse.</summary><p>$1</p></details>");
+        // if (auth > 5) {};
+        // Pings
+        if (html.includes(`@${info.name}`)) {
+            if (canPlayAudio && settings.allow_pings) { pingAudio.play(); };
+        } else if (auth > 4 && html.includes(`@everyone`) && canPlayAudio && settings.allow_pings) { importantAudio.play(); }
+        else if (auth > 4 && html.includes(`@developers`) && canPlayAudio && settings.allow_pings && info.auth === 6) { importantAudio.play(); }
+        else if (auth > 3 && html.includes(`@admins`) && canPlayAudio && settings.allow_pings && info.auth === 5) { importantAudio.play(); }
+        else if (auth > 2 && html.includes(`@overseers`) && canPlayAudio && settings.allow_pings && info.auth === 4) { importantAudio.play(); }
+        else if (auth > 1 && html.includes(`@underseers`) && canPlayAudio && settings.allow_pings && info.auth === 3) { importantAudio.play(); }
+        else if (auth > 0 && html.includes(`@helpers`) && canPlayAudio && settings.allow_pings && info.auth === 2) { importantAudio.play(); };
+        html = html.replace(regExPing, `<span class="message-ping">\$1</span>`);
+        // Filters
+        if (settings.filter_slurs) html = html.replace(slursRegex, (m) => "*".repeat(m.length));
+        if (settings.filter_swears) html = html.replace(swearsRegex, (m) => "*".repeat(m.length));
+        //    };
+        // };
         // p.innerHTML = reconstructed.join("");
         // paragraphs.push(p);
-        if (s.children.item(0).innerText === "") s.removeChild(s.children.item(0));
-        if (s.children.item(s.children.length - 1).innerText === "") s.removeChild(s.children.item(s.children.length - 1));
-        if (s.children.item(0).tagName === "IMG" && s.children.length < 2) {
-            // s.children.item(0).style.width = "100px";
-            // s.children.item(0).style.height = "100px";
-            s.children.item(0).classList.add("big-emote");
-        } else if (s.children.item(0).tagName === "I" && s.children.length < 2) {
-            s.children.item(0).classList.add("big-emoji");
-            // s.children.item(0).style.fontSize = `${parseFloat(window.getComputedStyle(s.children[0]).fontSize)}px`;
+        s.children.item(0).innerHTML = html;
+        console.log(s.children.item(0).innerHTML);
+        // This removes empty P elements
+        if (s.children.item(0).children.length > 0) {
+            for (let x = 0; x < s.children.item(0).children.length; x++) {
+                const e = s.children.item(0).children.item(x);
+                if (e.tagName === "P" && e.innerText === "") s.children.item(0).removeChild(e);
+            };
+        };
+        // This removes the wrapped P element
+        if (s.children.item(0).children.length > 0) {
+            for (let x = 0; x < s.children.item(0).children.length; x++) {
+                const e = s.children.item(0).children.item(x);
+                if (e.tagName === "IMG") {
+                    s.innerHTML = s.children.item(0).innerHTML;
+                    break;
+                };
+            };
+        };
+        for (let i = 0; i < s.children.length; i++) {
+            if (!["IMG", "I"].includes(s.children.item(i).tagName)) {
+                // s.children.item(i).innerText === "" && !["IMG", "I"].includes(s.children.item(i).children.item(x).tagName) ? s.removeChild(s.children.item(i)) : null;
+                if (["shake", "hyperneo", "polychrome"].includes(color)) {
+                    switch (color) {
+                        case "polychrome": {
+                            const content = s.children.item(i).innerText;
+                            s.children.item(i).innerText = "";
+                            for (let x = 0; x < content.length; x++) {
+                                const letter = content[x];
+                                const l = document.createElement("b");
+                                l.style.animation = `ease-in-out 1s animRainbow infinite`;
+                                l.style.animationDelay = `-${(x % 16) * (1000 / 16)}ms`;
+                                if (letter !== " ") l.style.marginInlineEnd = "0px";
+                                l.innerText = letter;
+                                s.children.item(i).appendChild(l);
+                            };
+                            break;
+                        };
+                        case "hyperneo": {
+                            const content = s.children.item(i).innerText;
+                            s.children.item(i).innerText = "";
+                            for (let x = 0; x < content.length; x++) {
+                                const letter = content[x];
+                                const l = document.createElement("b");
+                                l.style.animation = `ease-in-out 2s animHyperneo infinite`;
+                                l.style.animationDelay = `-${(x % 8) * 1000 / 8}ms`;
+                                l.style.position = "relative";
+                                l.style.marginInlineEnd = "8px";
+                                l.innerText = letter;
+                                s.children.item(i).appendChild(l);
+                            };
+                            break;
+                        };
+                        case "shake": {
+                            const content = s.children.item(i).innerText;
+                            s.children.item(i).innerText = "";
+                            for (let x = 0; x < content.length; x++) {
+                                const letter = content[x];
+                                const l = document.createElement("b");
+                                l.style.animation = `linear 0.5s animShake infinite`;
+                                l.style.animationDelay = `-${Math.floor(Math.random() * (1000) + 1)}ms`;
+                                l.style.position = "relative";
+                                l.style.marginInlineEnd = "8px";
+                                l.innerText = letter;
+                                s.children.item(i).appendChild(l);
+                            };
+                            break;
+                        };
+                    };
+                };
+            };
+        };
+        if (s.children.length > 0) {
+            if (s.children.item(0).tagName === "IMG" && s.children.length < 2 && s.innerText === "") {
+                // s.children.item(0).style.width = "100px";
+                // s.children.item(0).style.height = "100px";
+                s.children.item(0).classList.add("big-emote");
+            } else if (s.children.item(0).tagName === "I" && s.children.length < 2) {
+                s.children.item(0).classList.add("big-emoji");
+                // s.children.item(0).style.fontSize = `${parseFloat(window.getComputedStyle(s.children[0]).fontSize)}px`;
+            };
+            // } else {
+            //     if (s.children.item(0).innerText === "") s.removeChild(s.children.item(0));
+            //     if (s.children.item(s.children.length - 1).innerText === "") s.removeChild(s.children.item(s.children.length - 1));
+            // };
         };
         paragraphs.push(s);
     });
@@ -759,17 +1137,20 @@ const messageCreateVideoElement = (file) => {
     return chatMessage;
 };
 
-const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, timestamp, iID, aID, id, reply, dm, canReply) => {
+const createMessageText = (user, auth, pfp, roles, bio, verified, message, neo, color, timestamp, iID, aID, id, reply, dm, canReply) => {
     if (message.toString() != "") {
         const messageElement = document.createElement("div");
         messageElement.className = `message${dm ? " dm" : ""}`;
 
         const replyText = document.createElement("p");
         replyText.className = "reply-text";
-        const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
-        if (reply != "-") replyText.innerText = reply.replace(badRegex, (m) => "*".repeat(m.length));
+        if (reply != "-") {
+            if (settings.filter_slurs) reply = reply.replace(slursRegex, (m) => "*".repeat(m.length));
+            if (settings.filter_swears) reply = reply.replace(swearsRegex, (m) => "*".repeat(m.length));
+            replyText.innerText = reply;
+        };
 
-        const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply);
+        const chatUser = messageCreateUserElement(user, auth, pfp, roles, bio, verified, neo, timestamp, message, iID, aID, id, dm, canReply);
         // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
         const chatMessage = messageCreateTextElement(message, color, auth);
 
@@ -785,7 +1166,7 @@ const createMessageText = (user, auth, pfp, bio, verified, message, neo, color, 
     };
 }
 
-const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, timestamp, iID, aID, id) => {
+const createMessageUpload = (user, auth, pfp, roles, bio, verified, file, mime, neo, timestamp, iID, aID, id) => {
     const messageElement = document.createElement("div");
     messageElement.className = "message";
 
@@ -793,7 +1174,7 @@ const createMessageUpload = (user, auth, pfp, bio, verified, file, mime, neo, ti
     // replyText.className = "reply-text";
     // if (reply != "-") replyText.innerText = reply;
 
-    const chatUser = messageCreateUserElement(user, auth, pfp, bio, verified, neo, timestamp, "[Upload]", iID, aID, id, false, true);
+    const chatUser = messageCreateUserElement(user, auth, pfp, roles, bio, verified, neo, timestamp, "[Upload]", iID, aID, id, false, true);
     let chatMedia = undefined;
     // chatUser.querySelector(".bi-trash").onclick = () => messageElement.remove();
     switch (mime.split("/")[0]) {
@@ -829,7 +1210,7 @@ const createMessageSimple = (message, timestamp, color) => {
     messageElement.className = `message`;
 
     let dateTime = new Date(timestamp);
-    const messageWithTime = `${dateTime.getHours() < 10 ? "0" : ""}${(dateTime.getHours() == 12 || dateTime.getHours() == 0) ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"}${message}`;
+    const messageWithTime = `${dateTime.getHours() < 10 ? "0" : ""}${(dateTime.getHours() == 12 || dateTime.getHours() == 0) ? "12" : dateTime.getHours() % 12}:${dateTime.getMinutes() < 10 ? "0" : ""}${dateTime.getMinutes()} ${dateTime.getHours() < 12 ? "AM" : "PM"} ${message}`;
 
     const chatMessage = messageCreateTextElement(messageWithTime, color, 0);
     messageElement.appendChild(chatMessage);
@@ -839,7 +1220,7 @@ const createMessageSimple = (message, timestamp, color) => {
     return messageElement;
 };
 
-const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
+const createUserInList = (id, aID, name, bio, pfp, roles, verified, neo, auth) => {
     const user = document.createElement("div");
     user.className = "users-user";
 
@@ -863,8 +1244,53 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
         `;
     };
     const userName = document.createElement("p");
-    userName.className = `user-name message-${neo}`;
-    userName.innerText = name;
+    if (!["shake", "hyperneo", "polychrome"].includes(neo)) {
+        userName.innerText = name;
+        userName.className = `user-name message-${neo}`;
+    } else {
+        switch (neo) {
+            case "polychrome": {
+                userName.className = `user-name`;
+                for (let i = 0; i < name.length; i++) {
+                    const letter = name[i];
+                    const s = document.createElement("b");
+                    s.style.animation = `ease-in-out 1s animRainbow infinite`;
+                    s.style.animationDelay = `-${(i % 16) * 1000 / 16}ms`;
+                    s.innerText = letter;
+                    userName.appendChild(s);
+                };
+                break;
+            };
+            case "hyperneo": {
+                userName.className = `user-name`;
+                for (let i = 0; i < name.length; i++) {
+                    const letter = name[i];
+                    const s = document.createElement("b");
+                    s.style.animation = `ease-in-out 2s animHyperneo infinite`;
+                    s.style.animationDelay = `-${(i % 8) * 1000 / 8}ms`;
+                    s.style.position = "relative";
+                    s.style.marginInlineEnd = "8px";
+                    s.innerText = letter;
+                    userName.appendChild(s);
+                };
+                break;
+            };
+            case "shake": {
+                userName.className = `user-name`;
+                for (let i = 0; i < name.length; i++) {
+                    const letter = name[i];
+                    const s = document.createElement("b");
+                    s.style.animation = `linear 0.5s animShake infinite`;
+                    s.style.animationDelay = `-${Math.floor(Math.random() * (1000) + 1)}ms`;
+                    s.style.position = "relative";
+                    s.style.marginInlineEnd = "8px";
+                    s.innerText = letter;
+                    userName.appendChild(s);
+                };
+                break;
+            };
+        };
+    };
     const openContext = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -888,20 +1314,19 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
                     if (aID == "-" || aID == "!") {
                         createToast("You can't view this profile.");
                     } else { // Invalid profiles do not have pfps
-                        elements.profile.classList.remove("hidden");
-                        elements.screen.classList.remove("hidden");
-                        elements.profileName.innerText = name;
-                        elements.profilePfp.src = pfp;
-                        elements.profileBio.innerHTML = "";
-                        if (!bio || bio == "" || bio == " ") elements.profileBio.insertAdjacentHTML("beforeend", `<p>No bio provided.</p>`);
-                        else {
-                            let lines = bio.split(/\r?\n|\\n/);
-                            lines.forEach((line) => {
-                                const p = document.createElement("p");
-                                p.innerText = line;
-                                elements.profileBio.appendChild(p);
-                                // elements.profileBio.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
-                            });
+                        messageCreateUserBio(name, pfp, roles, bio);
+                        elements.profileActionMod.onclick = (e) => {
+                            createToast(`This feature is unavailable.`);
+                        };
+                        elements.profileActionMessage.onclick = (e) => {
+                            createToast(`This feature is unavailable.`);
+                        };
+                        elements.profileActionBlock.onclick = (e) => {
+                            ws.send(JSON.stringify({
+                                type: "text",
+                                content: `/block add ${aID}`
+                            }));
+                            console.log(aID);
                         };
                     };
                     break;
@@ -918,6 +1343,43 @@ const createUserInList = (id, aID, name, bio, pfp, verified, neo) => {
 
     user.appendChild(userPfp);
     user.appendChild(userName);
+    switch (auth) {
+        case 2: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "users-user-badge";
+            userBadge.src = `${homeServer}/badges/helper.png`;
+            user.appendChild(userBadge);
+            break;
+        };
+        case 3: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "users-user-badge";
+            userBadge.src = `${homeServer}/badges/underseer.png`;
+            user.appendChild(userBadge);
+            break;
+        };
+        case 4: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "users-user-badge";
+            userBadge.src = `${homeServer}/badges/overseer.png`;
+            user.appendChild(userBadge);
+            break;
+        };
+        case 5: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "users-user-badge";
+            userBadge.src = `${homeServer}/badges/admin.png`;
+            user.appendChild(userBadge);
+            break;
+        };
+        case 6: {
+            let userBadge = document.createElement("img");
+            userBadge.className = "users-user-badge";
+            userBadge.src = `${homeServer}/badges/developer.png`;
+            user.appendChild(userBadge);
+            break;
+        };
+    };
     if (verified) userName.insertAdjacentHTML("beforeend", `<i class="bi bi-check-circle user-verified"></i>`);
     elements.users.appendChild(user);
     return user;
@@ -929,7 +1391,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Friends</h2>`);
         collectedUsers.friends.forEach((friend) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(friend.id, friend.aID, friend.name, friend.bio, friend.pfp, true, friend.neo);
+            const userInList = createUserInList(friend.id, friend.aID, friend.name, friend.bio, friend.pfp, friend.roles, true, friend.neo, friend.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -937,7 +1399,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Developers</h2>`);
         collectedUsers.developers.forEach((developer) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(developer.id, developer.aID, developer.name, developer.bio, developer.pfp, true, developer.neo);
+            const userInList = createUserInList(developer.id, developer.aID, developer.name, developer.bio, developer.pfp, developer.roles, true, developer.neo, developer.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -945,7 +1407,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Admins</h2>`);
         collectedUsers.admins.forEach((admin) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(admin.id, admin.aID, admin.name, admin.bio, admin.pfp, true, admin.neo);
+            const userInList = createUserInList(admin.id, admin.aID, admin.name, admin.bio, admin.pfp, admin.roles, true, admin.neo, admin.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -953,7 +1415,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Overseers</h2>`);
         collectedUsers.overseers.forEach((overseer) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(overseer.id, overseer.aID, overseer.name, overseer.bio, overseer.pfp, true, overseer.neo);
+            const userInList = createUserInList(overseer.id, overseer.aID, overseer.name, overseer.bio, overseer.pfp, overseer.roles, true, overseer.neo, overseer.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -961,7 +1423,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Underseers</h2>`);
         collectedUsers.underseers.forEach((underseer) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(underseer.id, underseer.aID, underseer.name, underseer.bio, underseer.pfp, true, underseer.neo);
+            const userInList = createUserInList(underseer.id, underseer.aID, underseer.name, underseer.bio, underseer.pfp, underseer.roles, true, underseer.neo, underseer.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -969,7 +1431,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Helpers</h2>`);
         collectedUsers.helpers.forEach((helper) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(helper.id, helper.aID, helper.name, helper.bio, helper.pfp, true, helper.neo);
+            const userInList = createUserInList(helper.id, helper.aID, helper.name, helper.bio, helper.pfp, helper.roles, true, helper.neo, helper.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -977,7 +1439,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Users</h2>`);
         collectedUsers.users.forEach((user) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(user.id, user.aID, user.name, user.bio, user.pfp, true, user.neo);
+            const userInList = createUserInList(user.id, user.aID, user.name, user.bio, user.pfp, user.roles, true, user.neo, user.auth);
         });
         //elements.users.innerHTML += `<hr>`;
     };
@@ -985,7 +1447,7 @@ const listAllUsers = () => {
         elements.users.insertAdjacentHTML("beforeend", `<h2 style="text-align: center; color: white; user-select: none;">Guests</h2>`);
         collectedUsers.guests.forEach((guest) => {
             // ID in this case is the actual instance ID (the thing guest names have after the hashtag)
-            const userInList = createUserInList(guest.id, guest.aID, guest.name, guest.bio, guest.pfp, false, guest.neo);
+            const userInList = createUserInList(guest.id, guest.aID, guest.name, guest.bio, guest.pfp, guest.roles, false, guest.neo, guest.auth);
         });
     };
     if (collectedUsers.guests.length < 1 &&
@@ -999,6 +1461,154 @@ const listAllUsers = () => {
     ) {
         elements.users.innerHTML += `<p style="text-align: center; color: white; user-select: none;">Nobody here!</p>`;
     };
+};
+
+const showDataUsers = (order) => {
+    let data = dataUsers;
+    switch (order) {
+        case "auth": {
+            data = dataUsers.toSorted((a, b) => b.auth - a.auth || a.name.localeCompare(b.name));
+            break;
+        };
+        case "newest": {
+            data = dataUsers.toSorted((a, b) => b.dID - a.dID);
+            break;
+        };
+    };
+    elements.dataTableBody.innerHTML = "";
+    if (!settings.show_all) data = data.filter(d => d.creatorID === info.aID || d.name === info.name);
+    data.forEach(account => {
+        const main = document.createElement("tr");
+        main.className = "data-account";
+        // dID
+        const dID = document.createElement("td");
+        dID.innerText = account.dID;
+        // Name
+        const name = document.createElement("td");
+        if ((info.auth > account.auth && info.auth > 3) || info.name === account.name || info.aID === account.creatorID) {
+            const editName = document.createElement("input");
+            editName.value = account.name;
+            editName.placeholder = "Display name...";
+            editName.maxLength = "35";
+            editName.minLength = "1";
+            editName.className = "data-name";
+            editName.type = "text";
+            name.appendChild(editName);
+        } else {
+            name.className = "data-name";
+            name.innerText = account.name;
+        }
+        // aID
+        const aID = document.createElement("td");
+        aID.innerText = account.aID;
+        // Token
+        const token = document.createElement("td");
+        if ((info.auth > account.auth && info.auth > 3) || info.name === account.name || info.aID === account.creatorID) {
+            const editToken = document.createElement("input");
+            editToken.value = account.token ?? "";
+            editToken.maxLength = "100";
+            editToken.minLength = "1";
+            editToken.placeholder = "Token";
+            editToken.type = "text";
+            token.appendChild(editToken);
+        } else {
+            token.innerText = account.token ?? "-";
+        };
+        // Access Level
+        const access = document.createElement("td");
+        if (info.auth > 5 && (info.auth > account.auth && info.auth > 3)) {
+            const editAccess = document.createElement("select");
+            if (info.auth > 5) {
+                // Developer
+                const oDeveloper = document.createElement("option");
+                oDeveloper.value = 6;
+                oDeveloper.innerText = "Developer (6)";
+                editAccess.appendChild(oDeveloper);
+                // Admin
+                const oAdmin = document.createElement("option");
+                oAdmin.value = 5;
+                oAdmin.innerText = "Admin (5)";
+                editAccess.appendChild(oAdmin);
+                // Overseer
+                const oOverseer = document.createElement("option");
+                oOverseer.value = 4;
+                oOverseer.innerText = "Overseer (4)";
+                editAccess.appendChild(oOverseer);
+                // Underseer
+                const oUnderseer = document.createElement("option");
+                oUnderseer.value = 3;
+                oUnderseer.innerText = "Underseer (3)";
+                editAccess.appendChild(oUnderseer);
+                // Helper
+                const oHelper = document.createElement("option");
+                oHelper.value = 2;
+                oHelper.innerText = "Helper (2)";
+                editAccess.appendChild(oHelper);
+            };
+            if (info.auth > 2) {
+                // User
+                const oUser = document.createElement("option");
+                oUser.value = 1;
+                oUser.innerText = "User (1)";
+                editAccess.appendChild(oUser);
+            };
+            if (info.auth > 5) {
+                // Registered Guest
+                const oGuest = document.createElement("option");
+                oGuest.value = 0;
+                oGuest.innerText = "Registered Guest (0)";
+                editAccess.appendChild(oGuest);
+            };
+            editAccess.value = account.auth;
+            access.appendChild(editAccess);
+        } else {
+            access.innerText = `${account.auth === 6 ? "Developer" : account.auth === 5 ? "Admin" : account.auth === 4 ? "Overseer" : account.auth === 3 ? "Underseer" : account.auth === 2 ? "Helper" : account.auth === 1 ? "User" : "Registered Guest"} (${account.auth})`;
+        }
+        // Creator
+        const creator = document.createElement("td");
+        creator.innerText = account.creator;
+        // Operations
+        const ops = document.createElement("td");
+        ops.className = "data-operations";
+        if ((info.auth > account.auth && info.auth > 3) || info.name === account.name || info.aID === account.creatorID) {
+            const opUpdate = document.createElement("button");
+            opUpdate.innerText = "Update";
+            opUpdate.onclick = (e) => {
+                // ws.send(JSON.stringify({
+                //     type: "text",
+                //     content: `/block add ${aID}`
+                // }));
+                postDataChanges(
+                    account.dID,
+                    name.children.length > 0 && name.children.item(0).value !== account.name ? name.children.item(0).value : null,
+                    token.children.length > 0 && token.children.item(0).value !== account.token ? token.children.item(0).value : null,
+                    access.children.length > 0 && access.children.item(0).value !== account.auth ? access.children.item(0).value : null
+                ).then((r) => {
+                    refreshData();
+                });
+            };
+            const opDelete = document.createElement("button");
+            opDelete.innerText = "Delete";
+            opDelete.onclick = (e) => {
+                postDataDelete(account.dID).then((r) => {
+                    refreshData();
+                });
+            };
+            ops.appendChild(opUpdate);
+            ops.appendChild(opDelete);
+        } else {
+            ops.innerText = "-";
+        };
+
+        main.appendChild(dID);
+        main.appendChild(name);
+        main.appendChild(aID);
+        main.appendChild(token);
+        main.appendChild(access);
+        main.appendChild(creator);
+        main.appendChild(ops);
+        elements.dataTableBody.appendChild(main);
+    });
 };
 
 // GET and POST Requests
@@ -1030,6 +1640,54 @@ const postTokenAuth = async () => {
     } catch (e) {
         elements.authError.innerText = `Error: ${e.message}`;
         elements.authError.classList.remove("hidden");
+    };
+};
+
+const postDataChanges = async (dID, newName, newToken, newAuth) => {
+    try {
+        let b = {
+            sessionID: sessionID,
+            dID: dID,
+        };
+        if (newName) b["newName"] = newName;
+        if (newToken) b["newToken"] = newToken;
+        if (newAuth) b["newAuth"] = newAuth;
+        const response = await fetch(`${endpointAddress}/update`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(b)
+        });
+        if (!response.ok) {
+            createToast(`Error: ${await response.text()}`);
+        } else {
+            createToast(await response.text());
+        }
+    } catch (e) {
+        createToast(`Error: ${e.message}`);
+    };
+};
+
+const postDataDelete = async (dID) => {
+    try {
+        const response = await fetch(`${endpointAddress}/delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                sessionID: sessionID,
+                dID: dID
+            })
+        });
+        if (!response.ok) {
+            createToast(`Error: ${await response.text()}`);
+        } else {
+            createToast(await response.text());
+        }
+    } catch (e) {
+        createToast(`Error: ${e.message}`);
     };
 };
 
@@ -1077,37 +1735,127 @@ const wsOpen = () => {
 const wsMessage = (data, isBinary) => {
     let isBinaryTrue = isBinary || data.data instanceof ArrayBuffer || data.data instanceof Blob;
     if (!isBinaryTrue) {
-        try {
-            const message = JSON.parse(data.data.toString());
-            switch (message.type) {
-                case "text": {
+        const message = JSON.parse(data.data.toString());
+        switch (message.type) {
+            case "text": {
+                console.log(message);
+                createMessageText(
+                    message.sender.name,
+                    message.sender.auth,
+                    message.sender.pfp,
+                    message.sender.roles,
+                    message.sender.bio,
+                    message.sender.aID != "-",
+                    message.content,
+                    message.neo,
+                    message.color,
+                    message.timestamp,
+                    message.sender.iID,
+                    message.sender.aID,
+                    message.id,
+                    message.reply,
+                    message.dm,
+                    message.canReply);
+                break;
+            };
+            case "simple": {
+                createMessageSimple(message.content, message.timestamp, message.color);
+                break;
+            };
+            case "pong": {
+                info = message;
+                if (info.auth > 2) {
+                    elements.toggleData.classList.remove("hidden");
+                } else elements.toggleData.classList.add("hidden");
+                break;
+            };
+            case "users": {
+                collectedUsers = {
+                    guests: message.guests,
+                    users: message.users,
+                    helpers: message.helpers,
+                    underseers: message.underseers,
+                    overseers: message.overseers,
+                    admins: message.admins,
+                    developers: message.developers,
+                    friends: message.friends
+                };
+                listAllUsers();
+                break;
+            };
+            case "greet": {
+                collectedUsers = {
+                    guests: message.guests,
+                    users: message.users,
+                    helpers: message.helpers,
+                    underseers: message.underseers,
+                    overseers: message.overseers,
+                    admins: message.admins,
+                    developers: message.developers,
+                    friends: message.friends
+                };
+                message.history.forEach((msg) => {
+                    msg = JSON.parse(msg);
                     createMessageText(
-                        message.sender.name,
-                        message.sender.auth,
-                        message.sender.pfp,
-                        message.sender.bio,
-                        message.sender.aID != "-",
-                        message.content,
-                        message.neo,
-                        message.color,
-                        message.timestamp,
-                        message.sender.iID,
-                        message.sender.aID,
-                        message.id,
-                        message.reply,
-                        message.dm,
-                        message.canReply);
-                    break;
+                        msg.sender.name,
+                        msg.sender.auth,
+                        msg.sender.pfp,
+                        msg.sender.roles,
+                        msg.sender.bio,
+                        msg.sender.aID != "-",
+                        msg.content,
+                        msg.neo,
+                        msg.color,
+                        msg.timestamp,
+                        msg.sender.iID,
+                        msg.sender.aID,
+                        msg.id,
+                        msg.reply,
+                        msg.dm,
+                        msg.canReply);
+                });
+                setTimeout(scrollChatHistory, 30);
+                break;
+            };
+            case "uwarn": {
+                nextUpload = message;
+                break;
+            };
+            case "greenlight": {
+                if (readyFile) {
+                    ws.send(readyFile);
+                    readyFile = undefined;
                 };
-                case "simple": {
-                    createMessageSimple(message.content, message.timestamp, message.color);
-                    break;
+                break;
+            };
+            case "clearall": {
+                elements.chatHistory.innerHTML = ``;
+                break;
+            };
+            case "mix": {
+                if (settings.allow_mixer) {
+                    // mixAudio.crossOrigin = "anonymous";
+                    mixAudio.src = `${message.src}`;
+                    mixAudio.load();
+                    mixAudio.oncanplay = (r) => {
+                        mixAudio.play().then((e) => {
+                            createToast(`Now playing: "${message.src.split("/").pop()}"`);
+                        }).catch((e) => {
+                            createToast(`Could not play requested audio: ${e.message}`);
+                        });
+                    };
+                    mixAudio.onerror = (e) => {
+                        createToast(`Could not play requested audio: ${mixAudio.error.message} (code ${mixAudio.error.code})`);
+                    };
                 };
-                case "pong": {
-                    info = message;
-                    break;
-                };
-                case "users": {
+                break;
+            }
+            case "auth": {
+                if (message.ok) {
+                    elements.auth.classList.add("hidden");
+                    elements.viewport.classList.remove("hidden");
+                    elements.users.classList.remove("hidden");
+                    elements.backToAuth.classList.remove("hidden");
                     collectedUsers = {
                         guests: message.guests,
                         users: message.users,
@@ -1119,106 +1867,18 @@ const wsMessage = (data, isBinary) => {
                         friends: message.friends
                     };
                     listAllUsers();
-                    break;
-                };
-                case "greet": {
-                    collectedUsers = {
-                        guests: message.guests,
-                        users: message.users,
-                        helpers: message.helpers,
-                        underseers: message.underseers,
-                        overseers: message.overseers,
-                        admins: message.admins,
-                        developers: message.developers,
-                        friends: message.friends
-                    };
-                    message.history.forEach((msg) => {
-                        msg = JSON.parse(msg);
-                        createMessageText(
-                            msg.sender.name,
-                            msg.sender.auth,
-                            msg.sender.pfp,
-                            msg.sender.bio,
-                            msg.sender.aID != "-",
-                            msg.content,
-                            msg.neo,
-                            msg.color,
-                            msg.timestamp,
-                            msg.sender.iID,
-                            msg.aID,
-                            msg.id,
-                            msg.reply,
-                            msg.dm,
-                            msg.canReply);
-                    });
+                    createToast("You are now logged in.");
                     setTimeout(scrollChatHistory, 30);
-                    break;
+                } else {
+                    elements.authError.innerText = `Error: ${message.text}`;
+                    elements.authError.classList.remove("hidden");
                 };
-                case "uwarn": {
-                    nextUpload = message;
-                    break;
-                };
-                case "greenlight": {
-                    if (readyFile) {
-                        ws.send(readyFile);
-                        readyFile = undefined;
-                    };
-                    break;
-                };
-                case "clearall": {
-                    elements.chatHistory.innerHTML = ``;
-                    break;
-                };
-                case "mix": {
-                    if (settings.allow_mixer) {
-                        // mixAudio.crossOrigin = "anonymous";
-                        mixAudio.src = `${message.src}`;
-                        mixAudio.load();
-                        mixAudio.oncanplay = (r) => {
-                            mixAudio.play().then((e) => {
-                                createToast(`Now playing: "${message.src.split("/").pop()}"`);
-                            }).catch((e) => {
-                                createToast(`Could not play requested audio: ${e.message}`);
-                            });
-                        };
-                        mixAudio.onerror = (e) => {
-                            createToast(`Could not play requested audio: ${mixAudio.error.message} (code ${mixAudio.error.code})`);
-                        };
-                    };
-                    break;
-                }
-                case "auth": {
-                    if (message.ok) {
-                        elements.auth.classList.add("hidden");
-                        elements.viewport.classList.remove("hidden");
-                        elements.users.classList.remove("hidden");
-                        elements.backToAuth.classList.remove("hidden");
-                        collectedUsers = {
-                            guests: message.guests,
-                            users: message.users,
-                            helpers: message.helpers,
-                            underseers: message.underseers,
-                            overseers: message.overseers,
-                            admins: message.admins,
-                            developers: message.developers,
-                            friends: message.friends
-                        };
-                        listAllUsers();
-                        createToast("You are now logged in.");
-                        setTimeout(scrollChatHistory, 30);
-                    } else {
-                        elements.authError.innerText = `Error: ${message.text}`;
-                        elements.authError.classList.remove("hidden");
-                    };
-                    break;
-                };
-                default: {
-                    console.warn(`Unhandled response from server: '${message.type}'.`);
-                    break;
-                };
+                break;
             };
-        } catch (err) {
-            console.error(`${err.name}: ${err.message}`);
+            default: {
+                console.warn(`Unhandled response from server: '${message.type}'.`);
+                break;
+            };
         };
     } else {
         let imgblob;
@@ -1227,7 +1887,7 @@ const wsMessage = (data, isBinary) => {
         } else {
             imgblob = data.data;
         };
-        createMessageUpload(nextUpload.sender.name, nextUpload.auth, nextUpload.sender.pfp, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.iID, nextUpload.sender.aID, nextUpload.id);
+        createMessageUpload(nextUpload.sender.name, nextUpload.auth, nextUpload.sender.pfp, nextUpload.sender.roles, nextUpload.sender.bio, nextUpload.sender.aID != "-", imgblob, nextUpload.mime, nextUpload.neo, nextUpload.timestamp, nextUpload.sender.iID, nextUpload.sender.aID, nextUpload.id);
     };
 };
 
@@ -1236,9 +1896,9 @@ const wsClose = (e) => {
     elements.screen.classList.remove("hidden");
     elements.loading.classList.add("hidden");
     elements.disconnectCode.innerText = `Exit code: ${e.code ? e.code : "No code given."}`;
-    elements.disconnectReason.innerText = `Reason: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unexpected error, or the servers are down." : "No reason given."}`;
-    createToast(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unexpected error, or the servers are down." : "No reason given."}`);
-    console.error(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unexpected error, or the servers are down." : "No reason given."}`);
+    elements.disconnectReason.innerText = `Reason: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unhandled error." : "No reason given."}`;
+    createToast(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unhandled error." : "No reason given."}`);
+    console.error(`WebSocket has closed! ${e.code ? e.code : "No code given"}: ${e.reason && e.reason !== "" ? e.reason : e.code == 1006 ? "Unhandled error." : "No reason given."}`);
 };
 
 // e functions are for events
@@ -1288,8 +1948,9 @@ const eInitiateReply = (user, message, id, dm) => {
     let sampleSize = 80;
     let sample = message.slice(0, sampleSize);
     if (sample.length == sampleSize) sample += "-...";
-    const badRegex = new RegExp(`\\b(${bad.join('|')})\\b`, "gi");
-    elements.replyContent.innerText = `${sample.replace(badRegex, (m) => "*".repeat(m.length))}`;
+    if (settings.filter_slurs) sample = sample.replace(slursRegex, (m) => "*".repeat(m.length));
+    if (settings.filter_swears) sample = sample.replace(swearsRegex, (m) => "*".repeat(m.length));
+    elements.replyContent.innerText = `${sample}`;
     messageReplyID = id;
     messageReplyDM = dm;
     if (autoScroll) setTimeout(scrollChatHistory, 30);
@@ -1560,7 +2221,7 @@ elements.emojiExpressionless.onclick = (e) => {
 const createNewEmote = (emoteList, emoteKey) => {
     const emoteElement = document.createElement("img");
     emoteElement.className = "emote";
-    emoteElement.src = allEmotes[emoteKey];
+    emoteElement.src = `${homeServer}/${allEmotes[emoteKey]}`;
     emoteElement.onclick = (e) => {
         elements.barMessage.value += `:${emoteKey}:`;
     };
@@ -1604,8 +2265,35 @@ elements.closeBook.onclick = (e) => {
     elements.screen.classList.add("hidden");
     elements.book.classList.add("hidden");
 };
+elements.bookAbout.onclick = (e) => {
+    // Tabs
+    elements.bookChangelog.classList.remove("book-side-option-h");
+    elements.bookChangelog.classList.add("book-side-option");
+    elements.bookAdmins.classList.remove("book-side-option-h");
+    elements.bookAdmins.classList.add("book-side-option");
+    elements.bookCommands.classList.remove("book-side-option-h");
+    elements.bookCommands.classList.add("book-side-option");
+    elements.bookSupport.classList.remove("book-side-option-h");
+    elements.bookSupport.classList.add("book-side-option");
+    elements.bookRules.classList.remove("book-side-option-h");
+    elements.bookRules.classList.add("book-side-option");
+    elements.bookAbout.classList.remove("book-side-option");
+    elements.bookAbout.classList.add("book-side-option-h");
+    elements.bookCredits.classList.remove("book-side-option-h");
+    elements.bookCredits.classList.add("book-side-option");
+    // Content
+    elements.bookAboutContent.classList.remove("hidden");
+    elements.bookRulesContent.classList.add("hidden");
+    elements.bookChangelogContent.classList.add("hidden");
+    elements.bookAdminsContent.classList.add("hidden");
+    elements.bookCommandsContent.classList.add("hidden");
+    elements.bookSupportContent.classList.add("hidden");
+    elements.bookCreditsContent.classList.add("hidden");
+};
 elements.bookRules.onclick = (e) => {
     // Tabs
+    elements.bookAbout.classList.remove("book-side-option-h");
+    elements.bookAbout.classList.add("book-side-option");
     elements.bookChangelog.classList.remove("book-side-option-h");
     elements.bookChangelog.classList.add("book-side-option");
     elements.bookAdmins.classList.remove("book-side-option-h");
@@ -1619,6 +2307,7 @@ elements.bookRules.onclick = (e) => {
     elements.bookCredits.classList.remove("book-side-option-h");
     elements.bookCredits.classList.add("book-side-option");
     // Content
+    elements.bookAboutContent.classList.add("hidden");
     elements.bookRulesContent.classList.remove("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
@@ -1628,6 +2317,8 @@ elements.bookRules.onclick = (e) => {
 };
 elements.bookChangelog.onclick = (e) => {
     // Tabs
+    elements.bookAbout.classList.remove("book-side-option-h");
+    elements.bookAbout.classList.add("book-side-option");
     elements.bookAdmins.classList.remove("book-side-option-h");
     elements.bookAdmins.classList.add("book-side-option");
     elements.bookCommands.classList.remove("book-side-option-h");
@@ -1641,6 +2332,7 @@ elements.bookChangelog.onclick = (e) => {
     elements.bookCredits.classList.remove("book-side-option-h");
     elements.bookCredits.classList.add("book-side-option");
     // Content
+    elements.bookAboutContent.classList.add("hidden");
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.remove("hidden");
     elements.bookAdminsContent.classList.add("hidden");
@@ -1650,6 +2342,8 @@ elements.bookChangelog.onclick = (e) => {
 };
 elements.bookAdmins.onclick = (e) => {
     // Tabs
+    elements.bookAbout.classList.remove("book-side-option-h");
+    elements.bookAbout.classList.add("book-side-option");
     elements.bookRules.classList.remove("book-side-option-h");
     elements.bookRules.classList.add("book-side-option");
     elements.bookChangelog.classList.remove("book-side-option-h");
@@ -1663,6 +2357,7 @@ elements.bookAdmins.onclick = (e) => {
     elements.bookCredits.classList.remove("book-side-option-h");
     elements.bookCredits.classList.add("book-side-option");
     // Content
+    elements.bookAboutContent.classList.add("hidden");
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.remove("hidden");
@@ -1672,6 +2367,8 @@ elements.bookAdmins.onclick = (e) => {
 };
 elements.bookCommands.onclick = (e) => {
     // Tabs
+    elements.bookAbout.classList.remove("book-side-option-h");
+    elements.bookAbout.classList.add("book-side-option");
     elements.bookAdmins.classList.remove("book-side-option-h");
     elements.bookAdmins.classList.add("book-side-option");
     elements.bookRules.classList.remove("book-side-option-h");
@@ -1685,6 +2382,7 @@ elements.bookCommands.onclick = (e) => {
     elements.bookCredits.classList.remove("book-side-option-h");
     elements.bookCredits.classList.add("book-side-option");
     // Content
+    elements.bookAboutContent.classList.add("hidden");
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
@@ -1694,6 +2392,8 @@ elements.bookCommands.onclick = (e) => {
 };
 elements.bookSupport.onclick = (e) => {
     // Tabs
+    elements.bookAbout.classList.remove("book-side-option-h");
+    elements.bookAbout.classList.add("book-side-option");
     elements.bookAdmins.classList.remove("book-side-option-h");
     elements.bookAdmins.classList.add("book-side-option");
     elements.bookCommands.classList.remove("book-side-option-h");
@@ -1707,6 +2407,7 @@ elements.bookSupport.onclick = (e) => {
     elements.bookCredits.classList.remove("book-side-option-h");
     elements.bookCredits.classList.add("book-side-option");
     // Content
+    elements.bookAboutContent.classList.add("hidden");
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
@@ -1717,6 +2418,8 @@ elements.bookSupport.onclick = (e) => {
 
 elements.bookCredits.onclick = (e) => {
     // Tabs
+    elements.bookAbout.classList.remove("book-side-option-h");
+    elements.bookAbout.classList.add("book-side-option");
     elements.bookAdmins.classList.remove("book-side-option-h");
     elements.bookAdmins.classList.add("book-side-option");
     elements.bookCommands.classList.remove("book-side-option-h");
@@ -1730,12 +2433,41 @@ elements.bookCredits.onclick = (e) => {
     elements.bookSupport.classList.remove("book-side-option-h");
     elements.bookSupport.classList.add("book-side-option");
     // Content
+    elements.bookAboutContent.classList.add("hidden");
     elements.bookRulesContent.classList.add("hidden");
     elements.bookChangelogContent.classList.add("hidden");
     elements.bookAdminsContent.classList.add("hidden");
     elements.bookCommandsContent.classList.add("hidden");
     elements.bookCreditsContent.classList.remove("hidden");
     elements.bookSupportContent.classList.add("hidden");
+};
+
+// Data
+elements.closeData.onclick = (e) => {
+    elements.screen.classList.add("hidden");
+    elements.data.classList.add("hidden");
+};
+elements.dataSearch.oninput = ((e) => {
+    const search = elements.dataSearch.value.trim().toLowerCase();
+    if (!search || search === "") {
+        for (let i = 0; i < elements.dataTableBody.children.length; i++) {
+            const account = elements.dataTableBody.children[i];
+            account.classList.remove("hidden");
+        };
+    } else {
+        for (let i = 0; i < elements.dataTableBody.children.length; i++) {
+            const account = elements.dataTableBody.children[i];
+            console.log(account.querySelector(".data-name").tagName === "INPUT" ? account.querySelector(".data-name").value : "");
+            if (account.querySelector(".data-name").tagName === "INPUT" ? account.querySelector(".data-name").value.trim().toLowerCase().includes(search) : account.querySelector(".data-name").innerText.trim().toLowerCase().includes(search)) {
+                account.classList.remove("hidden");
+            } else {
+                account.classList.add("hidden");
+            };
+        };
+    };
+});
+elements.dataRefresh.onclick = async (e) => {
+    refreshData();
 };
 
 // Profile
@@ -1798,6 +2530,33 @@ elements.optionsViewUI.onclick = (e) => {
         elements.sheet.href = "style.css";
         if (settings.show_users) elements.viewport.style.width = "60%";
         else elements.viewport.style.width = "80%";
+    };
+};
+elements.optionsViewSwears.onclick = (e) => {
+    settings.filter_swears = !settings.filter_swears;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.filter_swears) {
+        elements.optionsViewSwears.className = "bi bi-toggle-on";
+    } else {
+        elements.optionsViewSwears.className = "bi bi-toggle-off";
+    };
+};
+elements.optionsViewSlurs.onclick = (e) => {
+    settings.filter_slurs = !settings.filter_slurs;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.filter_slurs) {
+        elements.optionsViewSlurs.className = "bi bi-toggle-on";
+    } else {
+        elements.optionsViewSlurs.className = "bi bi-toggle-off";
+    };
+};
+elements.optionsShowAll.onclick = (e) => {
+    settings.show_all = !settings.show_all;
+    localStorage.setItem("settings", JSON.stringify(settings));
+    if (settings.show_all) {
+        elements.optionsShowAll.className = "bi bi-toggle-on";
+    } else {
+        elements.optionsShowAll.className = "bi bi-toggle-off";
     };
 };
 elements.optionsTAbyss.onclick = (e) => {
@@ -1869,6 +2628,7 @@ elements.optionsExpSeasonalTheme.onclick = (e) => {
         // }
     }
 };
+elements.door.onclick = (e) => createToast(`It's locked...`);
 
 elements.modHeader.onmousedown = (e) => {
     dragMod = true;
@@ -1947,6 +2707,24 @@ elements.imageConfirmY.onclick = () => {
     // createMessageUpload(user.name, user.pfp, user.verified, uploadFile, user.neo);
     if (uploadFile) eUploadFile();
 };
+
+elements.toggleData.onclick = (e) => {
+    if (info.auth > 2) {
+        elements.screen.classList.remove("hidden");
+        elements.data.classList.remove("hidden");
+        refreshData();
+    } else createToast(`You do not have permission to do that.`);
+};
+
+// document.onkeydown = (e) => {
+//     if (e.key === "Tab") {
+//         if (info.auth > 2) {
+//             elements.screen.classList.remove("hidden");
+//             elements.data.classList.remove("hidden");
+//             refreshData();
+//         } else createToast(`You do not have permission to do that.`);
+//     };
+// };
 
 ws.onopen = () => wsOpen();
 ws.onmessage = (e, isBinary) => wsMessage(e, isBinary);
