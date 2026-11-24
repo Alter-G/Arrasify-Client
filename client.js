@@ -935,7 +935,17 @@ const messageCreateTextElement = (message, color, auth) => {
         //     };
         //     // p.appendChild(s);
         // };
-        s.insertAdjacentHTML("beforeend", `<p>${line}</p>`);
+        const escapeHTML = (str) => {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+        const p = document.createElement("p");
+        p.textContent = escapeHTML(line);
+        s.appendChild(p);
         // s.innerText = line;
         // Pings
         const pingable = [
