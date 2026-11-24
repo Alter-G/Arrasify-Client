@@ -1,6 +1,6 @@
 @font-face {
     font-family: wingding;
-    src: url("./src/wingding.ttf");
+    src: url("https://arrasify.alter-g.workers.dev/wingding.ttf");
 }
 
 @keyframes animRainbow {

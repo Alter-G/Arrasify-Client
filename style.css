@@ -1,6 +1,6 @@
 @font-face {
     font-family: wingding;
-    src: url("./src/wingding.ttf");
+    src: url("https://arrasify.alter-g.workers.dev/wingding.ttf");
 }
 
 @keyframes animRainbow {
@@ -34,6 +34,26 @@
         color: magenta;
         fill: magenta;
         stroke: magenta;
+    }
+}
+
+@keyframes animDev2 {
+
+    0%,
+    100% {
+        color: rgb(145, 62, 190);
+    }
+
+    25% {
+        color: rgb(205, 102, 212);
+    }
+
+    50% {
+        color: rgb(173, 103, 172);
+    }
+
+    75% {
+        color: rgb(105, 51, 134);
     }
 }
 
@@ -239,6 +259,10 @@
 
 .message-rainbow {
     animation: animRainbow 5s infinite linear !important;
+}
+
+.message-dev2 {
+    animation: animDev2 8s infinite linear !important;
 }
 
 .message-youtuber {

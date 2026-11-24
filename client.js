@@ -51,8 +51,10 @@ const priority = [ // Priority for roles
     "testing",
     "flowey",
     "boyfriend",
+    "bognis",
     "beta_tester",
     "contributor",
+    "top_10",
     "youtuber",
     "supporter",
     "expie",
@@ -65,6 +67,7 @@ const priority = [ // Priority for roles
     "est_2024",
     "est_2023",
     "og",
+    "deltarune",
     "enthusiast"
 ];
 
@@ -201,6 +204,7 @@ const emotes = { // Emote - SRC
         "integrity": "emotes/integrity.png",
         "perseverence": "emotes/perseverence.png",
         "wave": "emotes/wave.gif",
+        "jevil": "emotes/jevil.gif",
         "gaster": "emotes/gaster.gif",
     },
     eRetro: {
@@ -256,7 +260,9 @@ const emotes = { // Emote - SRC
         "concrete_proof": "emotes/concrete_proof.png",
         "thinking": "emotes/thinking.gif",
         "oiia": "emotes/oiia.gif",
-        "cat": "emotes/cat.gif"
+        "cat": "emotes/cat.gif",
+        "fivefive": "emotes/fivefive.gif",
+        "idk2": "emotes/idk2.gif"
     },
     eCommunity: {
         "aperson": "emotes/aperson.jpeg",
@@ -284,7 +290,8 @@ const emotes = { // Emote - SRC
         "iq": "emotes/iq.png",
         "recursion": "emotes/recursion.png",
         "heyapple": "emotes/heyapple.gif",
-        "expiebomb": "emotes/expiebomb.png"
+        "expiebomb": "emotes/expiebomb.png",
+        "inglis": "emotes/inglis.png"
     }
 };
 
@@ -941,7 +948,6 @@ const messageCreateTextElement = (message, color, auth) => {
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
         };
         const p = document.createElement("p");
         p.textContent = escapeHTML(line);
@@ -989,7 +995,7 @@ const messageCreateTextElement = (message, color, auth) => {
         // Code
         html = html.replace(/\`(.+?)\`/g, "<code>$1</code>");
         // Header
-        html = html.replace(/\#(.+?)\#/g, "<h1>$1</h1>");
+        // html = html.replace(/\#(.+?)\#/g, "<h1>$1</h1>");
         // Spoiler
         html = html.replace(/\|{2}(.+?)\|{2}/g, "<details><summary>Click to expand or collapse.</summary><p>$1</p></details>");
         // if (auth > 5) {};
