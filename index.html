@@ -12,7 +12,7 @@
 
 <body class="theme-seasonal-dark">
     <header>
-        <h1>Arrasify [v1.4.1]</h1>
+        <h1>Arrasify [v1.4.2]</h1>
         <div class="header-tools">
             <i class="bi bi-person header-icons" id="toggleUsers"></i>
             <i class="bi bi-database-fill-gear header-icons hidden" id="toggleData"></i>
@@ -160,6 +160,7 @@
         </div>
         <h3>Trust</h3>
         <p>Credit to d2 & Testing</p>
+        <p>Some drawn by Gigillion</p>
         <div class="emotes" id="eTrust">
         </div>
         <h3>Deltarune</h3>
@@ -577,6 +578,18 @@
                 <div id="bookChangelogContent" class="hidden">
                     <h1>Getting Started - Changelog</h1>
                     <p>Note: all changelogs are made in the AWST timezone.</p>
+                    <h2>25th November 2026 - Minor Update - v1.4.2</h2>
+                    <h3>New features</h3>
+                    <ul>
+                        <li>Added 3 new people to the emote credits.</li>
+                        <li>Renamed <code>/simple</code> to its own command, available to admins+.</li>
+                    </ul>
+                    <h3>Bug fixes</h3>
+                    <ul>
+                        <li>Fixed uploads not showing roles at all.</li>
+                        <li>Fixed invalid roles making all subsequent roles not show at all.</li>
+                        <li>Fixed some more malformed UI elements.</li>
+                    </ul>
                     <h2>24th November 2026 - Minor Update - v1.4.1</h2>
                     <h3>New features</h3>
                     <ul>
@@ -661,7 +674,7 @@
                     <h3>Bug fixes</h3>
                     <ul>
                         <li>Fixed the <code>:absolutelytrust:</code> emote not loading the correct file.</li>
-                        <li>Fixed the <code>:tracker3</code> emote not being displayed.</li>
+                        <li>Fixed the <code>:tracker3:</code> emote not being displayed.</li>
                         <li>Fixed bios showing <code>:</code> instead of <code>,</code>.</li>
                         <li>Fixed the pings icon being crossed out when you load the site, even if it's on.</li>
                         <li>
@@ -1201,12 +1214,12 @@
                     <h4>/broadcast [param1]</h4>
                     <p>Broadcasts a message without a user attached to it.</p>
                     <h5>With [param1] - message</h5>
+                    <h5>Aliases: /b, /bc</h5>
                     <h4>/mute [param1] [param2] [param3]</h4>
                     <p>Mute a specific user, for text or uploads, for a specified duration. Use 0s to unmute.</p>
                     <h5>With [param1] - "text" and [param2] - account ID and [param3] - duration + unit</h5>
                     <h5>With [param1] - "upload" and [param2] - account ID and [param3] - duration + unit</h5>
                     <h5>With [param1] - "both" and [param2] - account ID and [param3] - duration + unit</h5>
-                    <h5>Aliases: /b, /s, /bc, /simple</h5>
                     <hr>
                     <h3>Underseer+ Commands</h3>
                     <h4>/data [param1] [param2] [param3] [param4] </h4>
@@ -1268,6 +1281,10 @@
                     <p>Restart the entire server.</p>
                     <h4>/refresh</h4>
                     <p>Refresh every user with the latest user list.</p>
+                    <h4>/simple [param1]</h4>
+                    <p>The same as /abc but without any timeframe or public status displayed.</p>
+                    <h5>With [param1] - message</h5>
+                    <h5>Aliases: /s</h5>
                     <hr>
                     <h3>Developer+ Commands</h3>
                     <h4>/role [param1] [param2] [param3] [param4]</h4>

@@ -50,7 +50,7 @@ const priority = [ // Priority for roles
     "mlg",
     "testing",
     "flowey",
-    "boyfriend",
+    "ethu",
     "bognis",
     "beta_tester",
     "contributor",
@@ -59,6 +59,7 @@ const priority = [ // Priority for roles
     "supporter",
     "expie",
     "femboy",
+    "couple",
     "mysterious",
     "polychrome",
     "est_2027",
@@ -599,65 +600,70 @@ const messageCreateUserBio = (user, pfp, roles, bio) => {
             const processed = role.split("?");
             const roleID = processed.shift();
             const basis = roleDefinitions.find(r => r.id === roleID);
-            const displayRole = document.createElement("li");
-            displayRole.innerText = basis.name;
-            displayRole.style.listStyleType = "none";
-            displayRole.classList.add("profile-role");
-            let vars = {};
-            if (processed.length > 0) {
-                processed.shift().split("&").forEach(v => {
-                    vars[v.split("=")[0]] = v.split("=")[1];
-                });
-            };
-            switch (roleID) {
-                case "youtuber": {
-                    if (basis.icon.type === "image") {
-                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><a href="https://www.youtube.com/${vars.channel}" class="message-youtuber">${basis.name}</a>`;
+            if (basis) {
+                const displayRole = document.createElement("li");
+                displayRole.innerText = basis.name;
+                displayRole.style.listStyleType = "none";
+                displayRole.classList.add("profile-role");
+                let vars = {};
+                if (processed.length > 0) {
+                    processed.shift().split("&").forEach(v => {
+                        vars[v.split("=")[0]] = v.split("=")[1];
+                    });
+                };
+                switch (roleID) {
+                    case "youtuber": {
+                        if (basis.icon.type === "image") {
+                            displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><a href="https://www.youtube.com/${vars.channel}" class="message-youtuber">${basis.name}</a>`;
+                        };
+                        break;
+                    } case "polychrome": {
+                        if (basis.icon.type === "image") {
+                            displayRole.innerHTML = displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p></p>`;
+                            for (let i = 0; i < basis.name.length; i++) {
+                                const letter = basis.name[i];
+                                const l = document.createElement("b");
+                                l.innerText = letter;
+                                l.style.animation = `ease-in-out 1s animRainbow infinite`;
+                                l.style.animationDelay = `-${(i % 16) * 1000 / 16}ms`;
+                                displayRole.children.item(1).appendChild(l);
+                            };
+                        };
+                        break;
+                    } case "femboy": {
+                        displayRole.innerHTML = `<p class="message-${basis.id}"><span class="profile-role-blank" style="background-color: ${basis.icon.color};"></span>${basis.name}</p>`;
+                        break;
                     };
-                    break;
-                } case "polychrome": {
-                    if (basis.icon.type === "image") {
-                        displayRole.innerHTML = displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p></p>`;
-                        for (let i = 0; i < basis.name.length; i++) {
-                            const letter = basis.name[i];
-                            const l = document.createElement("b");
-                            l.innerText = letter;
-                            l.style.animation = `ease-in-out 1s animRainbow infinite`;
-                            l.style.animationDelay = `-${(i % 16) * 1000 / 16}ms`;
-                            displayRole.children.item(1).appendChild(l);
+                    case "mysterious":
+                    case "expie": {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-${basis.id}">${basis.name}</p>`;
+                        break;
+                    } case "couple": {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-pink">${basis.name}</p>`;
+                        break;
+                    } case "ethu": {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-purple">${basis.name}</p>`;
+                        break;
+                    } case "mlg": {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-dark">${basis.name}</p>`;
+                        break;
+                    } case "beta_tester": {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-aqua">${basis.name}</p>`;
+                        break;
+                    } case "testing": {
+                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-dark">${basis.name}</p>`;
+                        break;
+                    } default: {
+                        if (basis.icon.type === "image") {
+                            displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p>${basis.name}</p>`;
+                        };
+                        if (basis.icon.type === "solid") {
+                            displayRole.innerHTML = `<p><span class="profile-role-blank" style="background-color: ${basis.icon.color};"></span>${basis.name}</p>`;
                         };
                     };
-                    break;
-                } case "femboy": {
-                    displayRole.innerHTML = `<p class="message-${basis.id}"><span class="profile-role-blank" style="background-color: ${basis.icon.color};"></span>${basis.name}</p>`;
-                    break;
                 };
-                case "mysterious":
-                case "expie": {
-                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-${basis.id}">${basis.name}</p>`;
-                    break;
-                } case "boyfriend": {
-                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-purple">${basis.name}</p>`;
-                    break;
-                } case "mlg": {
-                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-dark">${basis.name}</p>`;
-                    break;
-                } case "beta_tester": {
-                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-aqua">${basis.name}</p>`;
-                    break;
-                } case "testing": {
-                    displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p class="message-dark">${basis.name}</p>`;
-                    break;
-                } default: {
-                    if (basis.icon.type === "image") {
-                        displayRole.innerHTML = `<img class="profile-role-icon" src="${homeServer}/${basis.icon.src}"><p>${basis.name}</p>`;
-                    };
-                    if (basis.icon.type === "solid") {
-                        displayRole.innerHTML = `<p><span class="profile-role-blank" style="background-color: ${basis.icon.color};"></span>${basis.name}</p>`;
-                    };
-                };
+                elements.profileRoles.appendChild(displayRole);
             };
-            elements.profileRoles.appendChild(displayRole);
         });
     };
     elements.profileBio.innerHTML = "";
@@ -1017,7 +1023,6 @@ const messageCreateTextElement = (message, color, auth) => {
         // p.innerHTML = reconstructed.join("");
         // paragraphs.push(p);
         s.children.item(0).innerHTML = html;
-        console.log(s.children.item(0).innerHTML);
         // This removes empty P elements
         if (s.children.item(0).children.length > 0) {
             for (let x = 0; x < s.children.item(0).children.length; x++) {
@@ -1236,6 +1241,18 @@ const createMessageSimple = (message, timestamp, color) => {
     return messageElement;
 };
 
+const createMessageSimpleB = (message, color) => {
+    const messageElement = document.createElement("div");
+    messageElement.className = `message`;
+
+    const chatMessage = messageCreateTextElement(message, color, 0);
+    messageElement.appendChild(chatMessage);
+
+    elements.chatHistory.appendChild(messageElement);
+    if (autoScroll) setTimeout(scrollChatHistory, 30);
+    return messageElement;
+};
+
 const createUserInList = (id, aID, name, bio, pfp, roles, verified, neo, auth) => {
     const user = document.createElement("div");
     user.className = "users-user";
@@ -1342,7 +1359,6 @@ const createUserInList = (id, aID, name, bio, pfp, roles, verified, neo, auth) =
                                 type: "text",
                                 content: `/block add ${aID}`
                             }));
-                            console.log(aID);
                         };
                     };
                     break;
@@ -1754,7 +1770,6 @@ const wsMessage = (data, isBinary) => {
         const message = JSON.parse(data.data.toString());
         switch (message.type) {
             case "text": {
-                console.log(message);
                 createMessageText(
                     message.sender.name,
                     message.sender.auth,
@@ -1776,6 +1791,10 @@ const wsMessage = (data, isBinary) => {
             };
             case "simple": {
                 createMessageSimple(message.content, message.timestamp, message.color);
+                break;
+            };
+            case "simpleb": {
+                createMessageSimpleB(message.content, message.color);
                 break;
             };
             case "pong": {
@@ -2644,7 +2663,10 @@ elements.optionsExpSeasonalTheme.onclick = (e) => {
         // }
     }
 };
-elements.door.onclick = (e) => createToast(`It's locked...`);
+elements.door.onclick = (e) => {
+    if (confirm("Go inside?")) window.open(`${homeServer}/door`);
+    //createToast(`It's locked...`);
+};
 
 elements.modHeader.onmousedown = (e) => {
     dragMod = true;
